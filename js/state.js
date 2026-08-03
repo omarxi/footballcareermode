@@ -25,6 +25,9 @@ class CareerState {
     // Incoming Transfer Bids from rival clubs
     this.incomingOffers = [];
 
+    // Trophies / Silverware Cabinet
+    this.trophies = [];
+
     // History of finished seasons
     this.seasonHistory = [];
 
@@ -60,6 +63,10 @@ class CareerState {
     this.initLeagueTable();
     this.initEuropeanCompetitions();
     this.initFixtures();
+
+    if (typeof youthEngine !== 'undefined') {
+      youthEngine.initYouthLeague();
+    }
 
     this.news.unshift({
       headline: `APPOINTMENT: ${this.managerName} announced as Manager of ${club.name}! Target: Domestic & Champions League glory.`,
@@ -129,10 +136,10 @@ class CareerState {
           if (sorted.length >= 2) uclClubIds.push(sorted[0].clubId, sorted[1].clubId);
           if (sorted.length >= 4) uelClubIds.push(sorted[2].clubId, sorted[3].clubId);
         } else {
-          // Pick 2 random clubs for UCL and 2 random clubs for UEL from foreign league
-          const shuffled = [...leagueClubs].sort(() => Math.random() - 0.5);
-          if (shuffled.length >= 2) uclClubIds.push(shuffled[0].id, shuffled[1].id);
-          if (shuffled.length >= 4) uelClubIds.push(shuffled[2].id, shuffled[3].id);
+          // Select top-rated elite clubs (~85+ OVR) for UCL from foreign leagues
+          const sortedForeign = [...leagueClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
+          if (sortedForeign.length >= 2) uclClubIds.push(sortedForeign[0].id, sortedForeign[1].id);
+          if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
         }
       });
     }
@@ -364,6 +371,7 @@ class CareerState {
         biddingClubName: biddingClub.name,
         bidAmount: bidAmount,
         date: this.getFormattedDate(),
+        expiresTime: Date.now() + (14 * 24 * 60 * 60 * 1000), // 14 Days expiration
         status: 'PENDING'
       };
 
@@ -404,6 +412,7 @@ class CareerState {
         wageSplit: wageSplit, // % paid by borrowing club
         buyOptionFee: offerType === 'LOAN_OPTION' ? buyOptionFee : 0,
         date: this.getFormattedDate(),
+        expiresTime: Date.now() + (14 * 24 * 60 * 60 * 1000), // 14 Days expiration
         status: 'PENDING'
       };
 
@@ -494,6 +503,27 @@ class CareerState {
     this.currentDate.setDate(this.currentDate.getDate() + 1);
     this.playSound('tick');
     
+    // Check and expire pending offers older than 14 days
+    const nowTime = Date.now();
+    this.incomingOffers.forEach(off => {
+      if (off.status === 'PENDING' && off.expiresTime && nowTime > off.expiresTime) {
+        off.status = 'EXPIRED';
+        this.inbox.unshift({
+          id: 'msg_exp_' + Date.now() + '_' + Math.random(),
+          type: 'EXPIRED_OFFER',
+          title: `OFFER EXPIRED: ${off.biddingClubName}`,
+          sender: off.biddingClubName + ' Representative',
+          date: this.getFormattedDate(),
+          body: `The proposal from ${off.biddingClubName} for ${off.playerName} has expired after 2 weeks of inactivity.`
+        });
+        this.news.unshift({
+          headline: `EXPIRED: ${off.biddingClubName} withdraw offer for ${off.playerName} after 2 weeks.`,
+          date: this.getFormattedDate(),
+          category: 'TRANSFERS'
+        });
+      }
+    });
+
     // Increased chance to receive incoming transfer offers for any squad player (~45% chance per day advance)
     if (Math.random() < 0.45) {
       this.generateIncomingOffer();
@@ -529,6 +559,33 @@ class CareerState {
     const prizeMoney = userFinishPos === 1 ? 40000000 : (userFinishPos <= 4 ? 25000000 : 15000000);
     this.myClub.budget += prizeMoney;
 
+    // Record League Trophy if user came 1st
+    if (userFinishPos === 1) {
+      this.trophies.push({
+        id: 'tr_league_' + Date.now(),
+        name: `${this.myClub ? this.myClub.league : 'Domestic'} Champions`,
+        season: this.season,
+        icon: 'fa-trophy',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#ffd700'
+      });
+    }
+
+    // Check Youth League finish
+    if (typeof youthEngine !== 'undefined' && youthEngine.standings && youthEngine.standings.length) {
+      const topYouth = [...youthEngine.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
+      if (topYouth[0] && topYouth[0].isUser) {
+        this.trophies.push({
+          id: 'tr_youth_' + Date.now(),
+          name: 'Youth League Champions',
+          season: this.season,
+          icon: 'fa-graduation-cap',
+          club: `${this.myClub ? this.myClub.name : 'Club'} U19`,
+          badgeColor: '#00f0ff'
+        });
+      }
+    }
+
     // Save season to history
     this.seasonHistory.unshift({
       season: this.season,
@@ -556,11 +613,11 @@ class CareerState {
         if (sortedLeagueStandings.length >= 2) qualifiedUCL.push(sortedLeagueStandings[0].clubId, sortedLeagueStandings[1].clubId);
         if (sortedLeagueStandings.length >= 4) qualifiedUEL.push(sortedLeagueStandings[2].clubId, sortedLeagueStandings[3].clubId);
       } else {
-        // Foreign leagues: 2 random clubs -> UCL, 2 different random clubs -> UEL
+        // Foreign leagues: Top-rated elite teams (85+ OVR) -> UCL/UEL
         const foreignClubs = this.clubs.filter(c => c.league === leagueName);
-        const shuffled = [...foreignClubs].sort(() => Math.random() - 0.5);
-        if (shuffled.length >= 2) qualifiedUCL.push(shuffled[0].id, shuffled[1].id);
-        if (shuffled.length >= 4) qualifiedUEL.push(shuffled[2].id, shuffled[3].id);
+        const sortedForeign = [...foreignClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
+        if (sortedForeign.length >= 2) qualifiedUCL.push(sortedForeign[0].id, sortedForeign[1].id);
+        if (sortedForeign.length >= 4) qualifiedUEL.push(sortedForeign[2].id, sortedForeign[3].id);
       }
     });
 

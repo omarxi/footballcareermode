@@ -236,6 +236,11 @@ function renderTeamSelectGrid(leagueFilter = 'ALL') {
       const clubId = card.dataset.clubId;
       if (!clubId) return;
 
+      const nameInput = document.getElementById('managerNameInput');
+      if (nameInput && nameInput.value.trim()) {
+        state.managerName = nameInput.value.trim();
+      }
+
       state.selectUserClub(clubId);
       state.playSound?.('click');
 
@@ -938,7 +943,7 @@ function renderYouthAcademy() {
   const badgeEl = document.getElementById('youthRosterCountBadge');
   if (badgeEl) badgeEl.textContent = `${youthEngine.academy.length} Prospects`;
 
-  // Render Prospects Roster
+  // Render Prospects Roster with Management Controls (Promote, Train, Release)
   const renderAcademy = () => {
     container.innerHTML = youthEngine.academy.map(p => {
       const growthBadge = p.growthThisSeason > 0
@@ -946,15 +951,25 @@ function renderYouthAcademy() {
         : '';
 
       return `
-        <div class="player-row-item">
+        <div class="player-row-item" style="padding: 0.6rem 0.8rem;">
           <div class="player-row-left">
-            <div class="player-ovr-pill" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan);">${p.ovr}</div>
+            <div class="player-ovr-pill" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); font-weight: 900;">${p.ovr}</div>
             <div class="player-row-meta">
-              <div class="player-row-name">${p.name} (${p.pos}) ${p.nation} ${growthBadge}</div>
-              <div class="player-row-pos-age">Age ${p.age} • Potential: <strong style="color: var(--accent-lime);">${p.pot} POT</strong> • Val €${(p.val / 1000000).toFixed(1)}M</div>
+              <div class="player-row-name" style="font-weight: 800; font-size: 0.92rem;">${p.name} (${p.pos}) ${p.nation} ${growthBadge}</div>
+              <div class="player-row-pos-age" style="font-size: 0.78rem;">Age ${p.age} • Potential: <strong style="color: var(--accent-lime);">${p.pot} POT</strong> • Val €${(p.val / 1000000).toFixed(1)}M</div>
             </div>
           </div>
-          <button class="btn-primary btn-promote" data-youth-id="${p.id}" style="font-size: 0.75rem; padding: 0.35rem 0.7rem;">Promote to Squad</button>
+          <div style="display: flex; gap: 0.35rem; align-items: center;">
+            <button class="btn-secondary btn-train-youth" data-youth-id="${p.id}" title="Intensity Training (+OVR)" style="font-size: 0.72rem; padding: 0.3rem 0.55rem; background: rgba(0, 255, 137, 0.12); color: var(--accent-lime); border: 1px solid rgba(0, 255, 137, 0.3);">
+              <i class="fa-solid fa-bolt"></i> Train
+            </button>
+            <button class="btn-primary btn-promote" data-youth-id="${p.id}" style="font-size: 0.72rem; padding: 0.3rem 0.6rem;">
+              <i class="fa-solid fa-user-plus"></i> Promote
+            </button>
+            <button class="btn-secondary btn-release-youth" data-youth-id="${p.id}" title="Release Prospect" style="font-size: 0.72rem; padding: 0.3rem 0.5rem; background: rgba(255, 50, 80, 0.15); color: #ff4d6d; border: 1px solid rgba(255, 50, 80, 0.3);">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
         </div>
       `;
     }).join('');
@@ -965,6 +980,24 @@ function renderYouthAcademy() {
         renderYouthAcademy();
         renderSquadHub();
         updateHeaderStats();
+      });
+    });
+
+    container.querySelectorAll('.btn-train-youth').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ok = youthEngine.trainProspect(btn.dataset.youthId);
+        if (ok) {
+          renderYouthAcademy();
+        }
+      });
+    });
+
+    container.querySelectorAll('.btn-release-youth').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (confirm('Release this prospect from the Youth Academy?')) {
+          youthEngine.releaseProspect(btn.dataset.youthId);
+          renderYouthAcademy();
+        }
       });
     });
   };
@@ -1070,6 +1103,37 @@ function renderOffice() {
 
       modal.classList.add('active');
     };
+  }
+
+  // Render Trophy Room Cabinet
+  const trophyGrid = document.getElementById('trophyCabinetGrid');
+  const countBadge = document.getElementById('trophyTotalCount');
+
+  if (trophyGrid) {
+    if (countBadge) {
+      countBadge.textContent = `${state.trophies.length} Silverware`;
+    }
+
+    if (state.trophies.length === 0) {
+      trophyGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,215,0,0.2);">
+          <i class="fa-solid fa-trophy" style="font-size: 2.5rem; color: rgba(255,215,0,0.3); margin-bottom: 0.8rem; display: block;"></i>
+          <div>No trophies won yet this career!</div>
+          <div style="font-size: 0.8rem; margin-top: 0.3rem;">Win your Domestic League, UEFA Champions League, or Youth League to fill your Cabinet.</div>
+        </div>
+      `;
+    } else {
+      trophyGrid.innerHTML = state.trophies.map(tr => `
+        <div style="background: radial-gradient(circle at top, rgba(255,215,0,0.12) 0%, rgba(10,18,30,0.9) 100%); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 1.2rem; text-align: center; box-shadow: 0 0 20px rgba(255,215,0,0.1);">
+          <div style="font-size: 2.4rem; color: ${tr.badgeColor || '#ffd700'}; margin-bottom: 0.5rem; text-shadow: 0 0 15px ${tr.badgeColor || '#ffd700'};">
+            <i class="fa-solid ${tr.icon || 'fa-trophy'}"></i>
+          </div>
+          <div style="font-weight: 900; font-size: 1rem; color: #fff;">${tr.name}</div>
+          <div style="font-size: 0.78rem; color: var(--accent-lime); font-weight: 700; margin-top: 0.25rem;">Season ${tr.season}</div>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem;">${tr.club}</div>
+        </div>
+      `).join('');
+    }
   }
 }
 

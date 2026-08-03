@@ -384,6 +384,17 @@
             </ul>
           </div>
         </div>
+
+        <!-- Trophy Room / Cabinet Tile -->
+        <div class="card-tile" style="margin-top: 1.5rem; background: linear-gradient(135deg, rgba(20,32,54,0.9), rgba(10,18,30,0.95)); border: 1px solid rgba(255,215,0,0.3);">
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <span class="card-title" style="color: var(--accent-gold);"><i class="fa-solid fa-trophy"></i> Club Trophy Cabinet</span>
+            <span class="badge" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);" id="trophyTotalCount">0 Silverware</span>
+          </div>
+          <div id="trophyCabinetGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+            <!-- Rendered dynamically by app.js -->
+          </div>
+        </div>
       </div>
 
       <!-- TAB 6: EUROPEAN COMPETITIONS (UCL & UEL) -->
@@ -911,6 +922,14 @@
         <div class="logo-badge" style="display: inline-block; font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--accent-lime), var(--accent-cyan));">FC 27 MANAGER CAREER</div>
         <h2 style="font-size: 1.8rem; font-weight: 800; color: #fff;">Select Your Club to Begin</h2>
         <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 0.3rem;">Choose a heavy-weight club from Europe's top 5 leagues to take command.</p>
+      </div>
+
+      <!-- Manager Profile Customization -->
+      <div style="max-width: 420px; margin: 0 auto 1.5rem auto; background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 1rem; border-radius: 12px; text-align: left;">
+        <label class="input-label" style="font-size: 0.8rem; font-weight: 800; color: var(--accent-lime); text-transform: uppercase; margin-bottom: 0.4rem; display: block;">
+          <i class="fa-solid fa-user-tie"></i> Manager Name
+        </label>
+        <input type="text" id="managerNameInput" class="input-field" value="Carlo Ancelotti" placeholder="Enter your Manager Name..." style="width: 100%; box-sizing: border-box;" />
       </div>
 
       <!-- League Selector Filter Tabs -->
