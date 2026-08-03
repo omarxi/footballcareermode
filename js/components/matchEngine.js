@@ -1274,5 +1274,3 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
     }
   }
 }
-;
-}

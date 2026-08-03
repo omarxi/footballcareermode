@@ -258,6 +258,7 @@ function renderTeamSelectGrid(leagueFilter = 'ALL') {
       renderTransfers();
       renderStandingsTable();
       renderUCLHub();
+      renderCompetitionsHub();
     };
 
     card.onclick = selectFn;
