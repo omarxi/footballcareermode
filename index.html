@@ -399,6 +399,9 @@
           <button class="tab-btn sub-comp-btn" data-subcomp="swiss_ucl">
             <i class="fa-solid fa-star" style="color: var(--accent-cyan);"></i> 13-Team UEFA Champions League
           </button>
+          <button class="tab-btn sub-comp-btn" data-subcomp="top_scorers">
+            <i class="fa-solid fa-fire" style="color: #ff4d6d;"></i> Golden Boot & Top Scorers
+          </button>
         </div>
 
         <!-- SUB-VIEW 1: DOMESTIC COMPETITIONS (League + Knockout Cup Tree + Super Cup) -->
@@ -519,6 +522,40 @@
                 <!-- Rendered dynamically -->
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 3: TOP SCORERS & STATS -->
+        <div id="subview-top_scorers" class="subcomp-pane" style="display: none;">
+          <div class="card-tile" style="background: linear-gradient(135deg, rgba(40,10,20,0.95), rgba(15,5,10,0.95)); border: 1px solid rgba(255,77,109,0.3); margin-bottom: 1.5rem; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; color: #ff4d6d; font-weight: 800;">SEASON GOALSCORING LEADERBOARD</div>
+                <h1 style="font-size: 2rem; font-weight: 900; color: #fff; margin: 0.3rem 0;"><i class="fa-solid fa-futbol" style="color:#ff4d6d;"></i> Golden Boot Race</h1>
+                <div style="font-size: 0.88rem; color: var(--text-muted);">Top goal scorers across all competitions for the current season.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-tile">
+            <div class="card-header" style="border-bottom: 2px solid #ff4d6d;">
+              <span class="card-title"><i class="fa-solid fa-fire" style="color:#ff4d6d;"></i> Season Top Scorers Standings</span>
+            </div>
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Player</th>
+                  <th>Club</th>
+                  <th>Pos</th>
+                  <th style="text-align: center;">Apps</th>
+                  <th style="text-align: center; color: var(--accent-gold);">Goals</th>
+                </tr>
+              </thead>
+              <tbody id="topScorersTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

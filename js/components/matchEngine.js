@@ -1109,17 +1109,23 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
   const getScorers = (clubId, side, score) => {
     const scorers = [];
     let pool = [];
-    if (side === 'home' && stateRef.starters?.length) {
+    if (side === 'home' && isUserHome && stateRef.starters?.length) {
+      pool = stateRef.starters.filter(p => p.pos !== 'GK');
+    } else if (side === 'away' && !isUserHome && fixture.awayClub.id === stateRef.myClubId && stateRef.starters?.length) {
       pool = stateRef.starters.filter(p => p.pos !== 'GK');
     } else {
-      pool = INITIAL_PLAYERS.filter(p => p.clubId === clubId && p.pos !== 'GK');
+      pool = stateRef.players?.filter(p => p.clubId === clubId && p.pos !== 'GK');
+      if (!pool || !pool.length) {
+        pool = (typeof INITIAL_PLAYERS !== 'undefined' ? INITIAL_PLAYERS : []).filter(p => p.clubId === clubId && p.pos !== 'GK');
+      }
     }
-    if (!pool.length) pool = [{ name: 'Striker' }];
+    if (!pool || !pool.length) pool = [{ name: 'Forward', clubId }];
 
     for (let i = 0; i < score; i++) {
       const p = pool[Math.floor(Math.random() * pool.length)];
       const min = Math.floor(Math.random() * 88) + 2;
-      scorers.push({ name: p.name, min, side });
+      scorers.push({ name: p.name, min, side, clubId });
+      p.goals = (p.goals || 0) + 1;
     }
     return scorers;
   };
@@ -1127,6 +1133,10 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
   const homeScorers = getScorers(fixture.homeClub.id, 'home', homeScore);
   const awayScorers = getScorers(fixture.awayClub.id, 'away', awayScore);
   const allScorers = [...homeScorers, ...awayScorers].sort((a, b) => a.min - b.min);
+
+  if (isUserHome || fixture.awayClub.id === stateRef.myClubId) {
+    stateRef.starters?.forEach(p => { p.apps = (p.apps || 0) + 1; });
+  }
 
   // Generate Stats
   const homeShots = homeScore + Math.floor(Math.random() * 8) + 4;
@@ -1274,9 +1284,9 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
     }
   }
 
-  stateRef.simRestOfLeagueMatchday?.(fixture.compType === 'UCL');
-
-  stateRef.playSound?.('whistle');
+  if (isUserHome || fixture.awayClub.id === stateRef.myClubId) {
+    stateRef.playSound?.('whistle');
+  }
   stateRef.news.unshift({
     headline: `RESULT: ${fixture.homeClub.name} ${homeScore}–${awayScore} ${fixture.awayClub.name}`,
     date: stateRef.getFormattedDate?.() || '',

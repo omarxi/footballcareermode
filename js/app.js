@@ -403,7 +403,7 @@ function renderSquadHub() {
                 ? `<span style="background:rgba(255,207,37,0.15); color:var(--accent-gold); padding:2px 6px; border-radius:4px; font-size:0.68rem; font-weight:800; border:1px solid rgba(255,207,37,0.3); margin-left:4px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> ON LOAN AT ${player.loanClub || 'RIVAL'}</span>` 
                 : ''}
             </div>
-            <div class="player-row-pos-age"><strong style="color:var(--accent-lime);">${player.pos}</strong> • Age ${player.age} • ${player.nation} • Val: €${(player.val/1000000).toFixed(1)}M</div>
+            <div class="player-row-pos-age"><strong style="color:var(--accent-lime);">${player.pos}</strong> • Age ${player.age} • ${player.nation} • Val: €${(player.val/1000000).toFixed(1)}M • <span style="color:var(--accent-gold); font-weight:800;"><i class="fa-solid fa-futbol"></i> ${player.goals || 0} G</span> • <span style="color:var(--accent-cyan); font-weight:700;"><i class="fa-solid fa-shirt"></i> ${player.apps || 0} Apps</span></div>
           </div>
         </div>
         <div style="display: flex; gap: 0.35rem; align-items: center;">
@@ -2092,6 +2092,7 @@ function renderCompetitionsHub() {
   renderDomesticCupBracketTree();
   renderSwissUCLTable();
   renderUCLKnockoutBracket();
+  renderTopScorersTable();
 }
 
 function renderDomesticLeagueTable() {
@@ -2276,11 +2277,7 @@ function renderUCLKnockoutBracket() {
               <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
             </div>
             <div class="bracket-team-row">
-              <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
-            </div>
-          </div>
-        `).join('')}
-        ${fn.map(m => `
+          ${fn.map(m => `
           <div class="bracket-node-card" style="border: 1px solid var(--accent-gold);">
             <div style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; margin-bottom: 0.3rem;">🏆 ${m.matchName}</div>
             <div class="bracket-team-row">
@@ -2294,4 +2291,48 @@ function renderUCLKnockoutBracket() {
       </div>
     `;
   }
+}
+
+function renderTopScorersTable() {
+  const container = document.getElementById('topScorersTableBody');
+  if (!container) return;
+
+  const allPlayers = [...(state.players || []), ...(typeof INITIAL_PLAYERS !== 'undefined' ? INITIAL_PLAYERS : [])];
+  
+  // Deduplicate players by id
+  const playerMap = new Map();
+  allPlayers.forEach(p => {
+    if (!playerMap.has(p.id)) {
+      playerMap.set(p.id, p);
+    } else {
+      const existing = playerMap.get(p.id);
+      if ((p.goals || 0) > (existing.goals || 0)) playerMap.set(p.id, p);
+    }
+  });
+
+  const scorersList = Array.from(playerMap.values())
+    .filter(p => (p.goals || 0) > 0)
+    .sort((a, b) => (b.goals || 0) - (a.goals || 0));
+
+  if (scorersList.length === 0) {
+    container.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No goals scored yet this season. Play or sim matches to see top scorers!</td></tr>`;
+    return;
+  }
+
+  container.innerHTML = scorersList.slice(0, 25).map((p, idx) => {
+    const club = state.clubs.find(c => c.id === p.clubId);
+    const isUserPlayer = p.clubId === state.myClubId;
+    const rowStyle = isUserPlayer ? 'background: rgba(0, 240, 255, 0.1); font-weight: 800;' : '';
+
+    return `
+      <tr style="${rowStyle}">
+        <td style="padding: 0.45rem; font-weight: 800;">${idx === 0 ? '🥇 1' : (idx === 1 ? '🥈 2' : (idx === 2 ? '🥉 3' : idx + 1))}</td>
+        <td style="padding: 0.45rem;">${p.name} ${isUserPlayer ? '⭐' : ''}</td>
+        <td style="padding: 0.45rem;">${club ? club.name : 'Unknown Club'}</td>
+        <td style="padding: 0.45rem;"><span style="color: var(--accent-lime); font-weight: 800;">${p.pos}</span></td>
+        <td style="padding: 0.45rem; text-align: center;">${p.apps || 0}</td>
+        <td style="padding: 0.45rem; text-align: center; color: var(--accent-gold); font-weight: 900; font-size: 1.05rem;">⚽ ${p.goals}</td>
+      </tr>
+    `;
+  }).join('');
 }
