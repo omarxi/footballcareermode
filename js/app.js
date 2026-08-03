@@ -1,12 +1,12 @@
 /* Main Application Controller & UI View Manager */
 
-import { state } from './state.js?v=3';
-import { INITIAL_PLAYERS } from './data.js?v=3';
-import { renderPitch, calculateTeamRatings } from './components/pitch.js?v=3';
-import { LiveMatchEngine, quickSimMatch as engineQuickSim } from './components/matchEngine.js?v=3';
-import { transferEngine } from './components/transfers.js?v=3';
-import { youthEngine } from './components/youth.js?v=3';
-import { officeEngine } from './components/office.js?v=3';
+import { state } from './state.js';
+import { INITIAL_CLUBS, INITIAL_PLAYERS } from './data.js';
+import { renderPitch, calculateTeamRatings } from './components/pitch.js';
+import { LiveMatchEngine, quickSimMatch as engineQuickSim } from './components/matchEngine.js';
+import { transferEngine } from './components/transfers.js';
+import { youthEngine } from './components/youth.js';
+import { officeEngine } from './components/office.js';
 
 
 let selectedPitchSlot = null;
