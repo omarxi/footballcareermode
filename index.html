@@ -304,12 +304,47 @@
           </div>
         </div>
 
-        <div class="card-tile">
-          <div class="card-header">
-            <span class="card-title"><i class="fa-solid fa-graduation-cap"></i> Youth Prospects Roster</span>
+        <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div class="card-tile">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="card-title"><i class="fa-solid fa-graduation-cap"></i> Youth Prospects Roster</span>
+              <span style="font-size: 0.75rem; color: var(--accent-cyan); font-weight: 700;" id="youthRosterCountBadge">0 Players</span>
+            </div>
+            <div class="player-list-scroll" id="youthAcademyList" style="max-height: 480px;">
+              <!-- Rendered dynamically -->
+            </div>
           </div>
-          <div class="player-list-scroll" id="youthAcademyList" style="max-height: 450px;">
-            <!-- Rendered dynamically -->
+
+          <div class="card-tile">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="card-title"><i class="fa-solid fa-trophy"></i> Youth Academy League (6 Teams)</span>
+              <button class="btn-secondary" id="btnSimYouthMatch" style="font-size: 0.75rem; padding: 0.3rem 0.7rem;"><i class="fa-solid fa-play"></i> Sim Matchday</button>
+            </div>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem;" id="youthLeagueTable">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-glass); color: var(--text-muted); text-align: left;">
+                    <th style="padding: 0.5rem;">#</th>
+                    <th style="padding: 0.5rem;">Team</th>
+                    <th style="padding: 0.5rem; text-align: center;">MP</th>
+                    <th style="padding: 0.5rem; text-align: center;">W</th>
+                    <th style="padding: 0.5rem; text-align: center;">D</th>
+                    <th style="padding: 0.5rem; text-align: center;">L</th>
+                    <th style="padding: 0.5rem; text-align: center;">GD</th>
+                    <th style="padding: 0.5rem; text-align: center;">Pts</th>
+                  </tr>
+                </thead>
+                <tbody id="youthLeagueStandingsBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top: 1.2rem; border-top: 1px solid var(--border-glass); padding-top: 0.75rem;">
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem; text-transform: uppercase;">Recent Youth League Results</div>
+              <div id="youthRecentResults" style="font-size: 0.82rem; color: #fff; display: flex; flex-direction: column; gap: 0.35rem;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -96,9 +96,18 @@ function initUI() {
       return;
     }
     state.advanceDay();
+
+    // Youth League matchday & player rating growth
+    if (state.currentDate.getDay() === 6) {
+      youthEngine.simYouthMatchday();
+    } else {
+      youthEngine.processYouthGrowth(false);
+    }
+
     updateHeaderStats();
     renderDashboard();
     renderUCLHub();
+    renderYouthAcademy();
   });
 
   // Change Club Button
@@ -748,19 +757,33 @@ function renderYouthAcademy() {
   const container = document.getElementById('youthAcademyList');
   if (!container) return;
 
+  // Ensure minimum squad size guarantee
+  youthEngine.ensureMinimumRoster();
+
+  // Badge count
+  const badgeEl = document.getElementById('youthRosterCountBadge');
+  if (badgeEl) badgeEl.textContent = `${youthEngine.academy.length} Prospects`;
+
+  // Render Prospects Roster
   const renderAcademy = () => {
-    container.innerHTML = youthEngine.academy.map(p => `
-      <div class="player-row-item">
-        <div class="player-row-left">
-          <div class="player-ovr-pill" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan);">${p.ovr}</div>
-          <div class="player-row-meta">
-            <div class="player-row-name">${p.name} (${p.pos}) ${p.nation}</div>
-            <div class="player-row-pos-age">Age ${p.age} • Potential: <strong style="color: var(--accent-lime);">${p.pot} POT</strong></div>
+    container.innerHTML = youthEngine.academy.map(p => {
+      const growthBadge = p.growthThisSeason > 0
+        ? `<span style="font-size: 0.7rem; color: #00ff87; font-weight: 800; margin-left: 0.3rem;">+${p.growthThisSeason} 🟢</span>`
+        : '';
+
+      return `
+        <div class="player-row-item">
+          <div class="player-row-left">
+            <div class="player-ovr-pill" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan);">${p.ovr}</div>
+            <div class="player-row-meta">
+              <div class="player-row-name">${p.name} (${p.pos}) ${p.nation} ${growthBadge}</div>
+              <div class="player-row-pos-age">Age ${p.age} • Potential: <strong style="color: var(--accent-lime);">${p.pot} POT</strong> • Val €${(p.val / 1000000).toFixed(1)}M</div>
+            </div>
           </div>
+          <button class="btn-primary btn-promote" data-youth-id="${p.id}" style="font-size: 0.75rem; padding: 0.35rem 0.7rem;">Promote to Squad</button>
         </div>
-        <button class="btn-primary btn-promote" data-youth-id="${p.id}">Promote to First Team</button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     container.querySelectorAll('.btn-promote').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -772,16 +795,66 @@ function renderYouthAcademy() {
     });
   };
 
-  renderAcademy();
+  // Render Youth League Standings Table
+  const renderStandings = () => {
+    const standingsBody = document.getElementById('youthLeagueStandingsBody');
+    if (!standingsBody) return;
 
-  document.getElementById('btnScoutEurope')?.addEventListener('click', () => {
+    standingsBody.innerHTML = youthEngine.standings.map((st, idx) => {
+      const isUser = st.isUser;
+      const rowStyle = isUser ? 'background: rgba(0, 240, 255, 0.12); font-weight: 800; color: var(--accent-cyan);' : '';
+      const gdSign = st.gd > 0 ? `+${st.gd}` : st.gd;
+
+      return `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); ${rowStyle}">
+          <td style="padding: 0.45rem;">${idx + 1}</td>
+          <td style="padding: 0.45rem;">${st.name} ${isUser ? '⭐' : ''}</td>
+          <td style="padding: 0.45rem; text-align: center;">${st.mp}</td>
+          <td style="padding: 0.45rem; text-align: center;">${st.w}</td>
+          <td style="padding: 0.45rem; text-align: center;">${st.d}</td>
+          <td style="padding: 0.45rem; text-align: center;">${st.l}</td>
+          <td style="padding: 0.45rem; text-align: center;">${gdSign}</td>
+          <td style="padding: 0.45rem; text-align: center; color: var(--accent-gold); font-weight: 800;">${st.pts}</td>
+        </tr>
+      `;
+    }).join('');
+
+    // Render Recent Results
+    const resultsEl = document.getElementById('youthRecentResults');
+    if (resultsEl) {
+      if (!youthEngine.recentResults.length) {
+        resultsEl.innerHTML = `<div style="color: var(--text-muted); font-size: 0.8rem;">No matches played yet. Advance dates to simulate Youth League matchdays!</div>`;
+      } else {
+        resultsEl.innerHTML = youthEngine.recentResults.map(res => `
+          <div style="background: rgba(255,255,255,0.04); padding: 0.3rem 0.6rem; border-radius: 6px; border-left: 3px solid var(--accent-cyan);">
+            ${res}
+          </div>
+        `).join('');
+      }
+    }
+  };
+
+  renderAcademy();
+  renderStandings();
+
+  // Scout Buttons
+  document.getElementById('btnScoutEurope')?.onclick = () => {
     youthEngine.scoutRegion('Europe');
-    renderAcademy();
-  });
-  document.getElementById('btnScoutSAmerica')?.addEventListener('click', () => {
+    renderYouthAcademy();
+  };
+  document.getElementById('btnScoutSAmerica')?.onclick = () => {
     youthEngine.scoutRegion('South America');
-    renderAcademy();
-  });
+    renderYouthAcademy();
+  };
+
+  // Sim Matchday Button
+  const btnSim = document.getElementById('btnSimYouthMatch');
+  if (btnSim) {
+    btnSim.onclick = () => {
+      youthEngine.simYouthMatchday();
+      renderYouthAcademy();
+    };
+  }
 }
 
 function renderOffice() {

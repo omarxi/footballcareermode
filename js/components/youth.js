@@ -5,9 +5,199 @@ import { state } from '../state.js';
 export class YouthEngine {
   constructor() {
     this.academy = [
-      { id: 'y1', name: 'Diego Silva', pos: 'CAM', ovr: 68, pot: 92, age: 16, nation: '🇧🇷', pac: 82, sho: 70, pas: 75, dri: 80, def: 40, phy: 55, val: 4500000, wage: 5000 },
-      { id: 'y2', name: 'Mateo Kovac', pos: 'CB', ovr: 65, pot: 89, age: 15, nation: '🇭🇷', pac: 74, sho: 40, pas: 65, dri: 62, def: 72, phy: 70, val: 3200000, wage: 4000 }
+      { id: 'y1', name: 'Diego Silva', pos: 'CAM', ovr: 68, pot: 92, age: 16, nation: '🇧🇷', pac: 82, sho: 70, pas: 75, dri: 80, def: 40, phy: 55, val: 4500000, wage: 5000, growthThisSeason: 0 },
+      { id: 'y2', name: 'Mateo Kovac', pos: 'CB', ovr: 65, pot: 89, age: 15, nation: '🇭🇷', pac: 74, sho: 40, pas: 65, dri: 62, def: 72, phy: 70, val: 3200000, wage: 4000, growthThisSeason: 0 },
+      { id: 'y3', name: 'Jan Van Dijk', pos: 'GK', ovr: 64, pot: 86, age: 16, nation: '🇳🇱', pac: 60, sho: 30, pas: 55, dri: 50, def: 65, phy: 68, val: 2100000, wage: 3500, growthThisSeason: 0 },
+      { id: 'y4', name: 'Leo Dupont', pos: 'ST', ovr: 66, pot: 88, age: 16, nation: '🇫🇷', pac: 81, sho: 71, pas: 60, dri: 68, def: 35, phy: 64, val: 3800000, wage: 4500, growthThisSeason: 0 }
     ];
+
+    this.ensureMinimumRoster();
+    this.initYouthLeague();
+  }
+
+  ensureMinimumRoster() {
+    const minPlayers = 12;
+    if (this.academy.length >= minPlayers) return;
+
+    const needed = minPlayers - this.academy.length;
+    const positions = ['GK', 'RB', 'CB', 'LB', 'CM', 'CDM', 'CAM', 'RW', 'LW', 'ST'];
+    const firstNames = ['Liam', 'Noah', 'Oliver', 'Ethan', 'Lucas', 'Mateo', 'Alex', 'Jack', 'Sandro', 'Milan'];
+    const lastNames = ['Smith', 'Garcia', 'Martin', 'Bauer', 'Novak', 'Silva', 'Conti', 'Dubois', 'Nielsen', 'Kovacs'];
+
+    for (let i = 0; i < needed; i++) {
+      const pos = positions[i % positions.length];
+      const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
+      const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
+      const ovr = Math.floor(Math.random() * 7) + 60; // 60-66 OVR
+      const pot = Math.floor(Math.random() * 12) + 80; // 80-91 Potential
+
+      this.academy.push({
+        id: `y_auto_${Date.now()}_${i}`,
+        name: `${fn} ${ln}`,
+        pos,
+        ovr,
+        pot,
+        age: Math.floor(Math.random() * 3) + 15,
+        nation: '🇪🇺',
+        pac: Math.floor(Math.random() * 20) + 65,
+        sho: Math.floor(Math.random() * 20) + 55,
+        pas: Math.floor(Math.random() * 20) + 60,
+        dri: Math.floor(Math.random() * 20) + 62,
+        def: Math.floor(Math.random() * 20) + 50,
+        phy: Math.floor(Math.random() * 20) + 55,
+        val: Math.round(ovr * 45000),
+        wage: 2500,
+        growthThisSeason: 0
+      });
+    }
+  }
+
+  initYouthLeague() {
+    this.leagueTeams = [
+      { id: 'user_u19', name: 'Youth Academy XI', isUser: true },
+      { id: 'rm_u19', name: 'Real Madrid U19', rating: 70 },
+      { id: 'barca_u19', name: 'FC Barcelona U19', rating: 71 },
+      { id: 'bayern_u19', name: 'Bayern Munich U19', rating: 69 },
+      { id: 'mancity_u19', name: 'Man City U19', rating: 70 },
+      { id: 'psg_u19', name: 'PSG U19', rating: 68 }
+    ];
+
+    this.standings = this.leagueTeams.map(t => ({
+      teamId: t.id,
+      name: t.name,
+      isUser: !!t.isUser,
+      mp: 0,
+      w: 0,
+      d: 0,
+      l: 0,
+      gf: 0,
+      ga: 0,
+      gd: 0,
+      pts: 0
+    }));
+
+    this.recentResults = [];
+    this.generateSchedule();
+  }
+
+  generateSchedule() {
+    const teams = this.leagueTeams.map(t => t.id);
+    this.schedule = [];
+
+    // Simple 10-matchday round robin generator for 6 teams
+    const n = teams.length;
+    for (let round = 0; round < (n - 1) * 2; round++) {
+      const matchday = [];
+      for (let i = 0; i < n / 2; i++) {
+        const homeIdx = (round + i) % (n - 1);
+        let awayIdx = (n - 1 - i + round) % (n - 1);
+        if (i === 0) awayIdx = n - 1;
+
+        if (round >= n - 1) {
+          matchday.push({ home: teams[awayIdx], away: teams[homeIdx], played: false, homeGoals: 0, awayGoals: 0 });
+        } else {
+          matchday.push({ home: teams[homeIdx], away: teams[awayIdx], played: false, homeGoals: 0, awayGoals: 0 });
+        }
+      }
+      this.schedule.push(matchday);
+    }
+    this.currentMatchdayIndex = 0;
+  }
+
+  simYouthMatchday() {
+    if (this.currentMatchdayIndex >= this.schedule.length) return;
+
+    const matchday = this.schedule[this.currentMatchdayIndex];
+    let userMatchResult = null;
+
+    matchday.forEach(m => {
+      if (m.played) return;
+
+      const homeTeam = this.leagueTeams.find(t => t.id === m.home);
+      const awayTeam = this.leagueTeams.find(t => t.id === m.away);
+
+      const hRating = homeTeam.isUser ? this.getUserYouthRating() : homeTeam.rating;
+      const aRating = awayTeam.isUser ? this.getUserYouthRating() : awayTeam.rating;
+
+      const diff = hRating - aRating;
+      const hExp = 1.4 + (diff * 0.05);
+      const aExp = 1.4 - (diff * 0.05);
+
+      const hG = Math.max(0, Math.floor(Math.random() * (hExp + 1.2)));
+      const aG = Math.max(0, Math.floor(Math.random() * (aExp + 1.2)));
+
+      m.homeGoals = hG;
+      m.awayGoals = aG;
+      m.played = true;
+
+      // Update Standings
+      const hSt = this.standings.find(s => s.teamId === m.home);
+      const aSt = this.standings.find(s => s.teamId === m.away);
+
+      hSt.mp++;
+      aSt.mp++;
+      hSt.gf += hG;
+      hSt.ga += aG;
+      aSt.gf += aG;
+      aSt.ga += hG;
+      hSt.gd = hSt.gf - hSt.ga;
+      aSt.gd = aSt.gf - aSt.ga;
+
+      if (hG > aG) {
+        hSt.w++; hSt.pts += 3;
+        aSt.l++;
+      } else if (aG > hG) {
+        aSt.w++; aSt.pts += 3;
+        hSt.l++;
+      } else {
+        hSt.d++; hSt.pts += 1;
+        aSt.d++; aSt.pts += 1;
+      }
+
+      if (homeTeam.isUser || awayTeam.isUser) {
+        userMatchResult = `${homeTeam.name} ${hG} - ${aG} ${awayTeam.name}`;
+      }
+    });
+
+    this.standings.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+    this.currentMatchdayIndex++;
+
+    if (userMatchResult) {
+      this.recentResults.unshift(userMatchResult);
+      if (this.recentResults.length > 5) this.recentResults.pop();
+    }
+
+    // Match experience boosts rating growth for academy players
+    this.processYouthGrowth(true);
+  }
+
+  getUserYouthRating() {
+    if (!this.academy.length) return 60;
+    const top11 = [...this.academy].sort((a, b) => b.ovr - a.ovr).slice(0, 11);
+    const avg = top11.reduce((sum, p) => sum + p.ovr, 0) / top11.length;
+    return Math.round(avg);
+  }
+
+  processYouthGrowth(fromMatch = false) {
+    this.ensureMinimumRoster();
+
+    this.academy.forEach(p => {
+      if (p.ovr >= p.pot) return;
+
+      // Growth chance: higher if far below potential or after match
+      const chance = fromMatch ? 0.35 : 0.08;
+      if (Math.random() < chance) {
+        p.ovr += 1;
+        p.growthThisSeason = (p.growthThisSeason || 0) + 1;
+
+        // Boost individual sub-attributes
+        p.pac = Math.min(99, p.pac + 1);
+        p.sho = Math.min(99, p.sho + 1);
+        p.pas = Math.min(99, p.pas + 1);
+        p.dri = Math.min(99, p.dri + 1);
+        p.val = Math.round(p.ovr * 55000);
+      }
+    });
   }
 
   scoutRegion(regionName) {
@@ -18,8 +208,8 @@ export class YouthEngine {
     const name = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`;
     const positions = ['ST', 'CAM', 'RW', 'LW', 'CM', 'CB', 'LB', 'RB', 'GK'];
     const pos = positions[Math.floor(Math.random() * positions.length)];
-    const ovr = Math.floor(Math.random() * 8) + 62; // 62 - 70
-    const pot = Math.floor(Math.random() * 10) + 85; // 85 - 95
+    const ovr = Math.floor(Math.random() * 8) + 62;
+    const pot = Math.floor(Math.random() * 10) + 85;
 
     const prospect = {
       id: `y_${Date.now()}`,
@@ -27,7 +217,7 @@ export class YouthEngine {
       pos,
       ovr,
       pot,
-      age: Math.floor(Math.random() * 3) + 15, // 15 - 17
+      age: Math.floor(Math.random() * 3) + 15,
       nation: regionName === 'South America' ? '🇧🇷' : regionName === 'Europe' ? '🇪🇸' : '🇯🇵',
       pac: Math.floor(Math.random() * 20) + 70,
       sho: Math.floor(Math.random() * 20) + 60,
@@ -36,7 +226,8 @@ export class YouthEngine {
       def: Math.floor(Math.random() * 20) + 50,
       phy: Math.floor(Math.random() * 20) + 55,
       val: Math.round(ovr * 60000),
-      wage: 3000
+      wage: 3000,
+      growthThisSeason: 0
     };
 
     this.academy.unshift(prospect);
@@ -63,6 +254,9 @@ export class YouthEngine {
         category: 'ACADEMY'
       });
 
+      // Auto-replenish to maintain full youth squad
+      this.ensureMinimumRoster();
+
       state.playSound('goal');
       return prospect;
     }
@@ -71,3 +265,4 @@ export class YouthEngine {
 }
 
 export const youthEngine = new YouthEngine();
+
