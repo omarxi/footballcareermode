@@ -594,16 +594,22 @@
         </div>
 
         <!-- Right: Offer Controls -->
-        <div>
+        <div id="feeNegotiationSection">
           <!-- Fee Section -->
-          <div id="feeNegotiationSection">
             <div class="input-group">
-              <span class="input-label">Asking Price</span>
+              <span class="input-label" id="negAskingPriceLabel">Asking Price</span>
               <div style="font-weight: 800; font-size: 1.4rem; color: var(--accent-gold);" id="negAskingPrice">€100.0M</div>
             </div>
             <div class="input-group">
-              <span class="input-label">Your Offer (€ Millions)</span>
+              <span class="input-label" id="negOfferInputLabel">Your Offer (€ Millions)</span>
               <input type="number" class="input-field" id="feeOfferInput" placeholder="e.g. 110" step="0.5" />
+            </div>
+            <div class="input-group" id="loanDurationGroup" style="display: none;">
+              <span class="input-label">Loan Duration</span>
+              <select class="input-field" id="loanDurationInput">
+                <option value="1" selected>1 Season</option>
+                <option value="2">2 Seasons</option>
+              </select>
             </div>
             <button class="btn-primary" id="btnSubmitFeeOffer" style="width: 100%;"><i class="fa-solid fa-gavel"></i> Submit Offer</button>
           </div>
@@ -924,8 +930,14 @@
     </div>
   </div>
 
-  <!-- Main ES Module Script -->
-  <script type="module" src="js/app.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/components/pitch.js"></script>
+  <script src="js/components/matchEngine.js"></script>
+  <script src="js/components/transfers.js"></script>
+  <script src="js/components/youth.js"></script>
+  <script src="js/components/office.js"></script>
+  <script src="js/app.js"></script>
   <!-- End of Season Review & Celebration Modal -->
   <div class="modal-backdrop" id="endOfSeasonModal">
     <div class="modal-card" style="max-width: 650px; text-align: center; background: linear-gradient(135deg, #0d1527, #060a12); border: 1px solid rgba(0, 240, 255, 0.4); box-shadow: 0 0 40px rgba(0, 240, 255, 0.2);">
@@ -957,6 +969,28 @@
       <button class="btn-primary" id="btnStartNextSeasonConfirm" style="width: 100%; padding: 0.95rem; font-size: 1.1rem; font-weight: 900; background: linear-gradient(135deg, var(--accent-lime), #00bb66); color: #001a0d; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 0 20px rgba(0, 255, 137, 0.3);">
         <i class="fa-solid fa-play"></i> Advance to Next Season <span id="eosNextSeasonYear">2027/28</span>
       </button>
+    </div>
+  </div>
+
+  <!-- Incoming Transfer & Loan Offer Modal -->
+  <div class="modal-backdrop" id="incomingBidModal">
+    <div class="modal-card" style="max-width: 540px; background: linear-gradient(135deg, #0d1527, #060a12); border: 1px solid rgba(0, 255, 137, 0.4); box-shadow: 0 0 30px rgba(0, 255, 137, 0.15);">
+      <button class="modal-close-btn">&times;</button>
+      <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-lime); font-weight: 800; margin-bottom: 0.3rem;" id="bidModalTypeBadge">INCOMING PROPOSAL</div>
+      <h2 style="font-size: 1.5rem; font-weight: 900; color: #fff; margin-bottom: 1rem;" id="bidModalTitle">Transfer Proposal</h2>
+      
+      <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 1rem; margin-bottom: 1.2rem;" id="bidModalDetails">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div style="display: flex; gap: 0.8rem;">
+        <button class="btn-secondary" id="btnRejectBid" style="flex: 1; padding: 0.75rem; background: rgba(255, 50, 80, 0.2); color: #ff4d6d; border: 1px solid rgba(255, 50, 80, 0.4); font-weight: 800; border-radius: 8px; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i> Reject Offer
+        </button>
+        <button class="btn-primary" id="btnAcceptBid" style="flex: 1; padding: 0.75rem; background: linear-gradient(135deg, var(--accent-lime), #00b359); color: #001a0d; font-weight: 900; border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 0 15px rgba(0, 255, 137, 0.3);">
+          <i class="fa-solid fa-check"></i> Accept Offer
+        </button>
+      </div>
     </div>
   </div>
 </body>

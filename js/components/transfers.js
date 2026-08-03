@@ -1,8 +1,8 @@
 /* Transfer Market & Dynamic Interactive Negotiation Engine — Fast & Fun Mode */
 
-import { state } from '../state.js';
 
-export class TransferEngine {
+
+class TransferEngine {
   constructor() {
     this.activeNegotiation = null;
   }
@@ -177,6 +177,119 @@ export class TransferEngine {
     return neg;
   }
 
+  startLoanNegotiation(player, dealType = 'LOAN', seasons = 1) {
+    const val = player.val;
+    const isTooValuable = player.val >= 40000000 || player.ovr >= 85;
+
+    this.activeNegotiation = {
+      player,
+      isLoan: true,
+      dealType, // 'LOAN' or 'LOAN_OPTION'
+      seasons,
+      stage: isTooValuable ? 'FAILED' : 'CLUB_LOAN',
+      currentWageSplit: 100, // % user agrees to pay
+      buyOptionFee: Math.round(val * 1.15),
+      clubCounters: 0,
+      playerTalkTurns: 0,
+      history: [],
+      playerChatHistory: [],
+      playerMood: 'neutral',
+    };
+
+    const neg = this.activeNegotiation;
+
+    if (isTooValuable) {
+      neg.history.push({
+        sender: 'Opposing Manager',
+        text: `A player of ${player.name}'s calibre (€${(player.val / 1000000).toFixed(1)}M valuation) is too valuable for a loan spell. We will only entertain permanent purchase offers!`,
+        status: 'failed'
+      });
+    } else {
+      const typeText = dealType === 'LOAN_OPTION' ? `${seasons}-Season Loan with Option to Buy` : `${seasons}-Season Loan`;
+      neg.history.push({
+        sender: 'Opposing Manager',
+        text: `We are willing to consider a ${typeText} proposal for ${player.name}. What percentage of his €${(player.wage / 1000).toFixed(0)}k/wk wage are you willing to cover?`,
+        status: 'counter'
+      });
+    }
+
+    return neg;
+  }
+
+  submitLoanOffer(wageSplitPercent, buyOptionFee = 0, seasons = 1) {
+    const neg = this.activeNegotiation;
+    if (!neg || !neg.isLoan || neg.stage !== 'CLUB_LOAN') return neg;
+
+    neg.currentWageSplit = wageSplitPercent;
+    neg.buyOptionFee = buyOptionFee || neg.buyOptionFee;
+    neg.seasons = seasons || neg.seasons || 1;
+
+    const offerDesc = neg.dealType === 'LOAN_OPTION'
+      ? `We offer a ${neg.seasons}-season loan covering ${wageSplitPercent}% of wage with €${(neg.buyOptionFee / 1000000).toFixed(1)}M option to buy.`
+      : `We offer a ${neg.seasons}-season loan covering ${wageSplitPercent}% of wage.`;
+
+    neg.history.push({
+      sender: 'You',
+      text: offerDesc,
+      status: 'user'
+    });
+
+    const minWageSplit = 60; // Minimum 60% wage cover required by selling club
+    if (wageSplitPercent >= minWageSplit) {
+      neg.stage = 'PLAYER_CHAT';
+      neg.history.push({
+        sender: 'Opposing Manager',
+        text: `That wage coverage (${wageSplitPercent}%) for ${neg.seasons} season(s) is fair. Deal agreed between clubs! You may now speak to ${neg.player.name} to confirm terms.`,
+        status: 'accepted'
+      });
+    } else {
+      neg.clubCounters++;
+      if (neg.clubCounters >= 3) {
+        neg.stage = 'FAILED';
+        neg.history.push({
+          sender: 'Opposing Manager',
+          text: `Offering less than 60% wage coverage is unfeasible for us. Loan talks broken off.`,
+          status: 'failed'
+        });
+      } else {
+        neg.history.push({
+          sender: 'Opposing Manager',
+          text: `We require at least 60% wage coverage to release ${neg.player.name} on loan.`,
+          status: 'counter'
+        });
+      }
+    }
+
+    return neg;
+  }
+
+  completeLoan(player, wageSplitPercent, buyOptionFee = 0, seasons = 1) {
+    const userWageCovered = Math.round(player.wage * (wageSplitPercent / 100));
+    state.myClub.wageBudget = Math.max(0, state.myClub.wageBudget - userWageCovered);
+
+    player.isLoanedIn = true;
+    player.loanParentClub = player.clubId;
+    player.clubId = state.myClubId;
+    player.loanWageSplit = wageSplitPercent;
+    player.loanBuyFee = buyOptionFee;
+    player.loanSeasonsLeft = seasons || 1;
+
+    state.bench.push(player);
+
+    const dealDesc = buyOptionFee > 0
+      ? `on a ${seasons}-season loan with €${(buyOptionFee / 1000000).toFixed(1)}M option to buy!`
+      : `on a ${seasons}-season loan!`;
+
+    state.news.unshift({
+      headline: `🔄 LOAN SIGNING: ${state.myClub.name} sign ${player.name} ${dealDesc}`,
+      date: state.getFormattedDate(),
+      category: 'DONE DEAL'
+    });
+
+    state.playSound('goal');
+    this.activeNegotiation = null;
+  }
+
   completeTransfer(player, fee, wage, years = 4) {
     state.myClub.budget = Math.max(0, state.myClub.budget - fee);
     state.myClub.wageBudget = Math.max(0, state.myClub.wageBudget - wage);
@@ -198,4 +311,4 @@ export class TransferEngine {
   }
 }
 
-export const transferEngine = new TransferEngine();
+const transferEngine = new TransferEngine();

@@ -1,6 +1,6 @@
 /* FIFA Career Mode Database — Full 96 Clubs Across 5 Major European Leagues (1,500+ Authentic Real Players) */
 
-export const INITIAL_CLUBS = [
+const INITIAL_CLUBS = [
   // ─── LA LIGA (20 CLUBS) ──────────────────────────────────────────────────
   { id: 'real_madrid', name: 'Real Madrid', shortName: 'RMA', crest: 'https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg', color: '#ffffff', league: 'La Liga', budget: 160000000, wageBudget: 2800000, rating: 89, att: 91, mid: 89, def: 87 },
   { id: 'barcelona', name: 'FC Barcelona', shortName: 'BAR', crest: 'https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg', color: '#004d98', league: 'La Liga', budget: 95000000, wageBudget: 1900000, rating: 87, att: 88, mid: 87, def: 85 },
@@ -2671,10 +2671,10 @@ function generateRoster() {
 }
 
 
-export const INITIAL_PLAYERS = generateRoster();
+const INITIAL_PLAYERS = generateRoster();
 
 // Tactical Formations Mapping (% coordinates for pitch layout)
-export const FORMATIONS = {
+const FORMATIONS = {
   '4-3-3': {
     name: '4-3-3 Attack',
     positions: [

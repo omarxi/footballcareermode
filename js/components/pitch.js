@@ -1,9 +1,9 @@
 /* Squad Hub Interactive Pitch Component */
 
-import { state } from '../state.js';
-import { FORMATIONS } from '../data.js';
 
-export function renderPitch(containerElement, selectedSlotIndex = null, onSelectSlot) {
+
+
+function renderPitch(containerElement, selectedSlotIndex = null, onSelectSlot) {
   const formation = FORMATIONS[state.selectedFormationKey] || FORMATIONS['4-3-3'];
   const starters = state.starters;
 
@@ -50,7 +50,7 @@ export function renderPitch(containerElement, selectedSlotIndex = null, onSelect
 }
 
 // Calculate team rating metrics
-export function calculateTeamRatings() {
+function calculateTeamRatings() {
   const starters = state.starters;
   if (!starters || starters.length === 0) return { att: 80, mid: 80, def: 80, ovr: 80 };
 

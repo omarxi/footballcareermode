@@ -9,9 +9,9 @@
      • Smooth Multi-Agent Player AI (Dribbling, Passing, Pressing, Shooting, GK Diving)
    ───────────────────────────────────────────────────────────────────────────── */
 
-import { state } from '../state.js';
-import { calculateTeamRatings } from './pitch.js';
-import { INITIAL_PLAYERS } from '../data.js';
+
+
+
 
 // Polyfill for roundRect
 if (!CanvasRenderingContext2D.prototype.roundRect) {
@@ -34,7 +34,7 @@ const GOAL_TOP = H / 2 - 42;
 const GOAL_BOT = H / 2 + 42;
 const MAX_COMM = 35;
 
-export class LiveMatchEngine {
+class LiveMatchEngine {
   constructor(canvasId, fixture, onMatchFinished) {
     this.canvasId   = canvasId;
     this.fixture    = fixture;
@@ -1082,7 +1082,7 @@ export class LiveMatchEngine {
   }
 }
 
-export function quickSimMatch(fixture, calculateTeamRatingsFn, stateRef) {
+function quickSimMatch(fixture, calculateTeamRatingsFn, stateRef) {
   if (!fixture) return null;
   const myRatings = calculateTeamRatingsFn();
   const isUserHome = fixture.homeClub.id === stateRef.myClubId;

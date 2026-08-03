@@ -1,12 +1,12 @@
 /* Main Application Controller & UI View Manager */
 
-import { state } from './state.js';
-import { INITIAL_CLUBS, INITIAL_PLAYERS } from './data.js';
-import { renderPitch, calculateTeamRatings } from './components/pitch.js';
-import { LiveMatchEngine, quickSimMatch as engineQuickSim } from './components/matchEngine.js';
-import { transferEngine } from './components/transfers.js';
-import { youthEngine } from './components/youth.js';
-import { officeEngine } from './components/office.js';
+
+
+
+
+
+
+
 
 
 let selectedPitchSlot = null;
@@ -388,6 +388,12 @@ function renderSquadHub() {
               ${player.isTransferListed 
                 ? '<span style="background:rgba(255,50,80,0.15); color:#ff4d6d; padding:2px 6px; border-radius:4px; font-size:0.68rem; font-weight:800; border:1px solid rgba(255,50,80,0.3); margin-left:4px;"><i class="fa-solid fa-tag"></i> FOR SALE</span>' 
                 : ''}
+              ${player.isLoanListed 
+                ? '<span style="background:rgba(0,240,255,0.15); color:var(--accent-cyan); padding:2px 6px; border-radius:4px; font-size:0.68rem; font-weight:800; border:1px solid rgba(0,240,255,0.3); margin-left:4px;"><i class="fa-solid fa-handshake"></i> LOAN LISTED</span>' 
+                : ''}
+              ${player.isLoaned 
+                ? `<span style="background:rgba(255,207,37,0.15); color:var(--accent-gold); padding:2px 6px; border-radius:4px; font-size:0.68rem; font-weight:800; border:1px solid rgba(255,207,37,0.3); margin-left:4px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> ON LOAN AT ${player.loanClub || 'RIVAL'}</span>` 
+                : ''}
             </div>
             <div class="player-row-pos-age"><strong style="color:var(--accent-lime);">${player.pos}</strong> • Age ${player.age} • ${player.nation} • Val: €${(player.val/1000000).toFixed(1)}M</div>
           </div>
@@ -395,6 +401,9 @@ function renderSquadHub() {
         <div style="display: flex; gap: 0.35rem; align-items: center;">
           <button class="btn-secondary btn-toggle-list" data-player-id="${player.id}" style="padding: 0.35rem 0.55rem; font-size: 0.72rem; ${player.isTransferListed ? 'background:rgba(255,50,80,0.2); color:#ff4d6d;' : ''}">
             <i class="fa-solid fa-tag"></i> ${player.isTransferListed ? 'Unlist' : 'For Sale'}
+          </button>
+          <button class="btn-secondary btn-toggle-loan" data-player-id="${player.id}" style="padding: 0.35rem 0.55rem; font-size: 0.72rem; ${player.isLoanListed ? 'background:rgba(0,240,255,0.2); color:var(--accent-cyan);' : ''}">
+            <i class="fa-solid fa-handshake"></i> ${player.isLoanListed ? 'Unlist Loan' : 'List Loan'}
           </button>
           <button class="btn-secondary btn-talk-player" data-player-id="${player.id}" style="padding: 0.35rem 0.55rem; font-size: 0.72rem;">
             <i class="fa-solid fa-comments"></i> Talk
@@ -414,6 +423,15 @@ function renderSquadHub() {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         state.toggleTransferList(btn.dataset.playerId);
+        renderSquadHub();
+        renderTransfers();
+      });
+    });
+
+    fullRosterContainer.querySelectorAll('.btn-toggle-loan').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        state.toggleLoanList(btn.dataset.playerId);
         renderSquadHub();
         renderTransfers();
       });
@@ -578,7 +596,12 @@ function renderTransfers() {
               </div>
             </div>
           </div>
-          <button class="btn-primary btn-negotiate" data-player-id="${p.id}">Approach to Buy</button>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <button class="btn-secondary btn-loan-negotiate" data-player-id="${p.id}" style="border: 1px solid var(--accent-cyan); color: var(--accent-cyan); font-size: 0.78rem; padding: 0.4rem 0.75rem;">
+              <i class="fa-solid fa-handshake"></i> Loan
+            </button>
+            <button class="btn-primary btn-negotiate" data-player-id="${p.id}" style="font-size: 0.78rem; padding: 0.4rem 0.85rem;">Approach to Buy</button>
+          </div>
         </div>
       `;
     }).join('');
@@ -587,6 +610,13 @@ function renderTransfers() {
       btn.addEventListener('click', () => {
         const player = state.players.find(p => p.id === btn.dataset.playerId);
         if (player) openNegotiationModal(player);
+      });
+    });
+
+    resultsContainer.querySelectorAll('.btn-loan-negotiate').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const player = state.players.find(p => p.id === btn.dataset.playerId);
+        if (player) openLoanNegotiationModal(player);
       });
     });
   };
@@ -605,11 +635,21 @@ function openNegotiationModal(player) {
   const modal = document.getElementById('negotiationModal');
   if (!modal) return;
 
+  const priceLabel = document.getElementById('negAskingPriceLabel');
+  const offerLabel = document.getElementById('negOfferInputLabel');
+  const durationGroup = document.getElementById('loanDurationGroup');
+  if (priceLabel) priceLabel.textContent = 'Asking Price';
+  if (offerLabel) offerLabel.textContent = 'Your Offer (€ Millions)';
+  if (durationGroup) durationGroup.style.display = 'none';
+
   // Clear all input fields
   const feeInput = document.getElementById('feeOfferInput');
   const wageInput = document.getElementById('wageOfferInput');
   const chatInput = document.getElementById('playerChatInput');
-  if (feeInput) feeInput.value = '';
+  if (feeInput) {
+    feeInput.value = '';
+    feeInput.placeholder = 'e.g. 110';
+  }
   if (wageInput) wageInput.value = '';
   if (chatInput) chatInput.value = '';
 
@@ -753,6 +793,140 @@ function renderContractChat(neg) {
   }
 }
 
+function openLoanNegotiationModal(player) {
+  transferEngine.activeNegotiation = null;
+  const modal = document.getElementById('negotiationModal');
+  if (!modal) return;
+
+  const priceLabel = document.getElementById('negAskingPriceLabel');
+  const offerLabel = document.getElementById('negOfferInputLabel');
+  const durationGroup = document.getElementById('loanDurationGroup');
+  const durationInput = document.getElementById('loanDurationInput');
+
+  if (priceLabel) priceLabel.textContent = 'Player Weekly Wage';
+  if (offerLabel) offerLabel.textContent = 'Wage Coverage (%)';
+  if (durationGroup) durationGroup.style.display = 'block';
+
+  const feeInput = document.getElementById('feeOfferInput');
+  if (feeInput) {
+    feeInput.value = '70'; // Default 70% wage offer
+    feeInput.placeholder = 'Enter wage % (e.g. 70)';
+  }
+
+  const initialSeasons = durationInput ? parseInt(durationInput.value) || 1 : 1;
+  const neg = transferEngine.startLoanNegotiation(player, 'LOAN', initialSeasons);
+
+  document.getElementById('feeNegotiationSection').style.display = 'block';
+  document.getElementById('negPlayerChatSection').style.display = 'none';
+  document.getElementById('contractNegotiationSection').style.display = 'none';
+  document.getElementById('negPlayerChatLog').innerHTML = '';
+  document.getElementById('negStageLabel').innerText = 'LOAN PROPOSAL — Wage Split & Terms';
+  document.getElementById('negMoodBar').innerText = '';
+
+  document.getElementById('negPlayerName').innerText = `[LOAN] ${player.name} (${player.pos} - ${player.ovr} OVR) ${player.nation}`;
+  document.getElementById('negAskingPrice').innerText = `€${(player.wage / 1000).toFixed(0)}k/wk wage`;
+  
+  if (neg.stage === 'FAILED') {
+    renderNegotiationChat(neg);
+  } else {
+    document.getElementById('negChatLog').innerHTML = `
+      <div class="chat-bubble agent">
+        <strong>Opposing Manager:</strong> "We are open to loaning out ${player.name}. What percentage of his wage (€${(player.wage / 1000).toFixed(0)}k/wk) will your club pay?"
+      </div>
+    `;
+  }
+
+  modal.classList.add('active');
+
+  const closeBtn = modal.querySelector('.modal-close-btn');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      transferEngine.activeNegotiation = null;
+      modal.classList.remove('active');
+    };
+  }
+
+  document.getElementById('btnSubmitFeeOffer').onclick = () => {
+    if (neg.stage === 'FAILED') return;
+    const split = parseInt(document.getElementById('feeOfferInput').value);
+    const seasons = parseInt(document.getElementById('loanDurationInput').value) || 1;
+    if (!split || isNaN(split)) return;
+
+    const result = transferEngine.submitLoanOffer(split, 0, seasons);
+    renderNegotiationChat(result);
+    if (result.stage === 'PLAYER_CHAT') {
+      setTimeout(() => {
+        transferEngine.completeLoan(player, split, 0, seasons);
+        document.getElementById('negStageLabel').innerText = '✅ Loan Complete!';
+        updateHeaderStats();
+        renderSquadHub();
+        renderTransfers();
+      }, 1000);
+    }
+  };
+}
+
+function openIncomingOfferModal(offer) {
+  const modal = document.getElementById('incomingBidModal');
+  if (!modal) return;
+
+  const typeBadge = document.getElementById('bidModalTypeBadge');
+  const titleEl = document.getElementById('bidModalTitle');
+  const detailsEl = document.getElementById('bidModalDetails');
+
+  if (offer.type === 'TRANSFER') {
+    if (typeBadge) typeBadge.textContent = 'INCOMING TRANSFER BID';
+    if (titleEl) titleEl.textContent = `Buy Offer for ${offer.playerName}`;
+    if (detailsEl) {
+      detailsEl.innerHTML = `
+        <div style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">${offer.playerName} (${offer.playerPos} - ${offer.playerOvr} OVR)</div>
+        <div style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">
+          Bidding Club: <strong style="color: #fff;">${offer.biddingClubName}</strong><br>
+          Market Value: <strong>€${(offer.playerVal / 1000000).toFixed(1)}M</strong><br>
+          Offered Fee: <strong style="color: var(--accent-lime); font-size: 1.1rem;">€${(offer.bidAmount / 1000000).toFixed(1)}M</strong>
+        </div>
+      `;
+    }
+  } else {
+    if (typeBadge) typeBadge.textContent = 'INCOMING LOAN PROPOSAL';
+    if (titleEl) titleEl.textContent = `Loan Offer for ${offer.playerName}`;
+    if (detailsEl) {
+      const optionText = offer.buyOptionFee > 0 ? `<br>Option to Buy Fee: <strong style="color: var(--accent-gold);">€${(offer.buyOptionFee / 1000000).toFixed(1)}M</strong>` : '';
+      detailsEl.innerHTML = `
+        <div style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 0.5rem;">${offer.playerName} (${offer.playerPos} - ${offer.playerOvr} OVR)</div>
+        <div style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">
+          Interested Club: <strong style="color: #fff;">${offer.biddingClubName}</strong><br>
+          Loan Duration: <strong>1 Season</strong><br>
+          Wage Coverage: <strong style="color: var(--accent-cyan);">${offer.wageSplit}% covered by borrower</strong>${optionText}
+        </div>
+      `;
+    }
+  }
+
+  modal.classList.add('active');
+
+  const closeBtn = modal.querySelector('.modal-close-btn');
+  if (closeBtn) {
+    closeBtn.onclick = () => modal.classList.remove('active');
+  }
+
+  document.getElementById('btnAcceptBid').onclick = () => {
+    state.acceptIncomingOffer(offer.id);
+    modal.classList.remove('active');
+    updateHeaderStats();
+    renderSquadHub();
+    renderTransfers();
+  };
+
+  document.getElementById('btnRejectBid').onclick = () => {
+    state.rejectIncomingOffer(offer.id);
+    modal.classList.remove('active');
+    updateHeaderStats();
+    renderSquadHub();
+    renderTransfers();
+  };
+}
+
 function renderYouthAcademy() {
   const container = document.getElementById('youthAcademyList');
   if (!container) return;
@@ -838,14 +1012,21 @@ function renderYouthAcademy() {
   renderStandings();
 
   // Scout Buttons
-  document.getElementById('btnScoutEurope')?.onclick = () => {
-    youthEngine.scoutRegion('Europe');
-    renderYouthAcademy();
-  };
-  document.getElementById('btnScoutSAmerica')?.onclick = () => {
-    youthEngine.scoutRegion('South America');
-    renderYouthAcademy();
-  };
+  const btnScoutEurope = document.getElementById('btnScoutEurope');
+  if (btnScoutEurope) {
+    btnScoutEurope.onclick = () => {
+      youthEngine.scoutRegion('Europe');
+      renderYouthAcademy();
+    };
+  }
+
+  const btnScoutSAmerica = document.getElementById('btnScoutSAmerica');
+  if (btnScoutSAmerica) {
+    btnScoutSAmerica.onclick = () => {
+      youthEngine.scoutRegion('South America');
+      renderYouthAcademy();
+    };
+  }
 
   // Sim Matchday Button
   const btnSim = document.getElementById('btnSimYouthMatch');

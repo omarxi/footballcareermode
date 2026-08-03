@@ -1,8 +1,8 @@
 /* Youth Academy & Scouting Engine */
 
-import { state } from '../state.js';
 
-export class YouthEngine {
+
+class YouthEngine {
   constructor() {
     this.academy = [
       { id: 'y1', name: 'Diego Silva', pos: 'CAM', ovr: 68, pot: 92, age: 16, nation: '🇧🇷', pac: 82, sho: 70, pas: 75, dri: 80, def: 40, phy: 55, val: 4500000, wage: 5000, growthThisSeason: 0 },
@@ -52,14 +52,32 @@ export class YouthEngine {
     }
   }
 
+  getUserYouthName() {
+    if (typeof state !== 'undefined' && state.myClub && state.myClub.name) {
+      return `${state.myClub.name} U19`;
+    }
+    return 'Youth Academy U19';
+  }
+
   initYouthLeague() {
+    const userTeamName = this.getUserYouthName();
+    const userClubId = (typeof state !== 'undefined' && state.myClubId) ? state.myClubId : 'real_madrid';
+
+    const opponentPool = [
+      { id: 'rm_u19', name: 'Real Madrid U19', rating: 70, parent: 'real_madrid' },
+      { id: 'barca_u19', name: 'FC Barcelona U19', rating: 71, parent: 'barcelona' },
+      { id: 'bayern_u19', name: 'Bayern Munich U19', rating: 69, parent: 'bayern' },
+      { id: 'mancity_u19', name: 'Man City U19', rating: 70, parent: 'man_city' },
+      { id: 'psg_u19', name: 'PSG U19', rating: 68, parent: 'psg' },
+      { id: 'juve_u19', name: 'Juventus U19', rating: 67, parent: 'juventus' },
+      { id: 'arsenal_u19', name: 'Arsenal U19', rating: 69, parent: 'arsenal' }
+    ];
+
+    const filteredOpponents = opponentPool.filter(o => o.parent !== userClubId).slice(0, 5);
+
     this.leagueTeams = [
-      { id: 'user_u19', name: 'Youth Academy XI', isUser: true },
-      { id: 'rm_u19', name: 'Real Madrid U19', rating: 70 },
-      { id: 'barca_u19', name: 'FC Barcelona U19', rating: 71 },
-      { id: 'bayern_u19', name: 'Bayern Munich U19', rating: 69 },
-      { id: 'mancity_u19', name: 'Man City U19', rating: 70 },
-      { id: 'psg_u19', name: 'PSG U19', rating: 68 }
+      { id: 'user_u19', name: userTeamName, isUser: true },
+      ...filteredOpponents
     ];
 
     this.standings = this.leagueTeams.map(t => ({
@@ -264,5 +282,5 @@ export class YouthEngine {
   }
 }
 
-export const youthEngine = new YouthEngine();
+const youthEngine = new YouthEngine();
 

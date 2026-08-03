@@ -1,8 +1,8 @@
 /* Office, Press Conferences & Board Objectives */
 
-import { state } from '../state.js';
 
-export class OfficeEngine {
+
+class OfficeEngine {
   constructor() {
     this.boardObjectives = [
       { id: 'b1', desc: 'Win the League Championship', category: 'DOMESTIC', progress: 0, status: 'In Progress' },
@@ -45,4 +45,4 @@ export class OfficeEngine {
   }
 }
 
-export const officeEngine = new OfficeEngine();
+const officeEngine = new OfficeEngine();

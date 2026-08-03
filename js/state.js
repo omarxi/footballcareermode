@@ -1,6 +1,6 @@
 /* FIFA Career Mode State Engine & Multi-Competition Manager */
 
-import { INITIAL_CLUBS, INITIAL_PLAYERS, FORMATIONS } from './data.js';
+
 
 class CareerState {
   constructor() {
@@ -303,23 +303,35 @@ class CareerState {
     const p = this.players.find(x => x.id === playerId);
     if (p) {
       p.isTransferListed = !p.isTransferListed;
+      if (p.isTransferListed) p.isLoanListed = false; // Mutually exclusive list
       this.playSound?.('click');
       return p.isTransferListed;
     }
     return false;
   }
 
+  toggleLoanList(playerId) {
+    const p = this.players.find(x => x.id === playerId);
+    if (p) {
+      p.isLoanListed = !p.isLoanListed;
+      if (p.isLoanListed) p.isTransferListed = false;
+      this.playSound?.('click');
+      return p.isLoanListed;
+    }
+    return false;
+  }
+
   generateIncomingOffer() {
-    const myPlayers = this.players.filter(p => p.clubId === this.myClubId);
+    const myPlayers = this.players.filter(p => p.clubId === this.myClubId && !p.isLoaned);
     if (!myPlayers.length) return;
 
     const availablePlayers = myPlayers.filter(p => !this.incomingOffers.some(o => o.playerId === p.id && o.status === 'PENDING'));
     if (!availablePlayers.length) return;
 
-    // Balance selection between transfer-listed and unlisted squad players
-    const listedPlayers = availablePlayers.filter(p => p.isTransferListed);
+    // Prioritize listed players (loan or transfer), otherwise random squad player
+    const listedPlayers = availablePlayers.filter(p => p.isTransferListed || p.isLoanListed);
     let player = null;
-    if (listedPlayers.length && Math.random() < 0.50) {
+    if (listedPlayers.length && Math.random() < 0.60) {
       player = listedPlayers[Math.floor(Math.random() * listedPlayers.length)];
     } else {
       player = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
@@ -328,43 +340,154 @@ class CareerState {
     const rivalClubs = this.clubs.filter(c => c.id !== this.myClubId);
     const biddingClub = rivalClubs[Math.floor(Math.random() * rivalClubs.length)];
 
-    // Unlisted players command higher premium bids (120%-150% value) from rival clubs
-    const feeMultiplier = player.isTransferListed ? (1.05 + Math.random() * 0.25) : (1.20 + Math.random() * 0.30);
-    const bidAmount = Math.round((player.val * feeMultiplier) / 100000) * 100000;
+    // Determine offer type: LOAN vs TRANSFER
+    // Young (<22) or OVR <= 76 or loan listed -> High probability of Loan offer
+    let offerType = 'TRANSFER';
+    if (player.isLoanListed || (player.age <= 22 && player.ovr < 78) || (player.ovr < 75 && Math.random() < 0.65)) {
+      offerType = Math.random() < 0.40 ? 'LOAN_OPTION' : 'LOAN';
+    }
 
-    const offer = {
-      id: 'offer_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-      playerId: player.id,
-      playerName: player.name,
-      playerPos: player.pos,
-      playerOvr: player.ovr,
-      playerAge: player.age,
-      playerVal: player.val,
-      biddingClubId: biddingClub.id,
-      biddingClubName: biddingClub.name,
-      bidAmount: bidAmount,
-      date: this.getFormattedDate(),
-      status: 'PENDING'
-    };
+    if (offerType === 'TRANSFER') {
+      const feeMultiplier = player.isTransferListed ? (1.05 + Math.random() * 0.25) : (1.20 + Math.random() * 0.30);
+      const bidAmount = Math.round((player.val * feeMultiplier) / 100000) * 100000;
 
-    this.incomingOffers.unshift(offer);
+      const offer = {
+        id: 'offer_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        type: 'TRANSFER',
+        playerId: player.id,
+        playerName: player.name,
+        playerPos: player.pos,
+        playerOvr: player.ovr,
+        playerAge: player.age,
+        playerVal: player.val,
+        biddingClubId: biddingClub.id,
+        biddingClubName: biddingClub.name,
+        bidAmount: bidAmount,
+        date: this.getFormattedDate(),
+        status: 'PENDING'
+      };
 
-    const tag = player.isTransferListed ? '[FOR SALE] ' : '[UNLISTED STAR] ';
+      this.incomingOffers.unshift(offer);
+
+      const tag = player.isTransferListed ? '[FOR SALE] ' : '[UNLISTED] ';
+      this.news.unshift({
+        headline: `TRANSFER BID: ${biddingClub.name} submit €${(bidAmount / 1000000).toFixed(1)}M offer for ${tag}${player.name}!`,
+        date: this.getFormattedDate(),
+        category: 'TRANSFERS'
+      });
+
+      this.inbox.unshift({
+        id: 'msg_' + Date.now(),
+        offerId: offer.id,
+        type: 'OFFER_TRANSFER',
+        title: `Transfer Offer for ${player.name}`,
+        sender: biddingClub.name + ' Representative',
+        date: this.getFormattedDate(),
+        body: `${biddingClub.name} have officially submitted a transfer offer of €${(bidAmount / 1000000).toFixed(1)}M for ${player.name} (${player.pos} - ${player.ovr} OVR).`
+      });
+    } else {
+      // Loan Offer
+      const wageSplit = Math.choice ? Math.choice([60, 70, 80, 100]) : [60, 70, 80, 100][Math.floor(Math.random() * 4)];
+      const buyOptionFee = Math.round(player.val * (1.10 + Math.random() * 0.25));
+
+      const offer = {
+        id: 'offer_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        type: offerType, // 'LOAN' or 'LOAN_OPTION'
+        playerId: player.id,
+        playerName: player.name,
+        playerPos: player.pos,
+        playerOvr: player.ovr,
+        playerAge: player.age,
+        playerVal: player.val,
+        biddingClubId: biddingClub.id,
+        biddingClubName: biddingClub.name,
+        wageSplit: wageSplit, // % paid by borrowing club
+        buyOptionFee: offerType === 'LOAN_OPTION' ? buyOptionFee : 0,
+        date: this.getFormattedDate(),
+        status: 'PENDING'
+      };
+
+      this.incomingOffers.unshift(offer);
+
+      const desc = offerType === 'LOAN_OPTION' 
+        ? `1-Season Loan with €${(buyOptionFee / 1000000).toFixed(1)}M Option to Buy (${wageSplit}% wage covered)`
+        : `1-Season Loan (${wageSplit}% wage covered)`;
+
+      this.news.unshift({
+        headline: `LOAN PROPOSAL: ${biddingClub.name} want ${player.name} on loan!`,
+        date: this.getFormattedDate(),
+        category: 'TRANSFERS'
+      });
+
+      this.inbox.unshift({
+        id: 'msg_' + Date.now(),
+        offerId: offer.id,
+        type: 'OFFER_LOAN',
+        title: `Loan Proposal for ${player.name}`,
+        sender: biddingClub.name + ' Manager',
+        date: this.getFormattedDate(),
+        body: `${biddingClub.name} have submitted a 1-season loan proposal for ${player.name} (${player.pos} - ${player.ovr} OVR). Terms: ${desc}.`
+      });
+    }
+
+    this.playSound?.('click');
+  }
+
+  acceptIncomingOffer(offerId) {
+    const offer = this.incomingOffers.find(o => o.id === offerId);
+    if (!offer || offer.status !== 'PENDING') return false;
+
+    const player = this.players.find(p => p.id === offer.playerId);
+    if (!player) return false;
+
+    if (offer.type === 'TRANSFER') {
+      offer.status = 'ACCEPTED';
+      this.myClub.budget += offer.bidAmount;
+
+      // Remove from starters/bench and change clubId
+      this.starters = this.starters.filter(p => p.id !== player.id);
+      this.bench = this.bench.filter(p => p.id !== player.id);
+      player.clubId = offer.biddingClubId;
+
+      this.news.unshift({
+        headline: `🔴 SOLD: ${player.name} transferred to ${offer.biddingClubName} for €${(offer.bidAmount / 1000000).toFixed(1)}M!`,
+        date: this.getFormattedDate(),
+        category: 'DONE DEAL'
+      });
+    } else {
+      // LOAN or LOAN_OPTION
+      offer.status = 'ACCEPTED';
+      player.isLoaned = true;
+      player.loanClub = offer.biddingClubName;
+      player.loanType = offer.type;
+      player.loanBuyFee = offer.buyOptionFee;
+
+      this.starters = this.starters.filter(p => p.id !== player.id);
+      this.bench = this.bench.filter(p => p.id !== player.id);
+
+      this.news.unshift({
+        headline: `🔄 LOAN AGREED: ${player.name} joins ${offer.biddingClubName} on loan for 1 season!`,
+        date: this.getFormattedDate(),
+        category: 'DONE DEAL'
+      });
+    }
+
+    this.playSound?.('goal');
+    return true;
+  }
+
+  rejectIncomingOffer(offerId) {
+    const offer = this.incomingOffers.find(o => o.id === offerId);
+    if (!offer) return false;
+
+    offer.status = 'REJECTED';
     this.news.unshift({
-      headline: `TRANSFER BID: ${biddingClub.name} submit €${(bidAmount / 1000000).toFixed(1)}M offer for ${tag}${player.name}!`,
+      headline: `REJECTED: Offer from ${offer.biddingClubName} for ${offer.playerName} rejected.`,
       date: this.getFormattedDate(),
       category: 'TRANSFERS'
     });
-
-    this.inbox.unshift({
-      id: 'msg_' + Date.now(),
-      title: `Transfer Offer for ${player.name}`,
-      sender: biddingClub.name + ' Representative',
-      date: this.getFormattedDate(),
-      body: `${biddingClub.name} have officially submitted a ${player.isTransferListed ? '' : 'surprise '}transfer offer of €${(bidAmount / 1000000).toFixed(1)}M for ${player.name} (${player.pos} - ${player.ovr} OVR). Head to the Transfers tab to respond!`
-    });
-
     this.playSound?.('click');
+    return true;
   }
 
   advanceDay() {
@@ -451,6 +574,36 @@ class CareerState {
       } else if (p.age >= 33) {
         p.ovr = Math.max(65, p.ovr - 1);
         p.val = Math.round(p.val * 0.85);
+      }
+    });
+
+    // Return loaned out players or decrement multi-season loans
+    this.players.forEach(p => {
+      if (p.isLoaned || p.isLoanedIn) {
+        p.loanSeasonsLeft = (p.loanSeasonsLeft || 1) - 1;
+        if (p.loanSeasonsLeft <= 0) {
+          if (p.isLoanedIn) {
+            p.isLoanedIn = false;
+            p.clubId = p.loanParentClub || p.clubId;
+            this.starters = this.starters.filter(s => s.id !== p.id);
+            this.bench = this.bench.filter(s => s.id !== p.id);
+            this.news.unshift({
+              headline: `LOAN END: ${p.name}'s loan spell at ${this.myClub.name} has concluded.`,
+              date: this.getFormattedDate(),
+              category: 'TRANSFERS'
+            });
+          }
+          if (p.isLoaned) {
+            p.isLoaned = false;
+            const prevClub = p.loanClub || 'their loan club';
+            p.loanClub = null;
+            this.news.unshift({
+              headline: `LOAN RETURN: ${p.name} returns to ${this.myClub.name} after loan spell at ${prevClub}!`,
+              date: this.getFormattedDate(),
+              category: 'TRANSFERS'
+            });
+          }
+        }
       }
     });
 
@@ -551,4 +704,4 @@ class CareerState {
   }
 }
 
-export const state = new CareerState();
+const state = new CareerState();
