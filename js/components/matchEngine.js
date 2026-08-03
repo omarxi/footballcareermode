@@ -1082,7 +1082,7 @@ class LiveMatchEngine {
   }
 }
 
-function quickSimMatch(fixture, calculateTeamRatingsFn, stateRef) {
+function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
   if (!fixture) return null;
   const myRatings = calculateTeamRatingsFn();
   const isUserHome = fixture.homeClub.id === stateRef.myClubId;
