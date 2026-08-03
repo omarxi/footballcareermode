@@ -95,8 +95,8 @@
       <button class="tab-btn" data-tab="youth">
         <i class="fa-solid fa-seedling"></i> Youth Academy
       </button>
-      <button class="tab-btn" data-tab="ucl">
-        <i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> European Competitions
+      <button class="tab-btn" data-tab="competitions">
+        <i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> Competitions & Cups
       </button>
       <button class="tab-btn" data-tab="office">
         <i class="fa-solid fa-briefcase"></i> Office & Press
@@ -164,15 +164,7 @@
                   <button class="btn-secondary comp-switch-btn" data-comp="UCL" style="font-size:0.72rem;padding:0.25rem 0.6rem;">⭐ UCL</button>
                 </div>
               </div>
-              <table class="standings-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Club</th>
-                    <th>P</th>
-                    <th>W</th>
-                    <th>D</th>
-                    <th>L</th>
+
                     <th>GD</th>
                     <th>Pts</th>
                   </tr>
@@ -397,8 +389,143 @@
         </div>
       </div>
 
-      <!-- TAB 6: EUROPEAN COMPETITIONS (UCL & UEL) -->
-      <div class="tab-pane" id="tab-ucl">
+      <!-- TAB 6: COMPETITIONS & CUPS HUB -->
+      <div class="tab-pane" id="tab-competitions">
+        <!-- Sub Navigation Switcher -->
+        <div style="display: flex; gap: 0.8rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.8rem; flex-wrap: wrap;">
+          <button class="tab-btn sub-comp-btn active" data-subcomp="domestic">
+            <i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i> Domestic League & Cups
+          </button>
+          <button class="tab-btn sub-comp-btn" data-subcomp="swiss_ucl">
+            <i class="fa-solid fa-star" style="color: var(--accent-cyan);"></i> 36-Team UEFA Champions League (Swiss Format)
+          </button>
+        </div>
+
+        <!-- SUB-VIEW 1: DOMESTIC COMPETITIONS (League + Knockout Cup Tree + Super Cup) -->
+        <div id="subview-domestic" class="subcomp-pane active">
+          <!-- Top Hero Card -->
+          <div class="card-tile" style="background: linear-gradient(135deg, rgba(20,32,54,0.95), rgba(10,18,30,0.95)); border: 1px solid rgba(255,215,0,0.3); margin-bottom: 1.5rem; padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <div style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-gold); font-weight: 800;" id="domLeagueNameBadge">DOMESTIC LEAGUE & CUPS</div>
+                <h1 style="font-size: 2rem; font-weight: 900; color: #fff; margin: 0.3rem 0;" id="domLeagueTitle">Domestic Competitions</h1>
+                <div style="font-size: 0.88rem; color: var(--text-muted);">Points League + Knockout Cup Bracket (Copa del Rey / FA Cup) + Super Cup</div>
+              </div>
+              <button class="btn-primary" id="btnSimDomesticCupRound" style="font-size: 0.82rem; padding: 0.5rem 1rem;">
+                <i class="fa-solid fa-play"></i> Sim Domestic Cup Round
+              </button>
+            </div>
+          </div>
+
+          <!-- Domestic Competitions Grid -->
+          <div class="dashboard-grid">
+            <!-- Left: Points League Table -->
+            <div class="card-tile">
+              <div class="card-header" style="border-bottom: 2px solid var(--accent-lime);">
+                <span class="card-title"><i class="fa-solid fa-list-ol"></i> League Standings (Points Format)</span>
+              </div>
+              <table class="standings-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Club</th>
+                    <th>P</th>
+                    <th>W</th>
+                    <th>D</th>
+                    <th>L</th>
+                    <th>GD</th>
+                    <th>Pts</th>
+                  </tr>
+                </thead>
+                <tbody id="domLeagueTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right: Domestic Knockout Bracket Tree (Visual Tree matching Cuadro Copa del Rey) -->
+            <div class="card-tile" style="grid-column: span 2;">
+              <div class="card-header" style="border-bottom: 2px solid var(--accent-gold); display: flex; justify-content: space-between; align-items: center;">
+                <span class="card-title" id="domCupTreeTitle"><i class="fa-solid fa-sitemap"></i> Domestic Cup Bracket Tree (Knockout / Elimination)</span>
+                <span class="badge" style="background: rgba(255,215,0,0.15); color: var(--accent-gold);">16-Team Bracket</span>
+              </div>
+
+              <!-- GORGEOUS VISUAL TOURNAMENT BRACKET TREE CONTAINER -->
+              <div id="domesticCupBracketTree" class="visual-bracket-tree" style="margin-top: 1rem; overflow-x: auto; padding: 1rem 0.5rem;">
+                <!-- Rendered dynamically by app.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUB-VIEW 2: 36-TEAM UEFA CHAMPIONS LEAGUE (SWISS FORMAT) -->
+        <div id="subview-swiss_ucl" class="subcomp-pane" style="display: none;">
+          <!-- UCL Swiss Banner -->
+          <div class="card-tile" style="background: linear-gradient(135deg, rgba(0,24,68,0.95), rgba(0,48,120,0.85)); border: 1px solid rgba(0,240,255,0.45); margin-bottom: 1.5rem; padding: 1.6rem;">
+            <div style="display:flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+              <div>
+                <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-cyan); font-weight: 800;">OFFICIAL NEW FORMAT</div>
+                <h1 style="font-size: 2rem; font-weight: 900; color: #fff; margin: 0.3rem 0;">UEFA CHAMPIONS LEAGUE (36 TEAMS)</h1>
+                <p style="color: var(--text-muted); font-size: 0.88rem; max-width: 780px;">
+                  Single 36-team combined table. 8 matches vs 8 different opponents (2 from Pot 1, 2 from Pot 2, 2 from Pot 3, 2 from Pot 4). 
+                  <strong style="color: #00ff87;">Ranks 1–8:</strong> Direct R16 • 
+                  <strong style="color: #00f0ff;">Ranks 9–24:</strong> Knockout Play-offs • 
+                  <strong style="color: #ff4d6d;">Ranks 25–36:</strong> Eliminated
+                </p>
+              </div>
+              <button class="btn-primary" id="btnSimSwissMatchday" style="font-size: 0.85rem; padding: 0.6rem 1.1rem; background: linear-gradient(135deg, var(--accent-cyan), #0080ff);">
+                <i class="fa-solid fa-play"></i> Sim UCL Matchday (<span id="uclSwissMatchdayBadge">MD 1/8</span>)
+              </button>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <!-- 36-Team Standings Table -->
+            <div class="card-tile" style="grid-column: span 2;">
+              <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent-cyan);">
+                <span class="card-title"><i class="fa-solid fa-table"></i> 36-Team Combined League Table</span>
+                <div style="font-size: 0.78rem; display: flex; gap: 0.8rem;">
+                  <span style="color: #00ff87;">🟢 1-8 Direct R16</span>
+                  <span style="color: #00f0ff;">🔵 9-24 Play-offs</span>
+                  <span style="color: #ff4d6d;">🔴 25-36 Eliminated</span>
+                </div>
+              </div>
+              <div style="max-height: 520px; overflow-y: auto;">
+                <table class="standings-table" style="font-size: 0.85rem;">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Club</th>
+                      <th>Pot</th>
+                      <th>P</th>
+                      <th>W</th>
+                      <th>D</th>
+                      <th>L</th>
+                      <th>GF</th>
+                      <th>GA</th>
+                      <th>GD</th>
+                      <th>Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody id="uclSwissTableBody">
+                    <!-- Rendered dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- UCL Knockout Bracket -->
+            <div class="card-tile" style="grid-column: span 2;">
+              <div class="card-header" style="border-bottom: 2px solid var(--accent-cyan);">
+                <span class="card-title"><i class="fa-solid fa-sitemap"></i> UEFA Champions League Knockout Bracket</span>
+              </div>
+              <div id="uclKnockoutBracketView" style="padding: 1rem 0;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
         <div class="card-tile" style="background: linear-gradient(135deg, rgba(0,24,68,0.95), rgba(0,48,120,0.85)); border: 1px solid rgba(0,240,255,0.45); margin-bottom: 1.5rem; padding: 1.8rem;">
           <div style="display:flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
             <div>
