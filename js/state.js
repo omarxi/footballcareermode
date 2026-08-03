@@ -230,6 +230,12 @@ class CareerState {
           if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
         }
       });
+
+      // Fill remaining UCL slots up to 13 teams with top rated European clubs
+      const remainingClubs = this.clubs.filter(c => !uclClubIds.includes(c.id)).sort((a, b) => (b.rating || 80) - (a.rating || 80));
+      while (uclClubIds.length < 13 && remainingClubs.length > 0) {
+        uclClubIds.push(remainingClubs.shift().id);
+      }
     }
 
     // Always ensure user club is in UCL or UEL if missing
@@ -810,6 +816,15 @@ class CareerState {
         if (sortedForeign.length >= 4) qualifiedUEL.push(sortedForeign[2].id, sortedForeign[3].id);
       }
     });
+
+    // Reset player goals and apps for the new season
+    this.players.forEach(p => {
+      p.goals = 0;
+      p.apps = 0;
+    });
+    if (typeof INITIAL_PLAYERS !== 'undefined') {
+      INITIAL_PLAYERS.forEach(p => { p.goals = 0; p.apps = 0; });
+    }
 
     // Player Development: ageing + growth
     this.players.forEach(p => {

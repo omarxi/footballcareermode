@@ -1105,7 +1105,7 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
   let homeScore = poissonRand(hExp);
   let awayScore = poissonRand(aExp);
 
-  // Generate Goal Scorers
+  // Generate Goal Scorers with Realistic Position Weights
   const getScorers = (clubId, side, score) => {
     const scorers = [];
     let pool = [];
@@ -1119,10 +1119,31 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
         pool = (typeof INITIAL_PLAYERS !== 'undefined' ? INITIAL_PLAYERS : []).filter(p => p.clubId === clubId && p.pos !== 'GK');
       }
     }
-    if (!pool || !pool.length) pool = [{ name: 'Forward', clubId }];
+    if (!pool || !pool.length) pool = [{ name: 'Forward', pos: 'ST', clubId }];
+
+    const getPosWeight = (pos) => {
+      const p = (pos || '').toUpperCase();
+      if (['ST', 'CF', 'LW', 'RW'].includes(p)) return 75;
+      if (['CAM', 'LM', 'RM'].includes(p)) return 40;
+      if (['CM', 'CDM'].includes(p)) return 15;
+      if (['CB', 'LB', 'RB', 'LWB', 'RWB'].includes(p)) return 4;
+      return 10;
+    };
+
+    const weightedPick = (playerPool) => {
+      const weightedList = [];
+      playerPool.forEach(player => {
+        const w = getPosWeight(player.pos);
+        for (let k = 0; k < w; k++) {
+          weightedList.push(player);
+        }
+      });
+      if (!weightedList.length) return playerPool[Math.floor(Math.random() * playerPool.length)];
+      return weightedList[Math.floor(Math.random() * weightedList.length)];
+    };
 
     for (let i = 0; i < score; i++) {
-      const p = pool[Math.floor(Math.random() * pool.length)];
+      const p = weightedPick(pool);
       const min = Math.floor(Math.random() * 88) + 2;
       scorers.push({ name: p.name, min, side, clubId });
       p.goals = (p.goals || 0) + 1;
@@ -1281,6 +1302,32 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
     if (fixture.roundKey === 'ucl_sf_2') {
        const uclfn = stateRef.fixtures.find(f => f.id === 'ucl_final');
        if (uclfn) uclfn.awayClub = winner;
+    }
+    if (fixture.roundKey === 'ucl_final' && winner && winner.id === stateRef.myClubId) {
+       stateRef.trophies = stateRef.trophies || [];
+       if (!stateRef.trophies.some(t => t.id === 'ucl_' + stateRef.season)) {
+         stateRef.trophies.push({
+           id: 'ucl_' + stateRef.season,
+           name: 'UEFA Champions League',
+           season: stateRef.season,
+           icon: 'fa-star',
+           club: winner.name,
+           badgeColor: '#00f0ff'
+         });
+       }
+    }
+    if ((fixture.roundKey === 'cup_final' || fixture.id === 'cup_final_1') && winner && winner.id === stateRef.myClubId) {
+       stateRef.trophies = stateRef.trophies || [];
+       if (!stateRef.trophies.some(t => t.id === 'cup_' + stateRef.season)) {
+         stateRef.trophies.push({
+           id: 'cup_' + stateRef.season,
+           name: stateRef.domesticCup ? stateRef.domesticCup.name : 'Domestic Cup',
+           season: stateRef.season,
+           icon: 'fa-crown',
+           club: winner.name,
+           badgeColor: '#ee2524'
+         });
+       }
     }
   }
 

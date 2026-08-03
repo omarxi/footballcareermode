@@ -1410,11 +1410,12 @@ function quickSimMatch() {
 
   const closeModal = () => {
     modal.classList.remove('active');
-    for (let i = 0; i < 7; i++) state.advanceDay?.();
     renderDashboard();
+    renderSquadHub();
     renderStandingsTable();
     renderUCLHub();
     renderCompetitionsHub();
+    renderOfficeHub();
     updateHeaderStats();
     checkEndOfSeasonTrigger();
   };
