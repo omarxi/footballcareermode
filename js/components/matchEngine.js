@@ -1277,29 +1277,28 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
     }
     
     // Advance UCL Knockout Bracket
-    if (fixture.roundKey === 'ucl_qf_1') {
+    const fixKey = fixture.roundKey || fixture.id || '';
+    if (fixKey === 'ucl_qf_1') {
        const uclsf = stateRef.fixtures.find(f => f.id === 'ucl_sf_2');
        if (uclsf) uclsf.awayClub = winner; // 2nd vs QF1 winner
     }
-    if (fixture.roundKey === 'ucl_qf_2') {
+    if (fixKey === 'ucl_qf_2') {
        const uclsf = stateRef.fixtures.find(f => f.id === 'ucl_sf_1');
        if (uclsf) uclsf.awayClub = winner; // 1st vs QF2 winner
     }
-    // Seed 1st and 2nd for SF when SF fixtures are reached?
-    // Let's seed them as soon as QF ends
-    if (fixture.roundKey.startsWith('ucl_qf')) {
-        const sorted = [...stateRef.uclStandings];
+    if (fixKey.startsWith('ucl_qf')) {
+        const sorted = [...stateRef.uclStandings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
         const clubs = (id) => stateRef.clubs.find(c => c.id === id);
         const sf1 = stateRef.fixtures.find(f => f.id === 'ucl_sf_1');
         const sf2 = stateRef.fixtures.find(f => f.id === 'ucl_sf_2');
-        if (sf1 && !sf1.homeClub) sf1.homeClub = clubs(sorted[0].clubId);
-        if (sf2 && !sf2.homeClub) sf2.homeClub = clubs(sorted[1].clubId);
+        if (sf1 && (!sf1.homeClub || !sf1.homeClub.id)) sf1.homeClub = clubs(sorted[0].clubId);
+        if (sf2 && (!sf2.homeClub || !sf2.homeClub.id)) sf2.homeClub = clubs(sorted[1].clubId);
     }
-    if (fixture.roundKey === 'ucl_sf_1') {
+    if (fixKey === 'ucl_sf_1') {
        const uclfn = stateRef.fixtures.find(f => f.id === 'ucl_final');
        if (uclfn) uclfn.homeClub = winner;
     }
-    if (fixture.roundKey === 'ucl_sf_2') {
+    if (fixKey === 'ucl_sf_2') {
        const uclfn = stateRef.fixtures.find(f => f.id === 'ucl_final');
        if (uclfn) uclfn.awayClub = winner;
     }

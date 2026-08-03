@@ -253,9 +253,11 @@ function renderTeamSelectGrid(leagueFilter = 'ALL') {
       }
 
       updateHeaderStats();
+      youthEngine?.initYouthLeague?.();
       renderDashboard();
       renderSquadHub();
       renderTransfers();
+      renderYouthAcademy();
       renderStandingsTable();
       renderUCLHub();
       renderCompetitionsHub();
@@ -963,9 +965,6 @@ function renderYouthAcademy() {
             </div>
           </div>
           <div style="display: flex; gap: 0.35rem; align-items: center;">
-            <button class="btn-secondary btn-train-youth" data-youth-id="${p.id}" title="Intensity Training (+OVR)" style="font-size: 0.72rem; padding: 0.3rem 0.55rem; background: rgba(0, 255, 137, 0.12); color: var(--accent-lime); border: 1px solid rgba(0, 255, 137, 0.3);">
-              <i class="fa-solid fa-bolt"></i> Train
-            </button>
             <button class="btn-primary btn-promote" data-youth-id="${p.id}" style="font-size: 0.72rem; padding: 0.3rem 0.6rem;">
               <i class="fa-solid fa-user-plus"></i> Promote
             </button>

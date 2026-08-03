@@ -220,8 +220,8 @@ class YouthEngine {
     this.academy.forEach(p => {
       if (p.ovr >= p.pot) return;
 
-      // Growth chance: higher if far below potential or after match
-      const chance = fromMatch ? 0.35 : 0.08;
+      // Growth chance: realistic gradual development over time
+      const chance = fromMatch ? 0.03 : 0.01;
       if (Math.random() < chance) {
         p.ovr += 1;
         p.growthThisSeason = (p.growthThisSeason || 0) + 1;
