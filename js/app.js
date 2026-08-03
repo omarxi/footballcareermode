@@ -2277,7 +2277,11 @@ function renderUCLKnockoutBracket() {
               <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
             </div>
             <div class="bracket-team-row">
-          ${fn.map(m => `
+              <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
+            </div>
+          </div>
+        `).join('')}
+        ${fn.map(m => `
           <div class="bracket-node-card" style="border: 1px solid var(--accent-gold);">
             <div style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; margin-bottom: 0.3rem;">🏆 ${m.matchName}</div>
             <div class="bracket-team-row">
