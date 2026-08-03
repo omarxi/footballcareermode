@@ -393,7 +393,7 @@ class CareerState {
   }
 
   getNextFixture() {
-    return this.fixtures.find(f => !f.played) || null;
+    return this.fixtures.find(f => !f.played && f.homeClub && f.awayClub && (f.homeClub.id === this.myClubId || f.awayClub.id === this.myClubId)) || null;
   }
 
   simRestOfLeagueMatchday(isEuropean = false, type = 'UCL') {
@@ -641,6 +641,20 @@ class CareerState {
   advanceDay() {
     this.currentDate.setDate(this.currentDate.getDate() + 1);
     this.playSound('tick');
+    
+    // Auto-simulate any CPU vs CPU fixtures scheduled on or before today
+    if (this.fixtures && this.fixtures.length) {
+      const cpuMatches = this.fixtures.filter(f => !f.played && f.homeClub && f.awayClub && new Date(f.date) <= this.currentDate && f.homeClub.id !== this.myClubId && f.awayClub.id !== this.myClubId);
+      cpuMatches.forEach(f => {
+        if (typeof engineQuickSim === 'function') {
+          const calculateTeamRatings = () => ({ ovr: 80 });
+          engineQuickSim(f, calculateTeamRatings, this);
+        } else {
+          f.played = true;
+          f.result = { homeScore: Math.floor(Math.random()*3), awayScore: Math.floor(Math.random()*3) };
+        }
+      });
+    }
     
     // Check and expire pending offers older than 14 days
     const nowTime = Date.now();

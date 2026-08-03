@@ -1236,6 +1236,10 @@ function openMatchModal() {
     return;
   }
 
+  while (state.currentDate < new Date(fixture.date)) {
+    state.advanceDay();
+  }
+
   const modal = document.getElementById('matchModal');
   if (!modal) return;
 
@@ -1343,6 +1347,11 @@ function quickSimMatch() {
   if (!fixture) {
     openEndOfSeasonModal();
     return;
+  }
+
+  // Advance state date to fixture date if needed and sim intermediate CPU matches
+  while (state.currentDate < new Date(fixture.date)) {
+    state.advanceDay();
   }
 
   const res = engineQuickSim(fixture, calculateTeamRatings, state);
