@@ -61,6 +61,7 @@ function bootApp() {
   renderOffice();
   renderStandingsTable();
   renderUCLHub();
+  renderCompetitionsHub();
 }
 
 if (document.readyState === 'loading') {
@@ -178,6 +179,7 @@ function initUI() {
     renderYouthAcademy();
     renderStandingsTable();
     renderUCLHub();
+    renderCompetitionsHub();
     state.playSound?.('goal');
   });
 
@@ -1307,6 +1309,7 @@ function openMatchModal() {
     renderDashboard();
     renderStandingsTable();
     renderUCLHub();
+    renderCompetitionsHub();
     checkEndOfSeasonTrigger();
   });
 
@@ -1401,6 +1404,7 @@ function quickSimMatch() {
     renderDashboard();
     renderStandingsTable();
     renderUCLHub();
+    renderCompetitionsHub();
     updateHeaderStats();
     checkEndOfSeasonTrigger();
   };
@@ -1426,6 +1430,7 @@ function simRestOfSeason() {
   renderDashboard();
   renderStandingsTable();
   renderUCLHub();
+  renderCompetitionsHub();
   openEndOfSeasonModal();
 }
 
@@ -2051,7 +2056,6 @@ function renderCompetitionsHub() {
     ? LEAGUE_COMPETITIONS[userLeague]
     : { cupTitle: 'Copa del Rey' };
 
-  // Update Hero Titles
   const badgeEl = document.getElementById('domLeagueNameBadge');
   const titleEl = document.getElementById('domLeagueTitle');
   const treeTitleEl = document.getElementById('domCupTreeTitle');
@@ -2060,7 +2064,6 @@ function renderCompetitionsHub() {
   if (titleEl) titleEl.textContent = `${userLeague} & ${compInfo.cupTitle}`;
   if (treeTitleEl) treeTitleEl.innerHTML = `<i class="fa-solid fa-sitemap"></i> ${compInfo.cupTitle} Bracket Tree (Knockout / Elimination)`;
 
-  // Setup Sub-Tab Switchers
   document.querySelectorAll('.sub-comp-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.sub-comp-btn').forEach(b => b.classList.remove('active'));
@@ -2079,37 +2082,6 @@ function renderCompetitionsHub() {
   renderDomesticCupBracketTree();
   renderSwissUCLTable();
   renderUCLKnockoutBracket();
-
-  // Sim Buttons
-  const btnCup = document.getElementById('btnSimDomesticCupRound');
-  if (btnCup) {
-    btnCup.onclick = () => {
-      if (!state.domesticCup || !state.domesticCup.bracket) return;
-      const b = state.domesticCup.bracket;
-
-      if (b.r16.some(m => !m.played)) {
-        state.simDomesticCupRound('r16');
-      } else if (b.qf.some(m => !m.played)) {
-        state.simDomesticCupRound('qf');
-      } else if (b.sf.some(m => !m.played)) {
-        state.simDomesticCupRound('sf');
-      } else if (b.final.some(m => !m.played)) {
-        state.simDomesticCupRound('final');
-      }
-      renderDomesticCupBracketTree();
-      updateHeaderStats();
-    };
-  }
-
-  const btnSwiss = document.getElementById('btnSimSwissMatchday');
-  if (btnSwiss) {
-    btnSwiss.onclick = () => {
-      state.simSwissUCLMatchday();
-      renderSwissUCLTable();
-      renderUCLKnockoutBracket();
-      updateHeaderStats();
-    };
-  }
 }
 
 function renderDomesticLeagueTable() {
@@ -2217,21 +2189,21 @@ function renderSwissUCLTable() {
   const badge = document.getElementById('uclSwissMatchdayBadge');
 
   if (badge) {
-    badge.textContent = state.uclSwissPhase === 'LEAGUE' 
-      ? `MD ${state.uclSwissCurrentMatchday}/8`
-      : state.uclSwissPhase;
+    const uclFix = state.fixtures.filter(f => f.compType === 'UCL' && f.played);
+    const md = Math.floor(uclFix.length / 6) + 1;
+    badge.textContent = `MD ${Math.min(md, 8)}/8`;
   }
 
-  if (!container || !state.uclSwissStandings) return;
+  if (!container || !state.uclStandings) return;
 
-  container.innerHTML = state.uclSwissStandings.map((st, idx) => {
+  container.innerHTML = state.uclStandings.map((st, idx) => {
     const isUser = st.clubId === state.myClubId;
     const rank = idx + 1;
     let rankBadge = '';
 
-    if (rank <= 8) {
+    if (rank <= 2) {
       rankBadge = 'background: rgba(0, 255, 137, 0.15); border-left: 4px solid #00ff87;';
-    } else if (rank <= 24) {
+    } else if (rank <= 6) {
       rankBadge = 'background: rgba(0, 240, 255, 0.12); border-left: 4px solid #00f0ff;';
     } else {
       rankBadge = 'background: rgba(255, 50, 80, 0.1); border-left: 4px solid #ff4d6d;';
@@ -2243,7 +2215,7 @@ function renderSwissUCLTable() {
       <tr style="${rankBadge} ${userStyle}">
         <td style="padding: 0.4rem; font-weight: 800;">${rank}</td>
         <td style="padding: 0.4rem;">${st.name} ${isUser ? '⭐' : ''}</td>
-        <td style="padding: 0.4rem; text-align: center;"><span style="background: rgba(255,255,255,0.08); padding: 0.1rem 0.4rem; border-radius: 4px;">Pot ${st.pot}</span></td>
+        <td style="padding: 0.4rem; text-align: center;"><span style="background: rgba(255,255,255,0.08); padding: 0.1rem 0.4rem; border-radius: 4px;">Top 13</span></td>
         <td style="padding: 0.4rem; text-align: center;">${st.played}</td>
         <td style="padding: 0.4rem; text-align: center;">${st.won}</td>
         <td style="padding: 0.4rem; text-align: center;">${st.drawn}</td>
@@ -2261,28 +2233,51 @@ function renderUCLKnockoutBracket() {
   const container = document.getElementById('uclKnockoutBracketView');
   if (!container || !state.uclKnockoutBracket) return;
 
-  const po = state.uclKnockoutBracket.playoffs;
-  if (!po || po.length === 0) {
+  if (!state.uclKnockoutSeeded) {
     container.innerHTML = `
       <div style="text-align: center; padding: 2rem; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(0,240,255,0.2);">
         <i class="fa-solid fa-shield-halved" style="font-size: 2rem; color: var(--accent-cyan); margin-bottom: 0.5rem; display: block;"></i>
-        <div>UCL League Phase in progress (Matchday ${state.uclSwissCurrentMatchday}/8)</div>
-        <div style="font-size: 0.8rem; margin-top: 0.25rem;">Complete 8 matchdays to unlock the 16-Team Knockout Play-offs & Round of 16 Brackets!</div>
+        <div>UCL League Phase in progress</div>
+        <div style="font-size: 0.8rem; margin-top: 0.25rem;">Complete the 8 matchdays for the Top 6 Knockout bracket to populate!</div>
       </div>
     `;
   } else {
+    const qf = state.uclKnockoutBracket.qf || [];
+    const sf = state.uclKnockoutBracket.sf || [];
+    const fn = state.uclKnockoutBracket.final || [];
+    
     container.innerHTML = `
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
-        ${po.map(m => `
+        ${qf.map(m => `
           <div class="bracket-node-card">
             <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.3rem;">${m.matchName}</div>
             <div class="bracket-team-row">
               <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
-              <span class="bracket-score-pill">${m.played ? m.aggregateHome : '-'}</span>
             </div>
             <div class="bracket-team-row">
               <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
-              <span class="bracket-score-pill">${m.played ? m.aggregateAway : '-'}</span>
+            </div>
+          </div>
+        `).join('')}
+        ${sf.map(m => `
+          <div class="bracket-node-card">
+            <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.3rem;">${m.matchName}</div>
+            <div class="bracket-team-row">
+              <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
+            </div>
+            <div class="bracket-team-row">
+              <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
+            </div>
+          </div>
+        `).join('')}
+        ${fn.map(m => `
+          <div class="bracket-node-card" style="border: 1px solid var(--accent-gold);">
+            <div style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; margin-bottom: 0.3rem;">🏆 ${m.matchName}</div>
+            <div class="bracket-team-row">
+              <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
+            </div>
+            <div class="bracket-team-row">
+              <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
             </div>
           </div>
         `).join('')}
