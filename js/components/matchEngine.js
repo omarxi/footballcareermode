@@ -1079,15 +1079,16 @@ export class LiveMatchEngine {
 export function quickSimMatch(fixture, calculateTeamRatingsFn, stateRef) {
   if (!fixture) return null;
   const myRatings = calculateTeamRatingsFn();
-  const oppRating = fixture.awayClub.rating;
+  const isUserHome = fixture.homeClub.id === stateRef.myClubId;
+  const homeRating = isUserHome ? (myRatings.ovr || fixture.homeClub.rating) : fixture.homeClub.rating;
+  const awayRating = isUserHome ? fixture.awayClub.rating : (myRatings.ovr || fixture.awayClub.rating);
 
-  const hPow = myRatings.ovr || fixture.homeClub.rating;
-  const aPow = oppRating;
-  const hProb = hPow / (hPow + aPow);
+  // Exponential Rating Curve: +10 OVR gap gives ~80%+ win chance (e.g. 89 OVR Real Madrid vs 76 OVR Mallorca)
+  const diff = (homeRating + 2) - awayRating;
+  const hProb = Math.min(0.92, Math.max(0.08, 1 / (1 + Math.pow(10, -diff / 12))));
 
-  const expectedGoals = 2.5;
-  const hExp = expectedGoals * hProb;
-  const aExp = expectedGoals * (1 - hProb);
+  const hExp = 2.7 * hProb;
+  const aExp = 2.7 * (1 - hProb);
 
   const poissonRand = (lambda) => {
     let L = Math.exp(-lambda), k = 0, p = 1;

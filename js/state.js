@@ -275,11 +275,15 @@ class CareerState {
 
       const hPow = homeClub?.rating || 80;
       const aPow = awayClub?.rating || 80;
-      const hProb = hPow / (hPow + aPow);
 
-      const expectedGoals = 2.5;
-      const hScore = poissonRand(expectedGoals * hProb);
-      const aScore = poissonRand(expectedGoals * (1 - hProb));
+      // Exponential Rating Curve: +10 OVR gap gives ~80%+ win chance (e.g. 89 OVR Real Madrid vs 76 OVR Mallorca)
+      const diff = (hPow + 2) - aPow;
+      const hProb = Math.min(0.92, Math.max(0.08, 1 / (1 + Math.pow(10, -diff / 12))));
+
+      const hExp = 2.7 * hProb;
+      const aExp = 2.7 * (1 - hProb);
+      const hScore = poissonRand(hExp);
+      const aScore = poissonRand(aExp);
 
       homeRow.played++; awayRow.played++;
       homeRow.gf += hScore; homeRow.ga += aScore;
