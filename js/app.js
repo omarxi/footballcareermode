@@ -253,7 +253,9 @@ function renderTeamSelectGrid(leagueFilter = 'ALL') {
       }
 
       updateHeaderStats();
-      youthEngine?.initYouthLeague?.();
+      if (typeof youthEngine !== 'undefined') {
+        youthEngine.initYouthLeague();
+      }
       renderDashboard();
       renderSquadHub();
       renderTransfers();

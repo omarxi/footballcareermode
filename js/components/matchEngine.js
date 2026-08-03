@@ -1335,7 +1335,7 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
   }
   stateRef.news.unshift({
     headline: `RESULT: ${fixture.homeClub.name} ${homeScore}–${awayScore} ${fixture.awayClub.name}`,
-    date: stateRef.getFormattedDate?.() || '',
+    date: stateRef.getFormattedDate ? stateRef.getFormattedDate() : '',
     category: 'MATCH RESULT',
   });
 
