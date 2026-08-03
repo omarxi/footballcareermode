@@ -1273,4 +1273,26 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
        if (uclfn) uclfn.awayClub = winner;
     }
   }
+
+  stateRef.simRestOfLeagueMatchday?.(fixture.compType === 'UCL');
+
+  stateRef.playSound?.('whistle');
+  stateRef.news.unshift({
+    headline: `RESULT: ${fixture.homeClub.name} ${homeScore}–${awayScore} ${fixture.awayClub.name}`,
+    date: stateRef.getFormattedDate?.() || '',
+    category: 'MATCH RESULT',
+  });
+
+  return {
+    fixture,
+    homeScore,
+    awayScore,
+    allScorers,
+    stats: {
+      homePoss, awayPoss,
+      homeShots, awayShots,
+      homeSot, awaySot,
+      homeXG, awayXG
+    }
+  };
 }
