@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EA FC Career Mode - Football Manager</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Top App Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="logo-badge">FC 27</div>
+        <div class="club-info">
+          <div class="club-crest" id="headerClubCrest">⚡</div>
+          <div class="club-details">
+            <span class="club-name" id="headerClubName">Real Madrid</span>
+            <span class="manager-title">Manager Career • Season 2026/27</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Financials & Ratings -->
+      <div class="header-stats">
+        <div class="stat-pill">
+          <i class="fa-solid fa-trophy stat-icon"></i>
+          <div class="stat-content">
+            <span class="stat-label">Manager Rating</span>
+            <span class="stat-value positive" id="headerManagerRating">88%</span>
+          </div>
+        </div>
+
+        <div class="stat-pill">
+          <i class="fa-solid fa-wallet stat-icon"></i>
+          <div class="stat-content">
+            <span class="stat-label">Transfer Budget</span>
+            <span class="stat-value" id="headerBudget">€150.0M</span>
+          </div>
+        </div>
+
+        <div class="stat-pill">
+          <i class="fa-solid fa-money-bill-wave stat-icon"></i>
+          <div class="stat-content">
+            <span class="stat-label">Wage Budget</span>
+            <span class="stat-value" id="headerWageBudget">€2,500k/wk</span>
+          </div>
+        </div>
+
+        <!-- Squad Overall Overview -->
+        <div class="stat-pill" style="border-color: rgba(0, 240, 255, 0.3);">
+          <i class="fa-solid fa-chart-simple stat-icon" style="color: var(--accent-cyan);"></i>
+          <div class="stat-content">
+            <span class="stat-label">ATT / MID / DEF</span>
+            <span class="stat-value"><span id="attRating">89</span> • <span id="midRating">88</span> • <span id="defRating">86</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendar & Advance Day -->
+      <div class="calendar-widget">
+        <div class="current-date">
+          <span class="date-text" id="headerDateText">01 JUL 2026</span>
+          <span class="season-text">Matchday 1 Upcoming</span>
+        </div>
+        <button class="btn-advance" id="btnAdvanceDay">
+          <i class="fa-solid fa-forward-step"></i> Advance Day
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="central">
+        <i class="fa-solid fa-house"></i> Central
+      </button>
+      <button class="tab-btn" data-tab="squad">
+        <i class="fa-solid fa-shirt"></i> Squad Hub <span class="tab-badge" id="headerTeamOvr">88</span>
+      </button>
+      <button class="tab-btn" data-tab="transfers">
+        <i class="fa-solid fa-arrows-rotate"></i> Transfers
+      </button>
+      <button class="tab-btn" data-tab="youth">
+        <i class="fa-solid fa-seedling"></i> Youth Academy
+      </button>
+      <button class="tab-btn" data-tab="ucl">
+        <i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> European Competitions
+      </button>
+      <button class="tab-btn" data-tab="office">
+        <i class="fa-solid fa-briefcase"></i> Office & Press
+      </button>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+      <!-- TAB 1: CENTRAL DASHBOARD -->
+      <div class="tab-pane active" id="tab-central">
+        <div class="dashboard-grid">
+          <!-- Left Main Tiles -->
+          <div>
+            <!-- Next Match Card -->
+            <div class="card-tile next-match-card" style="margin-bottom: 1.5rem;">
+              <div class="fixture-header">
+                <span class="fixture-competition" id="nextMatchdayText">MATCHDAY 1 • LA LIGA</span>
+                <span class="fixture-matchday">Santiago Bernabéu</span>
+              </div>
+              <div class="fixture-teams-versus">
+                <div class="team-box">
+                  <div class="team-box-crest" id="homeTeamCrest">⚡</div>
+                  <div class="team-box-name" id="homeTeamName">Real Madrid</div>
+                  <div class="team-box-rating">HOME</div>
+                </div>
+                <div class="vs-badge">VS</div>
+                <div class="team-box">
+                  <div class="team-box-crest" id="awayTeamCrest">👑</div>
+                  <div class="team-box-name" id="nextOpponentName">Manchester City</div>
+                  <div class="team-box-rating" id="nextOpponentRating">89 OVR</div>
+                </div>
+              </div>
+              <div class="fixture-actions">
+                <button class="btn-match-play" id="btnPlayMatch">
+                  <i class="fa-solid fa-play"></i> Play Match
+                </button>
+                <button class="btn-match-sim" id="btnQuickSim">
+                  <i class="fa-solid fa-bolt"></i> Quick Sim
+                </button>
+                <button class="btn-secondary" id="btnSimSeason" style="padding: 0.6rem 0.95rem; font-size: 0.82rem; font-weight: 800; border-color: rgba(0, 240, 255, 0.4); color: var(--accent-cyan); cursor: pointer;">
+                  <i class="fa-solid fa-forward"></i> Sim Rest of Season
+                </button>
+              </div>
+            </div>
+
+            <!-- News & Rumours Feed -->
+            <div class="card-tile">
+              <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-newspaper"></i> Breaking News & Live Feed</span>
+              </div>
+              <div id="dashboardNewsFeed" style="max-height: 240px; overflow-y: auto;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Tiles -->
+          <div>
+            <!-- League Standings Table Widget -->
+            <div class="card-tile" style="margin-bottom: 1.5rem;">
+              <div class="card-header">
+                <span class="card-title" id="standingsCardTitle"><i class="fa-solid fa-list-ol"></i> League Standings</span>
+                <div style="display:flex;gap:0.3rem;">
+                  <button class="btn-secondary comp-switch-btn active" data-comp="LEAGUE" style="font-size:0.72rem;padding:0.25rem 0.6rem;">League</button>
+                  <button class="btn-secondary comp-switch-btn" data-comp="UCL" style="font-size:0.72rem;padding:0.25rem 0.6rem;">⭐ UCL</button>
+                </div>
+              </div>
+              <table class="standings-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Club</th>
+                    <th>P</th>
+                    <th>W</th>
+                    <th>D</th>
+                    <th>L</th>
+                    <th>GD</th>
+                    <th>Pts</th>
+                  </tr>
+                </thead>
+                <tbody id="standingsTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Board Inbox -->
+            <div class="card-tile">
+              <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-envelope"></i> Board Inbox</span>
+              </div>
+              <div id="dashboardInboxList" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: SQUAD HUB & TACTICS -->
+      <div class="tab-pane" id="tab-squad">
+        <div class="squad-view-container">
+          <!-- Left Column: Full Squad Roster with Talk & For Sale Buttons -->
+          <div class="card-tile" style="display: flex; flex-direction: column; max-height: 980px;">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-users"></i> Full Squad Roster</span>
+            </div>
+            <div class="player-list-scroll" id="squadFullRosterList" style="max-height: 900px;">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Right Column: Visual 2D Pitch + Substitutes Bench -->
+          <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Visual 2D Pitch -->
+            <div class="card-tile">
+              <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-diagram-project"></i> Tactical Formation Pitch</span>
+                <div class="input-group" style="margin: 0; flex-direction: row; align-items: center; gap: 0.5rem;">
+                  <span class="input-label" style="margin: 0;">Formation:</span>
+                  <select class="input-field" id="formationSelect" style="padding: 0.4rem 2rem 0.4rem 0.8rem;">
+                    <option value="4-3-3">4-3-3 Attack</option>
+                    <option value="4-2-3-1">4-2-3-1 Wide</option>
+                    <option value="3-5-2">3-5-2 Counter</option>
+                  </select>
+                </div>
+              </div>
+              <div class="pitch-wrapper" id="interactivePitch">
+                <!-- Rendered dynamically by pitch.js -->
+              </div>
+            </div>
+
+            <!-- Bench & Substitutes -->
+            <div class="bench-container" style="max-height: 340px;">
+              <div class="card-header">
+                <span class="card-title"><i class="fa-solid fa-chair"></i> Substitutes & Bench</span>
+              </div>
+              <div class="player-list-scroll" id="squadBenchList" style="max-height: 260px;">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- TAB 3: TRANSFERS -->
+      <div class="tab-pane" id="tab-transfers">
+        <!-- Scout Consultation Banner -->
+        <div class="card-tile" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, rgba(0,240,255,0.09), rgba(0,255,137,0.05)); border: 1px solid rgba(0,240,255,0.25);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-cyan); font-weight: 800;">GLOBAL TRANSFER SCOUTING</div>
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0.2rem 0;"><i class="fa-solid fa-user-secret" style="color: var(--accent-lime);"></i> Consult Chief Scout Paolo Rossi</h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Ask your scout for personalized transfer recommendations, wonderkids, or positional targets.</p>
+            </div>
+            <button class="btn-primary" id="btnOpenScoutConsult" style="background: linear-gradient(135deg, var(--accent-cyan), #0088cc); color: #001520; font-weight: 800; border: none; padding: 0.75rem 1.4rem; font-size: 0.9rem; cursor: pointer; border-radius: 8px; box-shadow: 0 0 15px rgba(0,240,255,0.3);">
+              <i class="fa-solid fa-comments"></i> Talk to Chief Scout
+            </button>
+          </div>
+        </div>
+
+        <!-- Incoming Transfer Bids Section -->
+        <div class="card-tile" style="margin-bottom: 1.5rem;">
+          <div class="card-header" style="display: flex; align-items: center; justify-content: space-between;">
+            <span class="card-title"><i class="fa-solid fa-file-invoice-dollar" style="color: var(--accent-lime);"></i> Incoming Transfer Bids & Offers</span>
+            <span class="badge" id="incomingBidsCountBadge" style="background: var(--accent-lime); color: #001a0d; font-weight: 800;">0 Pending</span>
+          </div>
+          <div id="incomingBidsList" style="display: flex; flex-direction: column; gap: 0.6rem; max-height: 220px; overflow-y: auto;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <div class="card-tile" style="margin-bottom: 1.5rem;">
+          <div class="card-header">
+            <span class="card-title"><i class="fa-solid fa-magnifying-glass"></i> Global Player Search</span>
+          </div>
+          <div class="input-group">
+            <input type="text" class="input-field" id="transferSearchInput" placeholder="Search player name, position, or club (e.g., Haaland, Mbappé, Yamal, Saka)..." />
+          </div>
+        </div>
+
+        <div class="card-tile">
+          <div class="card-header">
+            <span class="card-title"><i class="fa-solid fa-cart-shopping"></i> Available Target Market</span>
+          </div>
+          <div class="player-list-scroll" id="transferResultsList" style="max-height: 480px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: YOUTH ACADEMY -->
+      <div class="tab-pane" id="tab-youth">
+        <div class="tile-row">
+          <div class="card-tile">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-compass"></i> Dispatch Youth Scouts</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Send elite 5-star scouts to discover the next generation of football wonderkids with potential up to 95 OVR!</p>
+            <div style="display: flex; gap: 1rem;">
+              <button class="btn-primary" id="btnScoutEurope"><i class="fa-solid fa-earth-europe"></i> Scout Europe</button>
+              <button class="btn-secondary" id="btnScoutSAmerica"><i class="fa-solid fa-earth-americas"></i> Scout South America</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-tile">
+          <div class="card-header">
+            <span class="card-title"><i class="fa-solid fa-graduation-cap"></i> Youth Prospects Roster</span>
+          </div>
+          <div class="player-list-scroll" id="youthAcademyList" style="max-height: 450px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: OFFICE & PRESS -->
+      <div class="tab-pane" id="tab-office">
+        <div class="tile-row">
+          <div class="card-tile">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-comments"></i> Press Conference Room</span>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Attend journalists' Q&A session ahead of the upcoming matchday. Answers directly impact player morale and board trust.</p>
+            <button class="btn-primary" id="btnStartPressConference">
+              <i class="fa-solid fa-microphone"></i> Hold Press Conference
+            </button>
+          </div>
+
+          <div class="card-tile">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-bullseye"></i> Board Objectives</span>
+            </div>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+              <li style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 0.8rem; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;">Win La Liga Title</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Domestic Expectation</div>
+                </div>
+                <span class="stat-value positive">High Priority</span>
+              </li>
+              <li style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 0.8rem; border-radius: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 700; font-size: 0.9rem;">Maintain Wage Budget</div>
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Financial Expectation</div>
+                </div>
+                <span class="stat-value positive">On Track</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: EUROPEAN COMPETITIONS (UCL & UEL) -->
+      <div class="tab-pane" id="tab-ucl">
+        <div class="card-tile" style="background: linear-gradient(135deg, rgba(0,24,68,0.95), rgba(0,48,120,0.85)); border: 1px solid rgba(0,240,255,0.45); margin-bottom: 1.5rem; padding: 1.8rem;">
+          <div style="display:flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-cyan); font-weight: 800;">UEFA EUROPEAN COMPETITIONS</div>
+              <h1 style="font-size: 2.2rem; font-weight: 900; color: #fff; font-family: var(--font-display); letter-spacing: 1px; margin: 0.3rem 0;">CHAMPIONS LEAGUE & EUROPA LEAGUE</h1>
+              <p style="color: var(--text-muted); font-size: 0.92rem;">
+                <span style="color:var(--accent-cyan); font-weight:800;">Top 2</span> teams in domestic leagues qualify for <strong>UEFA Champions League</strong>. 
+                <span style="color:#ff9f43; font-weight:800;">3rd & 4th</span> qualify for <strong>UEFA Europa League</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- UCL Group Standings -->
+          <div class="card-tile">
+            <div class="card-header" style="border-bottom: 2px solid var(--accent-cyan);">
+              <span class="card-title"><i class="fa-solid fa-star" style="color:var(--accent-cyan);"></i> UEFA Champions League (UCL)</span>
+              <span class="badge" style="background: rgba(0,240,255,0.15); color: var(--accent-cyan);">Top 2 Qualified</span>
+            </div>
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Club</th>
+                  <th>P</th>
+                  <th>W</th>
+                  <th>D</th>
+                  <th>L</th>
+                  <th>GD</th>
+                  <th>Pts</th>
+                </tr>
+              </thead>
+              <tbody id="uclStandingsTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- UEL Group Standings -->
+          <div class="card-tile">
+            <div class="card-header" style="border-bottom: 2px solid #ff9f43;">
+              <span class="card-title"><i class="fa-solid fa-shield-cat" style="color:#ff9f43;"></i> UEFA Europa League (UEL)</span>
+              <span class="badge" style="background: rgba(255,159,67,0.15); color: #ff9f43;">3rd & 4th Qualified</span>
+            </div>
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Club</th>
+                  <th>P</th>
+                  <th>W</th>
+                  <th>D</th>
+                  <th>L</th>
+                  <th>GD</th>
+                  <th>Pts</th>
+                </tr>
+              </thead>
+              <tbody id="uelStandingsTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+          <div class="card-tile">
+            <div class="card-header">
+              <span class="card-title"><i class="fa-solid fa-calendar-days" style="color:var(--accent-cyan);"></i> UCL Fixtures & Results</span>
+            </div>
+            <div id="uclFixturesList" style="display: flex; flex-direction: column; gap: 0.6rem; max-height: 400px; overflow-y: auto;">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL 1: LIVE 2D MATCH SIMULATOR -->
+  <div class="modal-backdrop" id="matchModal">
+    <div class="modal-card" style="max-width: 1240px; padding: 1.4rem; background: radial-gradient(circle at top, #142236 0%, #070d16 100%); border: 1px solid rgba(0,255,137,0.3); box-shadow: 0 0 50px rgba(0,0,0,0.9);">
+      <button class="modal-close-btn" id="matchModalClose">&times;</button>
+      
+      <!-- Top Scoreboard Header -->
+      <div class="match-score-banner" style="margin-bottom: 1rem; padding: 0.8rem 1.4rem; background: rgba(0,0,0,0.4); border-radius: 12px; border: 1px solid rgba(255,255,255,0.08);">
+        <div style="font-weight: 800; font-size: 1.25rem; flex: 1; color: var(--accent-lime);" id="matchHomeName">Home Club</div>
+        <div style="text-align: center; min-width: 200px;">
+          <div class="score-num" id="matchScoreDisplay" style="font-size: 2.3rem; font-weight: 900; color: #fff; letter-spacing: 4px; text-shadow: 0 0 20px rgba(0,255,137,0.5);">0 – 0</div>
+          <div id="matchClockText" style="font-family: var(--font-display); font-size: 1.25rem; color: var(--accent-lime); font-weight: 800; letter-spacing: 1.5px; margin-top: 2px;">0'</div>
+        </div>
+        <div style="font-weight: 800; font-size: 1.25rem; text-align: right; flex: 1; color: var(--accent-cyan);" id="matchAwayName">Away Club</div>
+      </div>
+
+      <!-- Controls Row: Mentality + Speed Controls -->
+      <div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center; flex-wrap: wrap; margin-bottom: 1rem;">
+        <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; margin-right: 0.2rem;">Mentality:</span>
+        <button class="btn-secondary mentality-btn" data-mentality="defensive" style="font-size:0.75rem; padding:0.3rem 0.75rem;">🛡️ Defensive</button>
+        <button class="btn-secondary mentality-btn active" data-mentality="balanced" style="font-size:0.75rem; padding:0.3rem 0.75rem;">⚖️ Balanced</button>
+        <button class="btn-secondary mentality-btn" data-mentality="attacking" style="font-size:0.75rem; padding:0.3rem 0.75rem;">⚡ Attacking</button>
+        
+        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.15); margin: 0 0.4rem;"></div>
+        
+        <span style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 800; margin-right: 0.2rem;">Match Speed:</span>
+        <button class="btn-secondary speed-btn active" data-speed="1" style="font-size:0.75rem; padding:0.3rem 0.75rem;">1× Normal</button>
+        <button class="btn-secondary speed-btn" data-speed="2" style="font-size:0.75rem; padding:0.3rem 0.75rem;">2× Fast</button>
+        <button class="btn-secondary speed-btn" data-speed="3" style="font-size:0.75rem; padding:0.3rem 0.75rem;">3× Rapid</button>
+        <button class="btn-secondary speed-btn" data-speed="4" style="font-size:0.75rem; padding:0.3rem 0.75rem;">4× Turbo</button>
+        <button class="btn-secondary speed-btn" data-speed="0" style="font-size:0.75rem; padding:0.3rem 0.75rem; background: rgba(255,50,80,0.15); color: #ff4d6d; border-color: rgba(255,50,80,0.3);">⏸️ Pause</button>
+      </div>
+
+      <!-- Main 3-Column Match Layout -->
+      <div style="display: grid; grid-template-columns: 240px 1fr 240px; gap: 1rem; align-items: start;">
+        
+        <!-- Left Column: Home Club Starting XI Lineup -->
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(0, 255, 137, 0.2); border-radius: 12px; padding: 0.8rem; height: 100%;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-lime); font-weight: 800; margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.4rem; text-align: center;" id="matchHomeHeaderTitle">
+            Home Lineup XI
+          </div>
+          <div id="matchHomeSquadList" style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 480px; overflow-y: auto; padding-right: 0.2rem;">
+            <!-- Home XI rendered by app.js -->
+          </div>
+        </div>
+
+        <!-- Middle Column: Pitch Canvas, Stats & Commentary -->
+        <div class="match-engine-container" style="display: flex; flex-direction: column; gap: 0.8rem;">
+          <!-- 2D Canvas Pitch -->
+          <canvas id="matchPitchCanvas" style="width: 100%; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);"></canvas>
+
+          <!-- Bottom Stats & Commentary -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+            <!-- Live Stats + Goal Timeline -->
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 10px; padding: 0.6rem 0.8rem;">
+                <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 0.4rem;">Live Match Stats</div>
+                <div id="matchLiveStats" style="color: var(--text-muted); font-size: 0.78rem; text-align: center;">Match starting...</div>
+              </div>
+              <!-- Goal Scorers Timeline -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 10px; padding: 0.6rem 0.8rem; min-height: 52px;">
+                <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 0.3rem;">⚽ Goal Timeline</div>
+                <div id="matchGoalTimeline" style="color: var(--text-muted); font-size: 0.76rem;">No goals yet.</div>
+              </div>
+            </div>
+
+            <!-- Commentary Feed -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); border-radius: 10px; padding: 0.6rem 0.8rem; overflow: hidden;">
+              <div style="font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-comment-dots" style="color: var(--accent-lime);"></i> Match Commentary
+              </div>
+              <div id="matchCommentaryFeed" style="max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.2rem;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Away Club Starting XI Lineup -->
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: 12px; padding: 0.8rem; height: 100%;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.4rem; text-align: center;" id="matchAwayHeaderTitle">
+            Away Lineup XI
+          </div>
+          <div id="matchAwaySquadList" style="display: flex; flex-direction: column; gap: 0.4rem; max-height: 480px; overflow-y: auto; padding-right: 0.2rem;">
+            <!-- Away XI rendered by app.js -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL 2: TRANSFER NEGOTIATION (3 Phase) -->
+  <div class="modal-backdrop" id="negotiationModal">
+    <div class="modal-card" style="max-width: 820px;">
+      <button class="modal-close-btn">&times;</button>
+
+      <!-- Header -->
+      <div style="margin-bottom: 1.2rem;">
+        <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.3rem;" id="negStageLabel">PHASE 1 &mdash; Club Fee Negotiation</div>
+        <div style="display:flex; align-items: center; justify-content: space-between;">
+          <span class="card-title"><i class="fa-solid fa-handshake"></i> &nbsp;<span id="negPlayerName">Player</span></span>
+          <span id="negMoodBar" style="font-weight: 700; font-size: 0.9rem; color: var(--accent-lime);"></span>
+        </div>
+      </div>
+
+      <div class="negotiation-wrapper">
+        <!-- Left: Club Chat Log -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div id="negChatLog" style="max-height: 280px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+            <!-- Dynamic Chat Bubbles -->
+          </div>
+
+          <!-- PHASE 2: Player Personal Chat (hidden until club fee agreed) -->
+          <div id="negPlayerChatSection" style="display: none;">
+            <div style="border-top: 1px solid var(--border-glass); padding-top: 0.75rem; margin-top: 0.5rem;">
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem;">💬 Talk to the player directly to convince him to sign:</div>
+              <div id="negPlayerChatLog" style="max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.75rem;"></div>
+              <div style="display: flex; gap: 0.5rem;">
+                <input type="text" class="input-field" id="playerChatInput" placeholder="e.g. You'll start every week. I'm offering you the captain's armband..." style="flex: 1; padding: 0.6rem 1rem;" />
+                <button class="btn-primary" id="btnSendPlayerMessage" style="white-space: nowrap;"><i class="fa-solid fa-paper-plane"></i></button>
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem;">💡 Try: starting time, captain armband, trophies, salary, young talent, the fans...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Offer Controls -->
+        <div>
+          <!-- Fee Section -->
+          <div id="feeNegotiationSection">
+            <div class="input-group">
+              <span class="input-label">Asking Price</span>
+              <div style="font-weight: 800; font-size: 1.4rem; color: var(--accent-gold);" id="negAskingPrice">€100.0M</div>
+            </div>
+            <div class="input-group">
+              <span class="input-label">Your Offer (€ Millions)</span>
+              <input type="number" class="input-field" id="feeOfferInput" placeholder="e.g. 110" step="0.5" />
+            </div>
+            <button class="btn-primary" id="btnSubmitFeeOffer" style="width: 100%;"><i class="fa-solid fa-gavel"></i> Submit Offer</button>
+          </div>
+
+          <!-- Contract Section (Phase 3, hidden until player says yes) -->
+          <div id="contractNegotiationSection" style="display: none;">
+            <div class="input-group">
+              <span class="input-label">Weekly Wage Offer (€ Thousands/wk)</span>
+              <input type="number" class="input-field" id="wageOfferInput" placeholder="e.g. 250" step="5" />
+              <span style="font-size: 0.72rem; color: var(--accent-gold);" id="negAgentMinWage"></span>
+            </div>
+            <div class="input-group">
+              <span class="input-label">Contract Length</span>
+              <select class="input-field" id="contractYearsInput">
+                <option value="2">2 Years</option>
+                <option value="3">3 Years</option>
+                <option value="4" selected>4 Years</option>
+                <option value="5">5 Years</option>
+              </select>
+            </div>
+            <button class="btn-primary" id="btnSubmitContractOffer" style="width: 100%;"><i class="fa-solid fa-signature"></i> Finalize Contract</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: PRESS CONFERENCE -->
+  <div class="modal-backdrop" id="pressModal">
+    <div class="modal-card" style="max-width: 650px;">
+      <button class="modal-close-btn">&times;</button>
+      <div class="card-header" style="margin-bottom: 1rem;">
+        <span class="card-title" id="pressTitle">Pre-Match Press Conference</span>
+      </div>
+      <p style="font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 1.5rem;" id="pressQuestionText">Question...</p>
+      <div id="pressOptionsContainer" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONSULT CHIEF SCOUT -->
+  <div class="modal-backdrop" id="scoutModal">
+    <div class="modal-card" style="max-width: 720px; padding: 1.5rem; background: radial-gradient(circle at top, #152238 0%, #0b121e 100%); border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: 0 0 40px rgba(0,0,0,0.8);">
+      <button class="modal-close-btn" id="scoutModalClose">&times;</button>
+      
+      <!-- Header -->
+      <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
+        <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-lime); font-weight: 800; margin-bottom: 0.3rem;">GLOBAL SCOUTING NETWORK</div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="card-title" style="font-size: 1.25rem;"><i class="fa-solid fa-user-secret" style="color: var(--accent-cyan);"></i> &nbsp;Chief Scout Paolo Rossi</span>
+          <span style="font-size: 0.78rem; background: rgba(0, 255, 137, 0.12); color: var(--accent-lime); padding: 0.25rem 0.6rem; border-radius: 20px; font-weight: 700; border: 1px solid rgba(0,255,137,0.3);">
+            <i class="fa-solid fa-circle-check"></i> 5-Star Scout Active
+          </span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">Ask your Chief Scout for transfer recommendations, wonderkids, positional targets, or budget deals.</div>
+      </div>
+
+      <!-- Chat Stream -->
+      <div id="scoutChatLog" style="max-height: 340px; min-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem; padding-right: 0.4rem;">
+        <!-- Dynamic chat messages -->
+      </div>
+
+      <!-- Quick Prompt Suggestion Pills -->
+      <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.6rem; margin-bottom: 0.8rem; scrollbar-width: none;">
+        <button class="tab-btn scout-pill-btn" data-query="Find me a world-class Striker (ST)" style="font-size: 0.78rem; white-space: nowrap; padding: 0.35rem 0.75rem;"><i class="fa-solid fa-futbol" style="color:var(--accent-lime);"></i> Top Striker</button>
+        <button class="tab-btn scout-pill-btn" data-query="Recommend young wonderkids under 22" style="font-size: 0.78rem; white-space: nowrap; padding: 0.35rem 0.75rem;"><i class="fa-solid fa-gem" style="color:var(--accent-cyan);"></i> Wonderkids (&lt;22)</button>
+        <button class="tab-btn scout-pill-btn" data-query="Find a solid Center-Back (CB)" style="font-size: 0.78rem; white-space: nowrap; padding: 0.35rem 0.75rem;"><i class="fa-solid fa-shield-halved" style="color:var(--accent-gold);"></i> Solid CB</button>
+        <button class="tab-btn scout-pill-btn" data-query="Find fast wingers LW RW" style="font-size: 0.78rem; white-space: nowrap; padding: 0.35rem 0.75rem;"><i class="fa-solid fa-bolt" style="color:#ff3366;"></i> Fast Wingers</button>
+        <button class="tab-btn scout-pill-btn" data-query="Find bargain players under 40M" style="font-size: 0.78rem; white-space: nowrap; padding: 0.35rem 0.75rem;"><i class="fa-solid fa-coins" style="color:#ffcc00;"></i> Bargains (&lt;€40M)</button>
+      </div>
+
+      <!-- Input Bar -->
+      <div style="display: flex; gap: 0.75rem;">
+        <input type="text" class="input-field" id="scoutInput" placeholder="Ask your scout... (e.g. 'Find a midfielder over 84 OVR', 'Young GK', etc.)" style="flex: 1; background: rgba(0,0,0,0.4); border-color: rgba(0, 240, 255, 0.2);" />
+        <button class="btn-primary" id="btnSendScoutMsg" style="padding: 0.7rem 1.4rem;"><i class="fa-solid fa-paper-plane"></i> Ask Scout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INCOMING TRANSFER OFFER & MANAGER NEGOTIATION -->
+  <div class="modal-backdrop" id="incomingOfferModal">
+    <div class="modal-card" style="max-width: 760px; padding: 1.6rem; background: radial-gradient(circle at top, #182842 0%, #0a111e 100%); border: 1px solid rgba(0, 255, 137, 0.35); box-shadow: 0 0 50px rgba(0,0,0,0.85);">
+      <button class="modal-close-btn" id="incomingOfferModalClose">&times;</button>
+      
+      <!-- Top Header -->
+      <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-lime); font-weight: 800;">TRANSFER NEGOTIATION ROOM</div>
+            <h2 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-top: 0.2rem;" id="ioHeader">Negotiate Sale with Opposing Manager</h2>
+          </div>
+          <span id="ioManagerMood" style="font-size: 0.8rem; background: rgba(0, 255, 137, 0.12); color: var(--accent-lime); padding: 0.3rem 0.7rem; border-radius: 20px; font-weight: 700; border: 1px solid rgba(0,255,137,0.3);">
+            <i class="fa-solid fa-handshake"></i> Manager Interest: High
+          </span>
+        </div>
+      </div>
+
+      <!-- Player & Offer Summary Card -->
+      <div style="background: rgba(0,0,0,0.35); padding: 1rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+        <div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #fff;" id="ioPlayerName">Player Name</div>
+          <div style="font-size: 0.82rem; color: var(--text-muted);" id="ioPlayerMeta">ST • 88 OVR • Age 24</div>
+          <div style="font-size: 0.8rem; color: var(--accent-cyan); margin-top: 4px;" id="ioPlayerVal">Market Value: €60.0M</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Current Offer</div>
+          <div style="font-size: 1.9rem; font-weight: 900; color: var(--accent-lime); text-shadow: 0 0 15px rgba(0,255,137,0.4);" id="ioOfferFee">€75.0M</div>
+          <div style="font-size: 0.78rem; color: #fff; font-weight: 700;" id="ioBiddingClub">From: PSG</div>
+        </div>
+      </div>
+
+      <!-- Interactive Manager Chat Log -->
+      <div id="ioManagerChatLog" style="max-height: 260px; min-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 1rem; padding-right: 0.4rem; background: rgba(0,0,0,0.25); padding: 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+        <!-- Populated dynamically by app.js -->
+      </div>
+
+      <!-- Counter Fee Input Section -->
+      <div style="margin-bottom: 0.8rem; background: rgba(0,240,255,0.04); padding: 0.75rem; border-radius: 10px; border: 1px solid rgba(0,240,255,0.2);">
+        <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.4rem;">Submit Counter Offer Fee</div>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="number" class="input-field" id="ioCounterInput" placeholder="Counter fee in Millions (e.g. 85)..." step="0.5" style="flex: 1; background: rgba(0,0,0,0.5);" />
+          <button class="btn-primary" id="btnCounterIncomingOffer" style="background: linear-gradient(135deg, var(--accent-cyan), #0088cc); color: #001520; font-weight: 800; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+            <i class="fa-solid fa-gavel"></i> Propose Counter Fee
+          </button>
+        </div>
+      </div>
+
+      <!-- Dialogue Input Section -->
+      <div style="margin-bottom: 1.2rem;">
+        <div style="display: flex; gap: 0.4rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 0.6rem;">
+          <button class="tab-btn io-pill-btn" data-text="He's a vital starter for us, you must increase your bid." style="font-size: 0.75rem; white-space: nowrap; padding: 0.3rem 0.7rem;">💬 Vital Starter</button>
+          <button class="tab-btn io-pill-btn" data-text="We are open to selling if you meet our valuation." style="font-size: 0.75rem; white-space: nowrap; padding: 0.3rem 0.7rem;">💬 Open to Deal</button>
+          <button class="tab-btn io-pill-btn" data-text="Throw in performance bonuses and we have a deal." style="font-size: 0.75rem; white-space: nowrap; padding: 0.3rem 0.7rem;">💬 Add Bonuses</button>
+          <button class="tab-btn io-pill-btn" data-text="This is our final price, take it or leave it." style="font-size: 0.75rem; white-space: nowrap; padding: 0.3rem 0.7rem;">💬 Final Offer</button>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" class="input-field" id="ioManagerTalkInput" placeholder="Talk to opposing manager..." style="flex: 1; background: rgba(0,0,0,0.4);" />
+          <button class="btn-primary" id="btnSendManagerTalkMsg" style="padding: 0.6rem 1.2rem;"><i class="fa-solid fa-paper-plane"></i> Talk</button>
+        </div>
+      </div>
+
+      <!-- Accept / Reject Actions -->
+      <div style="display: flex; gap: 0.75rem; justify-content: center;">
+        <button class="btn-primary" id="btnAcceptIncomingOffer" style="flex: 1; background: linear-gradient(135deg, var(--accent-lime), #00b359); color: #001a0d; font-weight: 800; border: none; padding: 0.8rem; font-size: 0.92rem; cursor: pointer; border-radius: 8px; box-shadow: 0 0 15px rgba(0,255,137,0.3);">
+          <i class="fa-solid fa-circle-check"></i> Accept Deal (€ Sell Player)
+        </button>
+        <button class="btn-secondary" id="btnRejectIncomingOffer" style="flex: 1; background: rgba(255,50,80,0.15); color: #ff4d6d; border: 1px solid rgba(255,50,80,0.3); font-weight: 800; padding: 0.8rem; font-size: 0.92rem; cursor: pointer; border-radius: 8px;">
+          <i class="fa-solid fa-circle-xmark"></i> Reject & Walk Away
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BOARD INBOX MESSAGE DETAIL -->
+  <div class="modal-backdrop" id="inboxDetailModal">
+    <div class="modal-card" style="max-width: 580px; padding: 1.6rem; background: radial-gradient(circle at top, #16243b 0%, #080e18 100%); border: 1px solid rgba(0, 240, 255, 0.35); box-shadow: 0 0 40px rgba(0,0,0,0.85);">
+      <button class="modal-close-btn" id="inboxDetailModalClose">&times;</button>
+      
+      <div style="margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.8rem;">
+        <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-cyan); font-weight: 800;">BOARD MAILBOX</div>
+        <h2 style="font-size: 1.3rem; font-weight: 800; color: #fff; margin-top: 0.2rem;" id="idMsgTitle">Official Notice</h2>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;" id="idMsgMeta">From: Board • Date</div>
+      </div>
+
+      <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 1.2rem; min-height: 120px;">
+        <div style="font-size: 0.92rem; color: #e2e8f0; line-height: 1.6;" id="idMsgBody">
+          Message body text...
+        </div>
+      </div>
+
+      <div style="text-align: right;">
+        <button class="btn-primary" id="btnCloseInboxDetail" style="padding: 0.6rem 1.4rem; background: linear-gradient(135deg, var(--accent-cyan), #0088cc); color: #001520; font-weight: 800; border: none; border-radius: 6px; cursor: pointer;">
+          Close Notice
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- MODAL: INTERACTIVE MATCH DECISION MOMENT -->
+  <div class="modal-backdrop" id="matchDecisionModal" style="z-index: 20000;">
+    <div class="modal-card" style="max-width: 680px; padding: 1.6rem; background: radial-gradient(circle at top, #16243b 0%, #080e18 100%); border: 2px solid var(--accent-lime); box-shadow: 0 0 50px rgba(0, 255, 137, 0.4);">
+      
+      <!-- Top Title Header -->
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <span id="mdBadge" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-lime); font-weight: 800; background: rgba(0,255,137,0.15); padding: 0.25rem 0.8rem; border-radius: 20px; border: 1px solid rgba(0,255,137,0.3);">
+          ⚡ KEY MATCH MOMENT • <span id="mdMinute">68'</span>
+        </span>
+        <h2 style="font-size: 1.45rem; font-weight: 900; color: #fff; margin-top: 0.5rem;" id="mdTitle">1-on-1 Chance! Choose Shot Placement</h2>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;" id="mdSubtitle">Select where your player should shoot or direct your goalkeeper!</p>
+      </div>
+
+      <!-- Player Info & Probability Bar -->
+      <div style="background: rgba(0,0,0,0.35); padding: 0.8rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+        <div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: #fff;" id="mdPlayerName">Kylian Mbappé</div>
+          <div style="font-size: 0.8rem; color: var(--accent-cyan);" id="mdPlayerStats">ST • 91 OVR • Shooting 92</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">Success Probability</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: var(--accent-lime);" id="mdChancePercent">78%</div>
+        </div>
+      </div>
+
+      <!-- Interactive Goal Net 3x2 / Choice Grid -->
+      <div id="mdGridContainer" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.65rem; margin-bottom: 1.2rem; background: radial-gradient(ellipse at center, #1b432c 0%, #07170e 100%); padding: 1.2rem; border-radius: 14px; border: 2px solid rgba(0,255,137,0.3); position: relative; min-height: 180px;">
+        <!-- Populated dynamically by matchEngine.js -->
+      </div>
+
+      <!-- Decision Result Banner (Hidden initially) -->
+      <div id="mdResultBanner" style="display: none; text-align: center; padding: 0.9rem; border-radius: 10px; font-weight: 800; font-size: 1.1rem; animation: pulse 0.4s ease;">
+        <!-- Goal / Save Result -->
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL 4: TALK TO YOUR PLAYER -->
+  <div class="modal-backdrop" id="playerTalkModal">
+
+    <div class="modal-card" style="max-width: 600px;">
+      <button class="modal-close-btn">&times;</button>
+      <div style="margin-bottom: 1.2rem;">
+        <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.4rem;">PLAYER MEETING ROOM</div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <span class="card-title"><i class="fa-solid fa-comments"></i> &nbsp;<span id="talkPlayerName">Player Name</span></span>
+          <span id="talkPlayerMorale" style="font-weight: 700; font-size: 0.9rem;">Morale: 90%</span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">Talk freely — try: playing time, contract, captain armband, training, transfers, praise, criticism...</div>
+      </div>
+
+      <div id="playerTalkLog" style="max-height: 320px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1rem; padding-right: 0.5rem;"></div>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <input type="text" class="input-field" id="playerTalkInput" placeholder="Type your message to the player..." style="flex: 1;" />
+        <button class="btn-primary" id="btnSendTalkMessage"><i class="fa-solid fa-paper-plane"></i> Send</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK SIM RESULT -->
+  <div class="modal-backdrop" id="quickSimModal">
+    <div class="modal-card" style="max-width: 680px; padding: 1.8rem; background: radial-gradient(circle at top, #16243b 0%, #0a111e 100%); border: 1px solid rgba(0, 240, 255, 0.25); box-shadow: 0 0 40px rgba(0,0,0,0.8);">
+      <button class="modal-close-btn" id="quickSimModalClose">&times;</button>
+      
+      <div style="text-align: center; margin-bottom: 1.2rem;">
+        <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-lime); font-weight: 800;" id="quickSimCompTitle">MATCH RESULT</span>
+        
+        <!-- Scoreboard Header -->
+        <div style="display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; margin-top: 1rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="text-align: right;">
+            <div id="qsHomeName" style="font-size: 1.2rem; font-weight: 800; color: #fff;">Home Team</div>
+          </div>
+          <div style="text-align: center;">
+            <div id="qsScore" style="font-size: 2.2rem; font-weight: 900; color: var(--accent-lime); text-shadow: 0 0 20px rgba(0,255,135,0.5); letter-spacing: 3px;">0 – 0</div>
+            <div style="font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px;">FULL TIME</div>
+          </div>
+          <div style="text-align: left;">
+            <div id="qsAwayName" style="font-size: 1.2rem; font-weight: 800; color: #fff;">Away Team</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Goal Timeline / Events -->
+      <div style="margin-bottom: 1.5rem;">
+        <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.4rem;">
+          <i class="fa-solid fa-futbol" style="color: var(--accent-lime);"></i> Goal Timeline
+        </div>
+        <div id="qsGoalsList" style="display: flex; flex-direction: column; gap: 0.45rem; max-height: 140px; overflow-y: auto; padding-right: 0.3rem;">
+          <!-- Goals populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Match Statistics comparison -->
+      <div style="margin-bottom: 1.8rem; background: rgba(0,0,0,0.25); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05);">
+        <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 0.8rem; text-align: center;">
+          Match Statistics
+        </div>
+        <div id="qsStatsContainer">
+          <!-- Stats populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div style="text-align: center;">
+        <button class="btn-primary" id="qsContinueBtn" style="padding: 0.8rem 2.5rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; background: linear-gradient(135deg, var(--accent-lime), #00b359); border: none; color: #001a0d; border-radius: 8px; cursor: pointer; box-shadow: 0 0 20px rgba(0,255,135,0.4);">
+          Continue <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: TEAM SELECTION ONBOARDING -->
+  <div class="modal-backdrop active" id="teamSelectModal">
+    <div class="modal-card" style="max-width: 1100px; padding: 2rem; position: relative;">
+      <button class="modal-close-btn" id="teamSelectModalClose">&times;</button>
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+        <div class="logo-badge" style="display: inline-block; font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--accent-lime), var(--accent-cyan));">FC 27 MANAGER CAREER</div>
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: #fff;">Select Your Club to Begin</h2>
+        <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 0.3rem;">Choose a heavy-weight club from Europe's top 5 leagues to take command.</p>
+      </div>
+
+      <!-- League Selector Filter Tabs -->
+      <div style="display: flex; gap: 0.6rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <button class="tab-btn league-filter-btn active" data-league="ALL"><i class="fa-solid fa-globe"></i> All Leagues</button>
+        <button class="tab-btn league-filter-btn" data-league="La Liga">🇪🇸 La Liga</button>
+        <button class="tab-btn league-filter-btn" data-league="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+        <button class="tab-btn league-filter-btn" data-league="Serie A">🇮🇹 Serie A</button>
+        <button class="tab-btn league-filter-btn" data-league="Bundesliga">🇩🇪 Bundesliga</button>
+        <button class="tab-btn league-filter-btn" data-league="Ligue 1">🇫🇷 Ligue 1</button>
+      </div>
+
+      <!-- Team Cards Grid -->
+      <div id="teamSelectGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.2rem; min-height: 320px; max-height: 520px; overflow-y: auto; padding: 0.5rem;">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main ES Module Script -->
+  <script type="module" src="js/app.js"></script>
+  <!-- End of Season Review & Celebration Modal -->
+  <div class="modal-backdrop" id="endOfSeasonModal">
+    <div class="modal-card" style="max-width: 650px; text-align: center; background: linear-gradient(135deg, #0d1527, #060a12); border: 1px solid rgba(0, 240, 255, 0.4); box-shadow: 0 0 40px rgba(0, 240, 255, 0.2);">
+      <div style="font-size: 3rem; margin-bottom: 0.5rem;" id="eosTrophyIcon">🏆</div>
+      <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-cyan); font-weight: 800;" id="eosSeasonLabel">SEASON 2026/27 COMPLETED</div>
+      <h2 style="font-size: 2rem; font-weight: 900; color: #fff; margin: 0.3rem 0 1rem 0;" id="eosHeaderTitle">SEASON REVIEW & CEREMONY</h2>
+
+      <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-glass); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.2rem; display: flex; justify-content: space-around; align-items: center;">
+        <div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Final League Finish</div>
+          <div style="font-size: 1.6rem; font-weight: 900; color: var(--accent-gold);" id="eosLeaguePos">#1 Champion</div>
+        </div>
+        <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
+        <div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">European Status</div>
+          <div style="font-size: 1.1rem; font-weight: 800; color: var(--accent-cyan);" id="eosEuroQual">UCL Qualified</div>
+        </div>
+        <div style="width: 1px; height: 40px; background: rgba(255,255,255,0.1);"></div>
+        <div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Board Reward</div>
+          <div style="font-size: 1.3rem; font-weight: 900; color: var(--accent-lime);" id="eosPrizeMoney">+€40.0M</div>
+        </div>
+      </div>
+
+      <div style="text-align: left; background: rgba(0, 240, 255, 0.03); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; max-height: 180px; overflow-y: auto;" id="eosHighlightsLog">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <button class="btn-primary" id="btnStartNextSeasonConfirm" style="width: 100%; padding: 0.95rem; font-size: 1.1rem; font-weight: 900; background: linear-gradient(135deg, var(--accent-lime), #00bb66); color: #001a0d; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 0 20px rgba(0, 255, 137, 0.3);">
+        <i class="fa-solid fa-play"></i> Advance to Next Season <span id="eosNextSeasonYear">2027/28</span>
+      </button>
+    </div>
+  </div>
+</body>
+</html>
+
