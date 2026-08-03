@@ -852,12 +852,16 @@ export class LiveMatchEngine {
 
   _drawPlayers(ctx, players, fillColor, strokeColor) {
     players.forEach(p => {
-      const isCarrier = this.ball.owner === p;
+      const px = Number.isFinite(p.x) ? p.x : (p.bx || 0);
+      const py = Number.isFinite(p.y) ? p.y : (p.by || 0);
+      const facing = Number.isFinite(p.facing) ? p.facing : (p.side === 'home' ? 0 : Math.PI);
+
+      const isCarrier = this.ball && this.ball.owner === p;
 
       if (isCarrier) {
         ctx.save();
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 16, 0, Math.PI * 2);
+        ctx.arc(px, py, 16, 0, Math.PI * 2);
         ctx.strokeStyle = p.side === 'home' ? '#00ff87' : '#00e5ff';
         ctx.lineWidth = 2.5;
         ctx.shadowColor = p.side === 'home' ? '#00ff87' : '#00e5ff';
@@ -868,7 +872,7 @@ export class LiveMatchEngine {
 
       ctx.save();
       ctx.beginPath();
-      ctx.ellipse(p.x + 2, p.y + 5, 11, 4.5, 0, 0, Math.PI * 2);
+      ctx.ellipse(px + 2, py + 5, 11, 4.5, 0, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(0,0,0,0.3)';
       ctx.fill();
       ctx.restore();
@@ -876,16 +880,18 @@ export class LiveMatchEngine {
       // Directional Notch Pointer (Subtle notch on circle edge)
       ctx.save();
       ctx.beginPath();
-      const pointerX = p.x + Math.cos(p.facing) * 12;
-      const pointerY = p.y + Math.sin(p.facing) * 12;
-      ctx.arc(pointerX, pointerY, 2.5, 0, Math.PI * 2);
+      const pointerX = px + Math.cos(facing) * 12;
+      const pointerY = py + Math.sin(facing) * 12;
+      if (Number.isFinite(pointerX) && Number.isFinite(pointerY)) {
+        ctx.arc(pointerX, pointerY, 2.5, 0, Math.PI * 2);
+      }
       ctx.fillStyle = fillColor;
       ctx.fill();
       ctx.restore();
 
       ctx.save();
       ctx.beginPath();
-      ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+      ctx.arc(px, py, 11, 0, Math.PI * 2);
       ctx.fillStyle   = fillColor;
       ctx.fill();
       ctx.strokeStyle = strokeColor;
@@ -896,7 +902,7 @@ export class LiveMatchEngine {
       ctx.font         = 'bold 9px Outfit, sans-serif';
       ctx.textAlign    = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(String(p.num), p.x, p.y);
+      ctx.fillText(String(p.num || ''), px, py);
       ctx.restore();
     });
   }
