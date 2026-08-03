@@ -559,15 +559,52 @@ class CareerState {
     const prizeMoney = userFinishPos === 1 ? 40000000 : (userFinishPos <= 4 ? 25000000 : 15000000);
     this.myClub.budget += prizeMoney;
 
-    // Record League Trophy if user came 1st
+    // Record League & Domestic Trophies based on user's league
+    const userLeagueName = this.myClub ? this.myClub.league : 'La Liga';
+    const compInfo = (typeof LEAGUE_COMPETITIONS !== 'undefined' && LEAGUE_COMPETITIONS[userLeagueName])
+      ? LEAGUE_COMPETITIONS[userLeagueName]
+      : { leagueTitle: 'Domestic League Trophy', cupTitle: 'National Cup', superCupTitle: 'Super Cup' };
+
     if (userFinishPos === 1) {
       this.trophies.push({
         id: 'tr_league_' + Date.now(),
-        name: `${this.myClub ? this.myClub.league : 'Domestic'} Champions`,
+        name: compInfo.leagueTitle,
         season: this.season,
         icon: 'fa-trophy',
         club: this.myClub ? this.myClub.name : '',
         badgeColor: '#ffd700'
+      });
+      this.trophies.push({
+        id: 'tr_supercup_' + Date.now(),
+        name: compInfo.superCupTitle,
+        season: this.season,
+        icon: 'fa-shield-halved',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#ff9f43'
+      });
+    }
+
+    // Domestic Cup Victory
+    if (userFinishPos <= 2 && Math.random() > 0.3) {
+      this.trophies.push({
+        id: 'tr_cup_' + Date.now(),
+        name: compInfo.cupTitle,
+        season: this.season,
+        icon: 'fa-crown',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#ee2524'
+      });
+    }
+
+    // Premier League EFL Cup
+    if (userLeagueName === 'Premier League' && userFinishPos <= 3 && Math.random() > 0.4) {
+      this.trophies.push({
+        id: 'tr_efl_' + Date.now(),
+        name: 'EFL Cup (Carabao Cup)',
+        season: this.season,
+        icon: 'fa-wine-glass-empty',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#00a859'
       });
     }
 
