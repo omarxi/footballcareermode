@@ -62,6 +62,9 @@ class CareerState {
     this.initEuropeanCompetitions();
     this.initDomesticCup();
     this.initFixtures();
+    if (typeof youthEngine !== 'undefined') {
+      youthEngine.initYouthLeague();
+    }
 
     this.news.unshift({
       headline: `APPOINTMENT: ${this.managerName} announced as Manager of ${club.name}! Target: Domestic & Champions League glory.`,

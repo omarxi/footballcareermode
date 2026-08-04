@@ -66,22 +66,24 @@ class YouthEngine {
 
   initYouthLeague() {
     const userTeamName = this.getUserYouthName();
-    const userClubId = (typeof state !== 'undefined' && state.myClubId) ? state.myClubId : 'real_madrid';
+    const userClubId = (typeof state !== 'undefined' && state.myClubId) ? state.myClubId : '';
 
     const opponentPool = [
       { id: 'rm_u19', name: 'Real Madrid U19', rating: 70, parent: 'real_madrid' },
       { id: 'barca_u19', name: 'FC Barcelona U19', rating: 71, parent: 'barcelona' },
-      { id: 'bayern_u19', name: 'Bayern Munich U19', rating: 69, parent: 'bayern' },
+      { id: 'bayern_u19', name: 'Bayern Munich U19', rating: 69, parent: 'bayern_munich' },
       { id: 'mancity_u19', name: 'Man City U19', rating: 70, parent: 'man_city' },
       { id: 'psg_u19', name: 'PSG U19', rating: 68, parent: 'psg' },
       { id: 'juve_u19', name: 'Juventus U19', rating: 67, parent: 'juventus' },
-      { id: 'arsenal_u19', name: 'Arsenal U19', rating: 69, parent: 'arsenal' }
+      { id: 'arsenal_u19', name: 'Arsenal U19', rating: 69, parent: 'arsenal' },
+      { id: 'chelsea_u19', name: 'Chelsea U19', rating: 70, parent: 'chelsea' },
+      { id: 'liverpool_u19', name: 'Liverpool U19', rating: 70, parent: 'liverpool' }
     ];
 
     const filteredOpponents = opponentPool.filter(o => o.parent !== userClubId).slice(0, 5);
 
     this.leagueTeams = [
-      { id: 'user_u19', name: userTeamName, isUser: true },
+      { id: 'user_u19', name: userTeamName, isUser: true, parent: userClubId },
       ...filteredOpponents
     ];
 

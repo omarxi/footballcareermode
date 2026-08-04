@@ -1003,7 +1003,7 @@ function renderYouthAcademy() {
       return `
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); ${rowStyle}">
           <td style="padding: 0.45rem;">${idx + 1}</td>
-          <td style="padding: 0.45rem;">${st.name} ${isUser ? '⭐' : ''}</td>
+          <td style="padding: 0.45rem;">${isUser ? youthEngine.getUserYouthName() : st.name} ${isUser ? '⭐' : ''}</td>
           <td style="padding: 0.45rem; text-align: center;">${st.mp}</td>
           <td style="padding: 0.45rem; text-align: center;">${st.w}</td>
           <td style="padding: 0.45rem; text-align: center;">${st.d}</td>
