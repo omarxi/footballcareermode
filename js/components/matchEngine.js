@@ -1068,9 +1068,6 @@ class LiveMatchEngine {
     });
 
     state.processTournamentResult?.(this.fixture, this.homeScore, this.awayScore);
-    state.simRestOfLeagueMatchday?.(this.fixture.competition === 'UEFA Champions League');
-
-    for (let i = 0; i < 7; i++) state.advanceDay?.();
 
     if (this.onFinished) {
       setTimeout(() => this.onFinished(this.homeScore, this.awayScore, this.stats.home, this.stats.away), 500);
@@ -1214,8 +1211,6 @@ function engineQuickSim(fixture, calculateTeamRatingsFn, stateRef) {
   }
 
   stateRef.processTournamentResult?.(fixture, homeScore, awayScore);
-
-  stateRef.simRestOfLeagueMatchday?.(fixture.competition === 'UEFA Champions League');
 
   stateRef.playSound?.('whistle');
   stateRef.news.unshift({
