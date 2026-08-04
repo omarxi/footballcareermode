@@ -269,7 +269,17 @@ class YouthEngine {
     if (idx !== -1) {
       const prospect = this.academy.splice(idx, 1)[0];
       prospect.clubId = state.myClubId;
-      state.bench.push(prospect);
+      prospect.goals = prospect.goals || 0;
+      prospect.apps = prospect.apps || 0;
+      prospect.val = prospect.val || 2500000;
+      prospect.wage = prospect.wage || 5000;
+      
+      if (!state.players.some(p => p.id === prospect.id)) {
+        state.players.push(prospect);
+      }
+      if (!state.bench.some(p => p.id === prospect.id)) {
+        state.bench.push(prospect);
+      }
 
       state.news.unshift({
         headline: `YOUTH PROMOTION: ${prospect.name} (${prospect.ovr} OVR) has been promoted to ${state.myClub.name} first team!`,

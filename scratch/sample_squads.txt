@@ -1,0 +1,294 @@
+CLUB: ARSENAL  (Full Roster Size: 25 Players)
+No.  | Player Name                    | Pos        | OVR   | Market Value | Country             
+1    | David Raya                     | GK         | 84    | €35M         | Spain               
+2    | Neto                           | GK         | 77    | €5M          | Brazil              
+3    | Tommy Setford                  | GK         | 64    | €2M          | England             
+4    | William Saliba                 | CB         | 87    | €80M         | France              
+5    | Gabriel Magalhães              | CB         | 86    | €70M         | Brazil              
+6    | Riccardo Calafiori             | CB/LB      | 81    | €45M         | Italy               
+7    | Jurriën Timber                 | RB/LB      | 80    | €40M         | Netherlands         
+8    | Ben White                      | RB/CB      | 83    | €55M         | England             
+9    | Oleksandr Zinchenko            | LB/CM      | 79    | €25M         | Ukraine             
+10   | Takehiro Tomiyasu              | RB/LB      | 78    | €20M         | Japan               
+11   | Kieran Tierney                 | LB         | 77    | €12M         | Scotland            
+12   | Jakub Kiwior                   | CB/LB      | 77    | €20M         | Poland              
+13   | Declan Rice                    | CDM/CM     | 86    | €110M        | England             
+14   | Thomas Partey                  | CDM        | 82    | €20M         | Ghana               
+15   | Jorginho                       | CM/CDM     | 80    | €15M         | Italy               
+16   | Martin Ødegaard                | CAM        | 89    | €110M        | Norway              
+17   | Mikel Merino                   | CM         | 83    | €50M         | Spain               
+18   | Ethan Nwaneri                  | CAM/RW     | 74    | €15M         | England             
+19   | Myles Lewis-Skelly             | CDM/LB     | 70    | €10M         | England             
+20   | Bukayo Saka                    | RW         | 87    | €140M        | England             
+21   | Gabriel Martinelli             | LW         | 84    | €70M         | Brazil              
+22   | Leandro Trossard               | LW/ST      | 82    | €35M         | Belgium             
+23   | Kai Havertz                    | ST/CAM     | 83    | €55M         | Germany             
+24   | Gabriel Jesus                  | ST/RW      | 82    | €45M         | Brazil              
+25   | Raheem Sterling                | LW/RW      | 81    | €25M         | England             
+
+CLUB: ASTON VILLA  (Full Roster Size: 23 Players)
+1    | Emiliano Martínez              | GK         | 87    | €28M         | Argentina           
+2    | Robin Olsen                    | GK         | 73    | €2M          | Sweden              
+3    | Joe Gauci                      | GK         | 68    | €2M          | Australia           
+4    | Ezri Konsa                     | CB/RB      | 81    | €40M         | England             
+5    | Pau Torres                     | CB         | 82    | €45M         | Spain               
+6    | Diego Carlos                   | CB         | 78    | €15M         | Brazil              
+7    | Tyrone Mings                   | CB         | 77    | €12M         | England             
+8    | Matty Cash                     | RB         | 79    | €22M         | Poland              
+9    | Lucas Digne                    | LB         | 80    | €15M         | France              
+10   | Ian Maatsen                    | LB         | 78    | €30M         | Netherlands         
+11   | Kosta Nedeljkovic              | RB         | 72    | €10M         | Serbia              
+12   | Amadou Onana                   | CDM        | 81    | €50M         | Belgium             
+13   | Boubacar Kamara                | CDM        | 81    | €38M         | France              
+14   | Youri Tielemans                | CM         | 82    | €30M         | Belgium             
+15   | John McGinn                    | CM/LM      | 82    | €30M         | Scotland            
+16   | Ross Barkley                   | CM         | 78    | €10M         | England             
+17   | Jacob Ramsey                   | LM/CM      | 78    | €32M         | England             
+18   | Morgan Rogers                  | CAM/LW     | 78    | €35M         | England             
+19   | Leon Bailey                    | RM/RW      | 82    | €42M         | Jamaica             
+20   | Emiliano Buendía               | CAM/RW     | 77    | €18M         | Argentina           
+21   | Jaden Philogene                | LW/RW      | 76    | €20M         | England             
+22   | Ollie Watkins                  | ST         | 85    | €65M         | England             
+23   | Jhon Durán                     | ST         | 78    | €35M         | Colombia            
+
+CLUB: BOURNEMOUTH  (Full Roster Size: 23 Players)
+1    | Kepa Arrizabalaga              | GK         | 79    | €12M         | Spain               
+2    | Mark Travers                   | GK         | 74    | €5M          | Republic of Ireland 
+3    | Will Dennis                    | GK         | 67    | €1M          | England             
+4    | Illia Zabarnyi                 | CB         | 78    | €32M         | Ukraine             
+5    | Marcos Senesi                  | CB         | 78    | €22M         | Argentina           
+6    | Dean Huijsen                   | CB         | 75    | €20M         | Spain               
+7    | James Hill                     | CB         | 71    | €5M          | England             
+8    | Milos Kerkez                   | LB         | 77    | €25M         | Hungary             
+9    | Julian Araujo                  | RB         | 74    | €12M         | Mexico              
+10   | Adam Smith                     | RB         | 73    | €2M          | England             
+11   | Max Aarons                     | RB         | 74    | €10M         | England             
+12   | Lewis Cook                     | CDM        | 76    | €14M         | England             
+13   | Ryan Christie                  | CM/CDM     | 77    | €15M         | Scotland            
+14   | Alex Scott                     | CM/CAM     | 75    | €20M         | England             
+15   | Philip Billing                 | CM/CAM     | 76    | €15M         | Denmark             
+16   | Tyler Adams                    | CDM        | 77    | €18M         | United States       
+17   | Marcus Tavernier               | LM/CAM     | 77    | €18M         | England             
+18   | Justin Kluivert                | LM/CAM     | 77    | €20M         | Netherlands         
+19   | Antoine Semenyo                | RM/RW      | 78    | €25M         | Ghana               
+20   | Dango Ouattara                 | LW/RW      | 75    | €15M         | Burkina Faso        
+21   | Luis Sinisterra                | LW/RW      | 77    | €18M         | Colombia            
+22   | Evanilson                      | ST         | 78    | €35M         | Brazil              
+23   | Enes Ünal                      | ST         | 76    | €15M         | Turkey              
+
+CLUB: BRENTFORD  (Full Roster Size: 24 Players)
+1    | Mark Flekken                   | GK         | 79    | €12M         | Netherlands         
+2    | Hákon Valdimarsson             | GK         | 71    | €4M          | Iceland             
+3    | Matthew Cox                    | GK         | 65    | €1M          | England             
+4    | Ethan Pinnock                  | CB         | 78    | €15M         | Jamaica             
+5    | Nathan Collins                 | CB         | 77    | €22M         | Republic of Ireland 
+6    | Sepp van den Berg              | CB         | 75    | €15M         | Netherlands         
+7    | Ben Mee                        | CB         | 76    | €3M          | England             
+8    | Kristoffer Ajer                | CB/RB      | 76    | €12M         | Norway              
+9    | Rico Henry                     | LB         | 77    | €18M         | England             
+10   | Aaron Hickey                   | RB/LB      | 76    | €20M         | Scotland            
+11   | Mad Roerslev                   | RB         | 75    | €8M          | Denmark             
+12   | Jayden Meghoma                 | LB         | 66    | €3M          | England             
+13   | Christian Nørgaard             | CDM        | 79    | €18M         | Denmark             
+14   | Vitaly Janelt                  | CDM/CM     | 77    | €18M         | Germany             
+15   | Mathias Jensen                 | CM         | 78    | €20M         | Denmark             
+16   | Mikkel Damsgaard               | CAM/CM     | 76    | €15M         | Denmark             
+17   | Yunus Emre Konak               | CDM        | 69    | €5M          | Turkey              
+18   | Paris Maghoma                  | CM         | 71    | €5M          | England             
+19   | Bryan Mbeumo                   | RW/ST      | 81    | €45M         | Cameroon            
+20   | Yoane Wissa                    | ST/LW      | 79    | €25M         | DR Congo            
+21   | Kevin Schade                   | LW/ST      | 75    | €18M         | Germany             
+22   | Keane Lewis-Potter             | LW/LWB     | 74    | €10M         | England             
+23   | Igor Thiago                    | ST         | 75    | €18M         | Brazil              
+24   | Gustavo Nunes                  | LW         | 72    | €8M          | Brazil              
+
+CLUB: BRIGHTON & HOVE ALBION  (Full Roster Size: 25 Players)
+1    | Bart Verbruggen                | GK         | 78    | €22M         | Netherlands         
+2    | Jason Steele                   | GK         | 74    | €3M          | England             
+3    | Lewis Dunk                     | CB         | 80    | €12M         | England             
+4    | Jan Paul van Hecke             | CB         | 78    | €25M         | Netherlands         
+5    | Adam Webster                   | CB         | 76    | €10M         | England             
+6    | Igor Julio                     | CB         | 76    | €12M         | Brazil              
+7    | Pervis Estupiñán               | LB         | 79    | €30M         | Ecuador             
+8    | Ferdi Kadıoğlu                 | LB/RB      | 78    | €30M         | Turkey              
+9    | Tariq Lamptey                  | RB         | 75    | €15M         | Ghana               
+10   | Joel Veltman                   | RB/CB      | 77    | €6M          | Netherlands         
+11   | Carlos Baleba                  | CDM        | 76    | €30M         | Cameroon            
+12   | Mats Wieffer                   | CDM/CM     | 78    | €28M         | Netherlands         
+13   | Matt O'Riley                   | CM/CAM     | 78    | €25M         | Denmark             
+14   | Yasin Ayari                    | CM         | 73    | €12M         | Sweden              
+15   | James Milner                   | CM/RB      | 75    | €2M          | England             
+16   | Brajan Gruda                   | RW/CAM     | 75    | €20M         | Germany             
+17   | Kaoru Mitoma                   | LM/LW      | 82    | €45M         | Japan               
+18   | Simon Adingra                  | RM/RW      | 77    | €30M         | Ivory Coast         
+19   | Yankuba Minteh                 | RW         | 76    | €25M         | Gambia              
+20   | Solly March                    | RM/RW      | 77    | €12M         | England             
+21   | Joao Pedro                     | ST/CAM     | 79    | €40M         | Brazil              
+22   | Evan Ferguson                  | ST         | 75    | €45M         | Republic of Ireland 
+23   | Danny Welbeck                  | ST         | 77    | €6M          | England             
+24   | Georginio Rutter               | ST/CAM     | 76    | €28M         | France              
+25   | Julio Enciso                   | CAM/ST     | 76    | €22M         | Paraguay            
+
+CLUB: CHELSEA  (Full Roster Size: 28 Players)
+1    | Robert Sánchez                 | GK         | 78    | €20M         | Spain               
+2    | Filip Jørgensen                | GK         | 75    | €15M         | Denmark             
+3    | Marcus Bettinelli              | GK         | 70    | €2M          | England             
+4    | Levi Colwill                   | CB/LB      | 80    | €50M         | England             
+5    | Wesley Fofana                  | CB         | 78    | €35M         | France              
+6    | Axel Disasi                    | CB/RB      | 78    | €28M         | France              
+7    | Benoît Badiashile              | CB         | 77    | €25M         | France              
+8    | Tosin Adarabioyo               | CB         | 78    | €20M         | England             
+9    | Reece James                    | RB         | 82    | €40M         | England             
+10   | Malo Gusto                     | RB         | 79    | €38M         | France              
+11   | Marc Cucurella                 | LB         | 81    | €35M         | Spain               
+12   | Renato Veiga                   | LB/CDM     | 75    | €20M         | Portugal            
+13   | Ben Chilwell                   | LB         | 78    | €18M         | England             
+14   | Moisés Caicedo                 | CDM        | 83    | €80M         | Ecuador             
+15   | Enzo Fernández                 | CM         | 82    | €75M         | Argentina           
+16   | Romeo Lavia                    | CDM        | 77    | €35M         | Belgium             
+17   | Kiernan Dewsbury-Hall          | CM         | 78    | €25M         | England             
+18   | Cole Palmer                    | RW/CAM     | 86    | €110M        | England             
+19   | Christopher Nkunku             | CAM/ST     | 83    | €60M         | France              
+20   | João Félix                     | CAM/ST     | 81    | €30M         | Portugal            
+21   | Pedro Neto                     | LW/RW      | 81    | €55M         | Portugal            
+22   | Noni Madueke                   | RW         | 78    | €35M         | England             
+23   | Jadon Sancho                   | LW/RW      | 81    | €30M         | England             
+24   | Mykhailo Mudryk                | LM/LW      | 77    | €30M         | Ukraine             
+25   | Nicolas Jackson                | ST         | 80    | €50M         | Senegal             
+26   | Marc Guiu                      | ST         | 71    | €10M         | Spain               
+27   | Carney Chukwuemeka             | CM/CAM     | 74    | €15M         | England             
+28   | Cesare Casadei                 | CM         | 72    | €10M         | Italy               
+
+CLUB: REAL MADRID  (Full Roster Size: 23 Players)
+1    | Thibaut Courtois               | GK         | 89    | €30M         | Belgium             
+2    | Andriy Lunin                   | GK         | 81    | €25M         | Ukraine             
+3    | Fran González                  | GK         | 65    | €1M          | Spain               
+4    | Antonio Rüdiger                | CB         | 88    | €25M         | Germany             
+5    | Éder Militão                   | CB         | 85    | €60M         | Brazil              
+6    | David Alaba                    | CB/LB      | 84    | €15M         | Austria             
+7    | Jesus Vallejo                  | CB         | 72    | €2M          | Spain               
+8    | Dani Carvajal                  | RB         | 86    | €12M         | Spain               
+9    | Lucas Vázquez                  | RB/RW      | 79    | €5M          | Spain               
+10   | Ferland Mendy                  | LB         | 82    | €22M         | France              
+11   | Fran García                    | LB         | 78    | €15M         | Spain               
+12   | Aurelien Tchouaméni            | CDM/CB     | 85    | €100M        | France              
+13   | Eduardo Camavinga              | CM/LB      | 83    | €100M        | France              
+14   | Federico Valverde              | CM/RW      | 88    | €130M        | Uruguay             
+15   | Jude Bellingham                | CAM/CM     | 90    | €180M        | England             
+16   | Luka Modrić                    | CM         | 86    | €6M          | Croatia             
+17   | Dani Ceballos                  | CM         | 78    | €12M         | Spain               
+18   | Arda Güler                     | CAM/RW     | 78    | €45M         | Turkey              
+19   | Brahim Díaz                    | CAM/RW     | 82    | €40M         | Morocco             
+20   | Vinícius Jr.                   | LW         | 91    | €170M        | Brazil              
+21   | Rodrygo                        | RW/ST      | 86    | €110M        | Brazil              
+22   | Kylian Mbappé                  | ST/LW      | 92    | €180M        | France              
+23   | Endrick                        | ST         | 77    | €60M         | Brazil              
+
+CLUB: FC BARCELONA  (Full Roster Size: 27 Players)
+1    | Marc-André ter Stegen          | GK         | 89    | €28M         | Germany             
+2    | Wojciech Szczęsny              | GK         | 82    | €5M          | Poland              
+3    | Iñaki Peña                     | GK         | 75    | €8M          | Spain               
+4    | Ander Astralaga                | GK         | 64    | €1M          | Spain               
+5    | Ronald Araújo                  | CB         | 85    | €70M         | Uruguay             
+6    | Jules Koundé                   | RB/CB      | 85    | €60M         | France              
+7    | Andreas Christensen            | CB/CDM     | 83    | €30M         | Denmark             
+8    | Inigo Martínez                 | CB         | 81    | €5M          | Spain               
+9    | Pau Cubarsí                    | CB         | 79    | €40M         | Spain               
+10   | Eric García                    | CB/RB      | 77    | €18M         | Spain               
+11   | Alejandro Balde                | LB         | 81    | €40M         | Spain               
+12   | Héctor Fort                    | RB/LB      | 72    | €10M         | Spain               
+13   | Gerard Martín                  | LB         | 68    | €4M          | Spain               
+14   | Frenkie de Jong                | CM         | 87    | €70M         | Netherlands         
+15   | Pedri                          | CM         | 86    | €90M         | Spain               
+16   | Gavi                           | CM         | 83    | €90M         | Spain               
+17   | Dani Olmo                      | CAM/LW     | 85    | €60M         | Spain               
+18   | Marc Casadó                    | CDM        | 74    | €15M         | Spain               
+19   | Marc Bernal                    | CDM        | 69    | €10M         | Spain               
+20   | Fermín López                   | CAM/CM     | 78    | €30M         | Spain               
+21   | Pablo Torre                    | CAM        | 73    | €8M          | Spain               
+22   | Lamine Yamal                   | RW         | 90    | €150M        | Spain               
+23   | Raphinha                       | LW/RW      | 86    | €60M         | Brazil              
+24   | Ferran Torres                  | LW/ST      | 80    | €30M         | Spain               
+25   | Ansu Fati                      | LW         | 77    | €25M         | Spain               
+26   | Robert Lewandowski             | ST         | 88    | €15M         | Poland              
+27   | Pau Víctor                     | ST         | 72    | €5M          | Spain               
+
+CLUB: BAYERN MUNICH  (Full Roster Size: 26 Players)
+1    | Manuel Neuer                   | GK         | 86    | €5M          | Germany             
+2    | Sven Ulreich                   | GK         | 74    | €1M          | Germany             
+3    | Daniel Peretz                  | GK         | 69    | €3M          | Israel              
+4    | Dayot Upamecano                | CB         | 82    | €45M         | France              
+5    | Kim Min-jae                    | CB         | 83    | €45M         | South Korea         
+6    | Eric Dier                      | CB         | 78    | €10M         | England             
+7    | Hiroki Ito                     | CB/LB      | 79    | €30M         | Japan               
+8    | Tarek Buchmann                 | CB         | 64    | €2M          | Germany             
+9    | Alphonso Davies                | LB         | 82    | €50M         | Canada              
+10   | Raphaël Guerreiro              | LB/CM      | 81    | €15M         | Portugal            
+11   | Sacha Boey                     | RB         | 77    | €18M         | France              
+12   | Josip Stanisic                 | RB/CB      | 77    | €25M         | Croatia             
+13   | Joshua Kimmich                 | CDM/RB     | 86    | €50M         | Germany             
+14   | Joao Palhinha                  | CDM        | 85    | €55M         | Portugal            
+15   | Leon Goretzka                  | CM         | 83    | €30M         | Germany             
+16   | Konrad Laimer                  | RB/CM      | 82    | €28M         | Austria             
+17   | Aleksandar Pavlovic            | CM/CDM     | 77    | €40M         | Germany             
+18   | Jamal Musiala                  | CAM/LM     | 87    | €130M        | Germany             
+19   | Thomas Müller                  | CAM/ST     | 82    | €8M          | Germany             
+20   | Michael Olise                  | RW/CAM     | 82    | €65M         | France              
+21   | Leroy Sané                     | RM/RW      | 85    | €60M         | Germany             
+22   | Kingsley Coman                 | LM/LW      | 84    | €45M         | France              
+23   | Serge Gnabry                   | RM/ST      | 83    | €35M         | Germany             
+24   | Harry Kane                     | ST         | 91    | €90M         | England             
+25   | Mathys Tel                     | ST/LW      | 77    | €35M         | France              
+26   | Arijon Ibrahimovic             | CAM/LW     | 68    | €4M          | Germany             
+
+CLUB: INTER MILAN  (Full Roster Size: 24 Players)
+1    | Yann Sommer                    | GK         | 84    | €5M          | Switzerland         
+2    | Josep Martínez                 | GK         | 76    | €12M         | Spain               
+3    | Raffaele Di Gennaro            | GK         | 66    | €500k        | Italy               
+4    | Alessandro Bastoni             | CB         | 87    | €70M         | Italy               
+5    | Benjamin Pavard                | CB/RB      | 84    | €45M         | France              
+6    | Stefan de Vrij                 | CB         | 81    | €8M          | Netherlands         
+7    | Francesco Acerbi               | CB         | 82    | €4M          | Italy               
+8    | Yann Bisseck                   | CB         | 77    | €25M         | Germany             
+9    | Tomas Palacios                 | CB         | 68    | €5M          | Argentina           
+10   | Denzel Dumfries                | RWB/RB     | 82    | €28M         | Netherlands         
+11   | Matteo Darmian                 | RWB/CB     | 79    | €5M          | Italy               
+12   | Federico Dimarco               | LWB/LB     | 84    | €50M         | Italy               
+13   | Carlos Augusto                 | LWB/CB     | 79    | €22M         | Brazil              
+14   | Hakan Çalhanoğlu               | CDM/CM     | 86    | €45M         | Turkey              
+15   | Kristjan Asllani               | CDM        | 76    | €18M         | Albania             
+16   | Nicolò Barella                 | CM         | 87    | €80M         | Italy               
+17   | Henrikh Mkhitaryan             | CM         | 83    | €8M          | Armenia             
+18   | Piotr Zieliński                | CM         | 82    | €22M         | Poland              
+19   | Davide Frattesi                | CM         | 80    | €35M         | Italy               
+20   | Tajon Buchanan                 | LM/RM      | 74    | €10M         | Canada              
+21   | Lautaro Martínez               | ST         | 89    | €110M        | Argentina           
+22   | Marcus Thuram                  | ST         | 84    | €65M         | France              
+23   | Mehdi Taremi                   | ST         | 80    | €10M         | Iran                
+24   | Joaquín Correa                 | ST         | 75    | €5M          | Argentina           
+
+CLUB: PARIS SAINT-GERMAIN  (Full Roster Size: 24 Players)
+1    | Gianluigi Donnarumma           | GK         | 88    | €40M         | Italy               
+2    | Matvey Safonov                 | GK         | 78    | €20M         | Russia              
+3    | Arnau Tenas                    | GK         | 74    | €8M          | Spain               
+4    | Marquinhos                     | CB         | 87    | €50M         | Brazil              
+5    | Willian Pacho                  | CB         | 80    | €40M         | Ecuador             
+6    | Lucas Beraldo                  | CB         | 77    | €30M         | Brazil              
+7    | Lucas Hernández                | CB/LB      | 83    | €35M         | France              
+8    | Presnel Kimpembe               | CB         | 80    | €12M         | France              
+9    | Achraf Hakimi                  | RB         | 85    | €60M         | Morocco             
+10   | Yoram Zague                    | RB         | 67    | €4M          | France              
+11   | Nuno Mendes                    | LB         | 83    | €55M         | Portugal            
+12   | Vitinha                        | CM         | 85    | €65M         | Portugal            
+13   | João Neves                     | CM         | 81    | €60M         | Portugal            
+14   | Warren Zaïre-Emery             | CM         | 80    | €60M         | France              
+15   | Fabian Ruiz                    | CM         | 82    | €35M         | Spain               
+16   | Senny Mayulu                   | CM         | 69    | €8M          | France              
+17   | Ousmane Dembélé                | RW/ST      | 90    | €60M         | France              
+18   | Kang-in Lee                    | CAM/RW     | 79    | €30M         | South Korea         
+19   | Desire Doué                    | CAM/LW     | 76    | €40M         | France              
+20   | Bradley Barcola                | LW         | 82    | €65M         | France              
+21   | Marco Asensio                  | RW/CAM     | 80    | €20M         | Spain               
+22   | Gonçalo Ramos                  | ST         | 80    | €50M         | Portugal            
+23   | Randal Kolo Muani              | ST         | 82    | €45M         | France              
+24   | Ibrahim Mbaye                  | RW         | 65    | €4M          | France              
