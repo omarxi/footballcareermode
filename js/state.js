@@ -253,26 +253,79 @@ class CareerState {
   initFixtures() {
     const targetLeague = this.myClub ? this.myClub.league : 'La Liga';
     const leagueClubs = this.clubs.filter(c => c.league === targetLeague);
-    const opponentClubs = leagueClubs.filter(c => c.id !== this.myClubId);
-    const opps = opponentClubs.length > 0 ? opponentClubs : this.clubs.filter(c => c.id !== this.myClubId);
+    if (!leagueClubs.length) return;
 
-    const leagueFix = [];
+    const clubs = [...leagueClubs];
+    const n = clubs.length;
+    if (n % 2 !== 0) clubs.push({ id: 'bye', name: 'Bye' });
+    const numTeams = clubs.length;
+    const rounds = numTeams - 1;
+
     let fixtureDate = new Date(this.currentDate);
     fixtureDate.setDate(fixtureDate.getDate() + 4);
 
-    opps.forEach((opp, idx) => {
-      leagueFix.push({
-        id: `fix_${idx + 1}`,
-        matchday: idx + 1,
-        date: new Date(fixtureDate),
-        competition: targetLeague,
-        homeClub: (idx % 2 === 0) ? this.myClub : opp,
-        awayClub: (idx % 2 === 0) ? opp : this.myClub,
-        played: false,
-        result: null
-      });
+    const leagueFix = [];
+    let fixIdCounter = 1;
+
+    // First Half of Season
+    for (let round = 0; round < rounds; round++) {
+      const matchdayNumber = round + 1;
+      for (let i = 0; i < numTeams / 2; i++) {
+        const homeIdx = (round + i) % (numTeams - 1);
+        let awayIdx = (numTeams - 1 - i + round) % (numTeams - 1);
+        if (i === 0) awayIdx = numTeams - 1;
+
+        const home = clubs[homeIdx];
+        const away = clubs[awayIdx];
+
+        if (home.id !== 'bye' && away.id !== 'bye') {
+          const finalHome = (round % 2 === 0) ? home : away;
+          const finalAway = (round % 2 === 0) ? away : home;
+
+          leagueFix.push({
+            id: `fix_lg_${fixIdCounter++}`,
+            matchday: `MD ${matchdayNumber}`,
+            date: new Date(fixtureDate),
+            competition: targetLeague,
+            homeClub: finalHome,
+            awayClub: finalAway,
+            played: false,
+            result: null
+          });
+        }
+      }
       fixtureDate.setDate(fixtureDate.getDate() + 7);
-    });
+    }
+
+    // Second Half of Season (Reverse Fixtures)
+    for (let round = 0; round < rounds; round++) {
+      const matchdayNumber = rounds + round + 1;
+      for (let i = 0; i < numTeams / 2; i++) {
+        const homeIdx = (round + i) % (numTeams - 1);
+        let awayIdx = (numTeams - 1 - i + round) % (numTeams - 1);
+        if (i === 0) awayIdx = numTeams - 1;
+
+        const home = clubs[homeIdx];
+        const away = clubs[awayIdx];
+
+        if (home.id !== 'bye' && away.id !== 'bye') {
+          const finalHome = (round % 2 === 0) ? away : home;
+          const finalAway = (round % 2 === 0) ? home : away;
+
+          leagueFix.push({
+            id: `fix_lg_${fixIdCounter++}`,
+            matchday: `MD ${matchdayNumber}`,
+            date: new Date(fixtureDate),
+            competition: targetLeague,
+            homeClub: finalHome,
+            awayClub: finalAway,
+            played: false,
+            result: null
+          });
+        }
+      }
+      fixtureDate.setDate(fixtureDate.getDate() + 7);
+    }
 
     const eurFix = this.uclFixtures || [];
     const cupFix = this.cupFixtures || [];
@@ -735,6 +788,7 @@ class CareerState {
   advanceDay() {
     this.currentDate.setDate(this.currentDate.getDate() + 1);
     this.playSound('tick');
+    this.simCpuMatches();
     
     // Increased chance to receive incoming transfer offers for any squad player (~45% chance per day advance)
     if (Math.random() < 0.45) {
