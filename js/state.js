@@ -62,6 +62,7 @@ class CareerState {
     this.initEuropeanCompetitions();
     this.initDomesticCup();
     this.initFixtures();
+    this.initTrophies();
     if (typeof youthEngine !== 'undefined') {
       youthEngine.initYouthLeague();
     }
@@ -460,8 +461,56 @@ class CareerState {
     });
   }
 
+  initTrophies() {
+    this.trophyCabinet = this.trophyCabinet || [];
+    if (this.trophyCabinet.length > 0) return;
+
+    const club = this.myClub;
+    if (!club) return;
+
+    const honours = {
+      'real_madrid': [
+        { id: 'h_ucl_24', name: 'UEFA Champions League', type: 'UCL', year: '2023/24', clubName: 'Real Madrid' },
+        { id: 'h_lg_24', name: 'La Liga Title', type: 'LEAGUE', year: '2023/24', clubName: 'Real Madrid' },
+        { id: 'h_cup_23', name: 'Copa del Rey', type: 'CUP', year: '2022/23', clubName: 'Real Madrid' }
+      ],
+      'barcelona': [
+        { id: 'h_lg_23', name: 'La Liga Title', type: 'LEAGUE', year: '2022/23', clubName: 'FC Barcelona' },
+        { id: 'h_cup_21', name: 'Copa del Rey', type: 'CUP', year: '2020/21', clubName: 'FC Barcelona' }
+      ],
+      'man_city': [
+        { id: 'h_lg_24_mc', name: 'Premier League Title', type: 'LEAGUE', year: '2023/24', clubName: 'Manchester City' },
+        { id: 'h_ucl_23_mc', name: 'UEFA Champions League', type: 'UCL', year: '2022/23', clubName: 'Manchester City' },
+        { id: 'h_cup_23_mc', name: 'FA Cup', type: 'CUP', year: '2022/23', clubName: 'Manchester City' }
+      ],
+      'arsenal': [
+        { id: 'h_cup_20_ars', name: 'FA Cup', type: 'CUP', year: '2019/20', clubName: 'Arsenal' }
+      ],
+      'liverpool': [
+        { id: 'h_cup_22_liv', name: 'FA Cup', type: 'CUP', year: '2021/22', clubName: 'Liverpool' },
+        { id: 'h_lg_20_liv', name: 'Premier League Title', type: 'LEAGUE', year: '2019/20', clubName: 'Liverpool' }
+      ],
+      'inter_milan': [
+        { id: 'h_lg_24_int', name: 'Serie A Title', type: 'LEAGUE', year: '2023/24', clubName: 'Inter Milan' },
+        { id: 'h_cup_23_int', name: 'Coppa Italia', type: 'CUP', year: '2022/23', clubName: 'Inter Milan' }
+      ],
+      'bayern_munich': [
+        { id: 'h_lg_23_bay', name: 'Bundesliga Title', type: 'LEAGUE', year: '2022/23', clubName: 'Bayern München' },
+        { id: 'h_ucl_20_bay', name: 'UEFA Champions League', type: 'UCL', year: '2019/20', clubName: 'Bayern München' }
+      ],
+      'psg': [
+        { id: 'h_lg_24_psg', name: 'Ligue 1 Title', type: 'LEAGUE', year: '2023/24', clubName: 'Paris Saint-Germain' },
+        { id: 'h_cup_24_psg', name: 'Coupe de France', type: 'CUP', year: '2023/24', clubName: 'Paris Saint-Germain' }
+      ]
+    };
+
+    if (honours[club.id]) {
+      this.trophyCabinet = [...honours[club.id]];
+    }
+  }
+
   processTournamentResult(fixture, homeScore, awayScore) {
-    if (!fixture.id.includes('cup_') && !fixture.id.includes('ucl_')) return;
+    if (!fixture.id.includes('cup_') && !fixture.id.includes('ucl_') && !fixture.id.includes('uel_')) return;
     
     // Force tie-breaker if draw in knockout
     if (homeScore === awayScore) {
@@ -480,12 +529,48 @@ class CareerState {
         }
       });
       if (tree.final && tree.final.id === fixture.id) {
-        tree.final.scoreHome = homeScore; tree.final.scoreAway = awayScore; tree.final.winner = winner;
+        tree.final.scoreHome = homeScore;
+        tree.final.scoreAway = awayScore;
+        tree.final.winner = winner;
+
+        if (winner && winner.id === this.myClubId) {
+          let trophyName = 'Tournament Trophy';
+          let trophyType = 'CUP';
+          if (fixture.id.includes('ucl_')) {
+            trophyName = 'UEFA Champions League';
+            trophyType = 'UCL';
+          } else if (fixture.id.includes('uel_')) {
+            trophyName = 'UEFA Europa League';
+            trophyType = 'UEL';
+          } else if (fixture.id.includes('cup_')) {
+            trophyName = this.domesticCupTitle || 'Domestic Cup';
+            trophyType = 'CUP';
+          }
+
+          this.trophyCabinet = this.trophyCabinet || [];
+          if (!this.trophyCabinet.some(t => t.id === fixture.id)) {
+            this.trophyCabinet.unshift({
+              id: fixture.id,
+              name: trophyName,
+              type: trophyType,
+              year: this.season,
+              date: this.getFormattedDate?.() || '',
+              clubName: this.myClub?.name || ''
+            });
+            this.playSound?.('fanfare');
+            this.news.unshift({
+              headline: `🏆 CHAMPIONS: ${this.myClub?.name} WIN THE ${trophyName.toUpperCase()}!`,
+              date: this.getFormattedDate?.() || '',
+              category: 'TROPHY WIN'
+            });
+          }
+        }
       }
     };
 
     if (fixture.id.includes('cup_') && this.cupTree) updateNode(this.cupTree);
     if (fixture.id.includes('ucl_') && this.uclTree) updateNode(this.uclTree);
+    if (fixture.id.includes('uel_') && this.uelTree) updateNode(this.uelTree);
   }
 
   checkTournamentProgression() {

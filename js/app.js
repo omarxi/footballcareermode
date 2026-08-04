@@ -106,6 +106,7 @@ function initUI() {
       if (btn.dataset.tab === 'stats') renderGoldenBootStats();
       if (btn.dataset.tab === 'transfers') renderTransfers();
       if (btn.dataset.tab === 'youth') renderYouthAcademy();
+      if (btn.dataset.tab === 'trophies') renderTrophyCabinet();
     });
   });
 
@@ -2314,4 +2315,61 @@ function renderGoldenBootStats() {
       </tr>
     `).join('');
   }
+}
+
+function renderTrophyCabinet() {
+  const grid = document.getElementById('trophyCabinetGrid');
+  const totalElem = document.getElementById('totalTrophiesCount');
+  const leagueElem = document.getElementById('leagueTrophiesCount');
+  const euroElem = document.getElementById('euroTrophiesCount');
+  const cupElem = document.getElementById('cupTrophiesCount');
+
+  const cabinet = state.trophyCabinet || [];
+
+  if (totalElem) totalElem.textContent = cabinet.length;
+  if (leagueElem) leagueElem.textContent = cabinet.filter(t => t.type === 'LEAGUE' || (t.name && t.name.includes('Title'))).length;
+  if (euroElem) euroElem.textContent = cabinet.filter(t => t.type === 'UCL' || t.type === 'UEL' || (t.name && (t.name.includes('Champions') || t.name.includes('Europa')))).length;
+  if (cupElem) cupElem.textContent = cabinet.filter(t => t.type === 'CUP' || (t.name && (t.name.includes('Cup') || t.name.includes('Copa')))).length;
+
+  if (!grid) return;
+
+  if (!cabinet.length) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3.5rem 2rem; background: #12141c; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.15);">
+        <div style="font-size: 3.5rem; margin-bottom: 0.8rem; opacity: 0.5;">🏆</div>
+        <h3 style="font-size: 1.3rem; color: #fff; margin-bottom: 0.4rem;">Cabinet Empty</h3>
+        <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 450px; margin: 0 auto;">No silverware won yet. Lead your club to victory in the League, Domestic Cup, or European Competitions to build your manager legacy!</p>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = cabinet.map(t => {
+    let iconClass = 'fa-trophy';
+    let iconColor = 'var(--accent-gold)';
+    let bgGlow = 'radial-gradient(circle, rgba(255,215,0,0.15) 0%, rgba(0,0,0,0) 70%)';
+
+    if (t.type === 'UCL' || (t.name && t.name.includes('Champions League'))) {
+      iconColor = 'var(--accent-cyan)';
+      bgGlow = 'radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(0,0,0,0) 70%)';
+    } else if (t.type === 'UEL' || (t.name && t.name.includes('Europa League'))) {
+      iconColor = '#ff9f43';
+      bgGlow = 'radial-gradient(circle, rgba(255,159,67,0.2) 0%, rgba(0,0,0,0) 70%)';
+    } else if (t.type === 'LEAGUE' || (t.name && t.name.includes('Title'))) {
+      iconColor = '#00ff87';
+      bgGlow = 'radial-gradient(circle, rgba(0,255,135,0.2) 0%, rgba(0,0,0,0) 70%)';
+    }
+
+    return `
+      <div class="card-tile" style="position: relative; overflow: hidden; background: #141722; border: 1px solid rgba(255,255,255,0.12); padding: 1.8rem 1.2rem; text-align: center; transition: transform 0.2s, border-color 0.2s;">
+        <div style="position: absolute; top:0; left:0; right:0; height:100%; background:${bgGlow}; pointer-events:none;"></div>
+        <div style="font-size: 3.5rem; color: ${iconColor}; margin-bottom: 0.8rem; text-shadow: 0 0 25px ${iconColor};">
+          <i class="fa-solid ${iconClass}"></i>
+        </div>
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; color: ${iconColor}; font-weight: 800; margin-bottom: 0.3rem;">${t.year || t.season || 'HONOUR'}</div>
+        <h3 style="font-size: 1.15rem; color: #fff; font-weight: 900; margin: 0.2rem 0;">${t.name}</h3>
+        <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600; margin-top: 0.3rem;">${t.clubName || state.myClub?.name || ''}</div>
+      </div>
+    `;
+  }).join('');
 }

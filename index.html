@@ -448,6 +448,40 @@
         </div>
       </div>
 
+      <!-- TAB: TROPHY CABINET -->
+      <div class="tab-pane" id="tab-trophies">
+        <div class="card-tile" style="background: linear-gradient(135deg, rgba(40,30,0,0.95), rgba(80,60,0,0.85)); border: 1px solid var(--accent-gold); margin-bottom: 1.5rem; padding: 1.8rem;">
+          <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent-gold); font-weight: 800;">CLUB HONOURS & SILVERWARE</div>
+          <h1 style="font-size: 2.2rem; font-weight: 900; color: #fff; font-family: var(--font-display); letter-spacing: 1px; margin: 0.3rem 0;">TROPHY CABINET</h1>
+          <p style="color: var(--text-muted); font-size: 0.92rem;">Every trophy won under your managerial reign is commemorated here.</p>
+        </div>
+
+        <!-- Trophy Stats Summary Row -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+          <div class="card-tile" style="text-align: center; padding: 1.2rem; border-top: 3px solid var(--accent-gold);">
+            <div style="font-size: 2.2rem; color: var(--accent-gold); font-weight: 900;" id="totalTrophiesCount">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">Total Trophies</div>
+          </div>
+          <div class="card-tile" style="text-align: center; padding: 1.2rem; border-top: 3px solid #00ff87;">
+            <div style="font-size: 2.2rem; color: #00ff87; font-weight: 900;" id="leagueTrophiesCount">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">League Titles</div>
+          </div>
+          <div class="card-tile" style="text-align: center; padding: 1.2rem; border-top: 3px solid var(--accent-cyan);">
+            <div style="font-size: 2.2rem; color: var(--accent-cyan); font-weight: 900;" id="euroTrophiesCount">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">European Cups</div>
+          </div>
+          <div class="card-tile" style="text-align: center; padding: 1.2rem; border-top: 3px solid #ff9f43;">
+            <div style="font-size: 2.2rem; color: #ff9f43; font-weight: 900;" id="cupTrophiesCount">0</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase;">Domestic Cups</div>
+          </div>
+        </div>
+
+        <!-- Trophy Cards Grid -->
+        <div id="trophyCabinetGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem;">
+          <!-- Dynamically Rendered Trophy Cards -->
+        </div>
+      </div>
+
       <!-- TAB 6: EUROPEAN COMPETITIONS (UCL & UEL) -->
       <div class="tab-pane" id="tab-ucl">
         <div class="card-tile" style="background: linear-gradient(135deg, rgba(0,24,68,0.95), rgba(0,48,120,0.85)); border: 1px solid rgba(0,240,255,0.45); margin-bottom: 1.5rem; padding: 1.8rem;">
