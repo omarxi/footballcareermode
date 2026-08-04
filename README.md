@@ -60,30 +60,6 @@ A feature-rich, high-performance web-based **Football Manager Career Mode** simu
 
 ---
 
-## 🚀 Quick Start Guide
-
-### Prerequisites
-- Modern web browser (Chrome, Firefox, Edge, Safari).
-- Python 3 installed (or any local web server).
-
-### Installation & Local Run
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/fifa-career-mode.git
-   cd fifa-career-mode
-   ```
-
-2. **Start a local HTTP server**:
-   ```bash
-   python3 -m http.server 8080
-   ```
-
-3. **Open in your browser**:
-   Navigate to `http://localhost:8080` to launch the game!
-
----
-
 ## 📁 Project Architecture
 
 ```
