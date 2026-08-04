@@ -198,26 +198,41 @@ class CareerState {
       generatedKnockouts: false
     };
 
+    // Generate full fixtures for ALL 13 UCL Clubs (8 matchdays)
     this.uclFixtures = [];
-    if (uclClubIds.includes(this.myClubId)) {
-      const uclOpps = uclClubs.filter(c => c.id !== this.myClubId);
-      let uclDate = new Date(this.currentDate);
-      uclDate.setDate(uclDate.getDate() + 10);
+    let uclDate = new Date(this.currentDate);
+    uclDate.setDate(uclDate.getDate() + 10);
 
-      const selectedOpps = uclOpps.slice(0, 8);
-      selectedOpps.forEach((opp, idx) => {
-        this.uclFixtures.push({
-          id: `ucl_fix_${idx + 1}`,
-          matchday: idx + 1,
-          date: new Date(uclDate),
-          competition: 'UEFA Champions League',
-          homeClub: (idx % 2 === 0) ? this.myClub : opp,
-          awayClub: (idx % 2 === 0) ? opp : this.myClub,
-          played: false,
-          result: null
-        });
-        uclDate.setDate(uclDate.getDate() + 14);
-      });
+    const uclList = [...uclClubs];
+    if (uclList.length % 2 !== 0) uclList.push({ id: 'bye', name: 'Bye' });
+    const uclNum = uclList.length;
+
+    let uclFixCounter = 1;
+    for (let md = 0; md < 8; md++) {
+      for (let i = 0; i < uclNum / 2; i++) {
+        const homeIdx = (md + i) % (uclNum - 1);
+        let awayIdx = (uclNum - 1 - i + md) % (uclNum - 1);
+        if (i === 0) awayIdx = uclNum - 1;
+
+        const home = uclList[homeIdx];
+        const away = uclList[awayIdx];
+
+        if (home.id !== 'bye' && away.id !== 'bye') {
+          const hClub = (md % 2 === 0) ? home : away;
+          const aClub = (md % 2 === 0) ? away : home;
+          this.uclFixtures.push({
+            id: `ucl_fix_${uclFixCounter++}`,
+            matchday: md + 1,
+            date: new Date(uclDate),
+            competition: 'UEFA Champions League',
+            homeClub: hClub,
+            awayClub: aClub,
+            played: false,
+            result: null
+          });
+        }
+      }
+      uclDate.setDate(uclDate.getDate() + 14);
     }
 
     // 2. UEL Setup (10 teams, 6 matchdays)
@@ -239,26 +254,40 @@ class CareerState {
       generatedKnockouts: false
     };
 
+    // Generate full fixtures for ALL 10 UEL Clubs (6 matchdays)
     this.uelFixtures = [];
-    if (uelClubIds.includes(this.myClubId)) {
-      const uelOpps = uelClubs.filter(c => c.id !== this.myClubId);
-      let uelDate = new Date(this.currentDate);
-      uelDate.setDate(uelDate.getDate() + 12);
+    let uelDate = new Date(this.currentDate);
+    uelDate.setDate(uelDate.getDate() + 12);
 
-      const selectedOpps = uelOpps.slice(0, 6);
-      selectedOpps.forEach((opp, idx) => {
-        this.uelFixtures.push({
-          id: `uel_fix_${idx + 1}`,
-          matchday: idx + 1,
-          date: new Date(uelDate),
-          competition: 'UEFA Europa League',
-          homeClub: (idx % 2 === 0) ? this.myClub : opp,
-          awayClub: (idx % 2 === 0) ? opp : this.myClub,
-          played: false,
-          result: null
-        });
-        uelDate.setDate(uelDate.getDate() + 14);
-      });
+    const uelList = [...uelClubs];
+    const uelNum = uelList.length;
+    let uelFixCounter = 1;
+
+    for (let md = 0; md < 6; md++) {
+      for (let i = 0; i < uelNum / 2; i++) {
+        const homeIdx = (md + i) % (uelNum - 1);
+        let awayIdx = (uelNum - 1 - i + md) % (uelNum - 1);
+        if (i === 0) awayIdx = uelNum - 1;
+
+        const home = uelList[homeIdx];
+        const away = uelList[awayIdx];
+
+        if (home.id !== 'bye' && away.id !== 'bye') {
+          const hClub = (md % 2 === 0) ? home : away;
+          const aClub = (md % 2 === 0) ? away : home;
+          this.uelFixtures.push({
+            id: `uel_fix_${uelFixCounter++}`,
+            matchday: md + 1,
+            date: new Date(uelDate),
+            competition: 'UEFA Europa League',
+            homeClub: hClub,
+            awayClub: aClub,
+            played: false,
+            result: null
+          });
+        }
+      }
+      uelDate.setDate(uelDate.getDate() + 14);
     }
   }
 
@@ -634,20 +663,20 @@ class CareerState {
       });
 
       const sortedUel = [...this.uelStandings].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
-      const top6 = sortedUel.slice(0, 6).map(s => this.clubs.find(c => c.id === s.clubId));
-      this.uelTree.top6Clubs = top6;
+      const top7 = sortedUel.slice(0, 7).map(s => this.clubs.find(c => c.id === s.clubId));
+      this.uelTree.top7Clubs = top7;
 
-      // 1st & 2nd Bye to SF; 3rd & 4th Bye to QF; 5th vs 6th in Playoff
+      // 1st & 2nd Bye to SF; 3rd, 4th & 5th Bye to QF; 6th vs 7th in Playoff
       this.uelTree.playoffs = [
-        { id: 'uel_po_gen_1', home: top6[4], away: top6[5], scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[4].id === this.myClubId || top6[5].id === this.myClubId }
+        { id: 'uel_po_gen_1', home: top7[5], away: top7[6], scoreHome: null, scoreAway: null, winner: null, isUserTie: top7[5].id === this.myClubId || top7[6].id === this.myClubId }
       ];
       this.uelTree.qf = [
-        { id: 'uel_qf_stub_1', home: top6[2], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
-        { id: 'uel_qf_stub_2', home: top6[3], away: top6[4], scoreHome: null, scoreAway: null, winner: null, isUserTie: false }
+        { id: 'uel_qf_stub_1', home: top7[2], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
+        { id: 'uel_qf_stub_2', home: top7[3], away: top7[4], scoreHome: null, scoreAway: null, winner: null, isUserTie: top7[3].id === this.myClubId || top7[4].id === this.myClubId }
       ];
       this.uelTree.sf = [
-        { id: 'uel_sf_stub_1', home: top6[0], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
-        { id: 'uel_sf_stub_2', home: top6[1], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false }
+        { id: 'uel_sf_stub_1', home: top7[0], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
+        { id: 'uel_sf_stub_2', home: top7[1], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false }
       ];
       this.uelTree.final = { id: 'uel_final_stub', home: { name: 'TBD' }, away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null };
 
@@ -661,11 +690,11 @@ class CareerState {
 
     // UEL Playoffs -> QF
     if (this.uelTree && this.uelTree.playoffs && this.uelTree.playoffs.every(m => m.winner) && (!this.uelTree.qf[0] || this.uelTree.qf[0].away.name === 'TBD')) {
-      const top6 = this.uelTree.top6Clubs || [];
+      const top7 = this.uelTree.top7Clubs || [];
       const poWinner = this.uelTree.playoffs[0].winner;
 
-      this.uelTree.qf[0] = { id: 'uel_qf_gen_1', home: top6[2], away: poWinner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[2].id === this.myClubId || poWinner.id === this.myClubId };
-      this.uelTree.qf[1] = { id: 'uel_qf_gen_2', home: top6[3], away: top6[4], scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[3].id === this.myClubId || top6[4].id === this.myClubId };
+      this.uelTree.qf[0] = { id: 'uel_qf_gen_1', home: top7[2], away: poWinner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top7[2].id === this.myClubId || poWinner.id === this.myClubId };
+      this.uelTree.qf[1] = { id: 'uel_qf_gen_2', home: top7[3], away: top7[4], scoreHome: null, scoreAway: null, winner: null, isUserTie: top7[3].id === this.myClubId || top7[4].id === this.myClubId };
 
       let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
       this.uelTree.qf.forEach(match => {
@@ -677,12 +706,12 @@ class CareerState {
 
     // UEL QF -> SF
     if (this.uelTree && this.uelTree.qf && this.uelTree.qf.every(m => m.winner) && (!this.uelTree.sf[0] || this.uelTree.sf[0].away.name === 'TBD')) {
-      const top6 = this.uelTree.top6Clubs || [];
+      const top7 = this.uelTree.top7Clubs || [];
       const qf1Winner = this.uelTree.qf[0].winner;
       const qf2Winner = this.uelTree.qf[1].winner;
 
-      this.uelTree.sf[0] = { id: 'uel_sf_gen_1', home: top6[0], away: qf1Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[0].id === this.myClubId || qf1Winner.id === this.myClubId };
-      this.uelTree.sf[1] = { id: 'uel_sf_gen_2', home: top6[1], away: qf2Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[1].id === this.myClubId || qf2Winner.id === this.myClubId };
+      this.uelTree.sf[0] = { id: 'uel_sf_gen_1', home: top7[0], away: qf1Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top7[0].id === this.myClubId || qf1Winner.id === this.myClubId };
+      this.uelTree.sf[1] = { id: 'uel_sf_gen_2', home: top7[1], away: qf2Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top7[1].id === this.myClubId || qf2Winner.id === this.myClubId };
 
       let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
       this.uelTree.sf.forEach(match => {

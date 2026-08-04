@@ -1319,10 +1319,10 @@ function renderCompetitionsHub() {
       if (idx < 2) {
         highlight = 'background: rgba(0, 255, 137, 0.12);';
         badgeText = '<span style="color:#00ff87; background:rgba(0,255,135,0.18); border:1px solid rgba(0,255,135,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">⭐ Bye to Semi-Finals</span>';
-      } else if (idx < 4) {
+      } else if (idx < 5) {
         highlight = 'background: rgba(0, 240, 255, 0.12);';
         badgeText = '<span style="color:#00e5ff; background:rgba(0,240,255,0.18); border:1px solid rgba(0,240,255,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">🔹 Bye to Quarter-Finals</span>';
-      } else if (idx < 6) {
+      } else if (idx < 7) {
         highlight = 'background: rgba(255, 190, 11, 0.12);';
         badgeText = '<span style="color:#ffbe0b; background:rgba(255,190,11,0.18); border:1px solid rgba(255,190,11,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">⚔️ Playoff Round</span>';
       } else {
@@ -1360,10 +1360,10 @@ function renderUclBracketHtml(uclTree, title = 'UEFA Champions League') {
   const po1 = uclTree?.playoffs?.[0] || { home: { name: '5th Place' }, away: { name: '8th Place' } };
   const po2 = uclTree?.playoffs?.[1] || { home: { name: '6th Place' }, away: { name: '7th Place' } };
   
-  const uelPo = uclTree?.playoffs?.[0] || { home: { name: '5th Place' }, away: { name: '6th Place' } };
+  const uelPo = uclTree?.playoffs?.[0] || { home: { name: '6th Place' }, away: { name: '7th Place' } };
 
   const qf1 = uclTree?.qf?.[0] || { home: { name: '3rd Place (Bye)' }, away: { name: isUel ? 'Playoff Winner' : 'Playoff 2 Winner' } };
-  const qf2 = uclTree?.qf?.[1] || { home: { name: '4th Place (Bye)' }, away: { name: isUel ? '5th Place' : 'Playoff 1 Winner' } };
+  const qf2 = uclTree?.qf?.[1] || { home: { name: '4th Place (Bye)' }, away: { name: isUel ? '5th Place (Bye)' : 'Playoff 1 Winner' } };
   
   const sf1 = uclTree?.sf?.[0] || { home: { name: '1st Place (Bye)' }, away: { name: 'QF1 Winner' } };
   const sf2 = uclTree?.sf?.[1] || { home: { name: '2nd Place (Bye)' }, away: { name: 'QF2 Winner' } };
