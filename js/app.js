@@ -1354,12 +1354,16 @@ function renderCompetitionsHub() {
   }
 }
 
-function renderUclBracketHtml(uclTree) {
+function renderUclBracketHtml(uclTree, title = 'UEFA Champions League') {
+  const isUel = title.includes('Europa');
+
   const po1 = uclTree?.playoffs?.[0] || { home: { name: '5th Place' }, away: { name: '8th Place' } };
   const po2 = uclTree?.playoffs?.[1] || { home: { name: '6th Place' }, away: { name: '7th Place' } };
   
-  const qf1 = uclTree?.qf?.[0] || { home: { name: '3rd Place (Bye)' }, away: { name: 'Playoff 2 Winner' } };
-  const qf2 = uclTree?.qf?.[1] || { home: { name: '4th Place (Bye)' }, away: { name: 'Playoff 1 Winner' } };
+  const uelPo = uclTree?.playoffs?.[0] || { home: { name: '5th Place' }, away: { name: '6th Place' } };
+
+  const qf1 = uclTree?.qf?.[0] || { home: { name: '3rd Place (Bye)' }, away: { name: isUel ? 'Playoff Winner' : 'Playoff 2 Winner' } };
+  const qf2 = uclTree?.qf?.[1] || { home: { name: '4th Place (Bye)' }, away: { name: isUel ? '5th Place' : 'Playoff 1 Winner' } };
   
   const sf1 = uclTree?.sf?.[0] || { home: { name: '1st Place (Bye)' }, away: { name: 'QF1 Winner' } };
   const sf2 = uclTree?.sf?.[1] || { home: { name: '2nd Place (Bye)' }, away: { name: 'QF2 Winner' } };
@@ -1376,12 +1380,12 @@ function renderUclBracketHtml(uclTree) {
       <div class="bracket-card ${isUser ? 'is-user' : ''}">
         ${label ? `<div style="font-size:0.65rem; color:var(--accent-cyan); font-weight:800; text-transform:uppercase; margin-bottom:0.25rem;">${label}</div>` : ''}
         <div class="bracket-card-team ${m.winner && m.winner.id === m.home?.id ? 'winner' : ''}">
-          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">${hName}</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:130px;">${hName}</span>
           ${m.scoreHome !== null && m.scoreHome !== undefined ? `<span class="bracket-score">${m.scoreHome}</span>` : ''}
         </div>
         <div style="border-top:1px solid rgba(255,255,255,0.08); margin:0.15rem 0;"></div>
         <div class="bracket-card-team ${m.winner && m.winner.id === m.away?.id ? 'winner' : ''}">
-          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">${aName}</span>
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:130px;">${aName}</span>
           ${m.scoreAway !== null && m.scoreAway !== undefined ? `<span class="bracket-score">${m.scoreAway}</span>` : ''}
         </div>
       </div>
@@ -1389,32 +1393,42 @@ function renderUclBracketHtml(uclTree) {
   };
 
   return `
-    <div class="bracket-tree-wrapper" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; align-items: center; justify-items: center; padding: 1rem 0;">
-      <!-- Column 1: Playoff Round -->
-      <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; width:100%;">
-        <div style="font-size:0.75rem; text-align:center; color:var(--accent-gold); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">⚔️ PLAYOFF ROUND</div>
-        ${renderCard(po1, 'Playoff 1 (5th vs 8th)')}
-        ${renderCard(po2, 'Playoff 2 (6th vs 7th)')}
-      </div>
+    <div style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 0.5rem 0; box-sizing: border-box;">
+      <div class="bracket-tree-wrapper" style="display: flex; gap: 1.5rem; min-width: 840px; width: max-content; align-items: center; justify-content: space-between; padding: 1rem; margin: 0 auto; box-sizing: border-box;">
+        ${!isUel ? `
+          <!-- Column 1: Playoff Round (UCL) -->
+          <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; min-width: 175px;">
+            <div style="font-size:0.75rem; text-align:center; color:var(--accent-gold); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">⚔️ PLAYOFF ROUND</div>
+            ${renderCard(po1, 'Playoff 1 (5th vs 8th)')}
+            ${renderCard(po2, 'Playoff 2 (6th vs 7th)')}
+          </div>
+        ` : `
+          <!-- Column 1: Playoff Round (UEL 5th vs 6th) -->
+          <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; min-width: 175px;">
+            <div style="font-size:0.75rem; text-align:center; color:var(--accent-gold); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">⚔️ PLAYOFF ROUND</div>
+            ${renderCard(uelPo, 'Playoff (5th vs 6th)')}
+          </div>
+        `}
 
-      <!-- Column 2: Quarter-Finals -->
-      <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; width:100%;">
-        <div style="font-size:0.75rem; text-align:center; color:var(--accent-cyan); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">🔹 QUARTER-FINALS</div>
-        ${renderCard(qf1, 'QF 1 (3rd Bye)')}
-        ${renderCard(qf2, 'QF 2 (4th Bye)')}
-      </div>
+        <!-- Column 2: Quarter-Finals -->
+        <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; min-width: 175px;">
+          <div style="font-size:0.75rem; text-align:center; color:var(--accent-cyan); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">🔹 QUARTER-FINALS</div>
+          ${renderCard(qf1, 'QF 1 (3rd Bye)')}
+          ${renderCard(qf2, 'QF 2 (4th Bye)')}
+        </div>
 
-      <!-- Column 3: Semi-Finals -->
-      <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; width:100%;">
-        <div style="font-size:0.75rem; text-align:center; color:var(--accent-lime); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">⭐ SEMI-FINALS</div>
-        ${renderCard(sf1, 'SF 1 (1st Bye)')}
-        ${renderCard(sf2, 'SF 2 (2nd Bye)')}
-      </div>
+        <!-- Column 3: Semi-Finals -->
+        <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; min-width: 175px;">
+          <div style="font-size:0.75rem; text-align:center; color:var(--accent-lime); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">⭐ SEMI-FINALS</div>
+          ${renderCard(sf1, 'SF 1 (1st Bye)')}
+          ${renderCard(sf2, 'SF 2 (2nd Bye)')}
+        </div>
 
-      <!-- Column 4: Final -->
-      <div class="bracket-column" style="display:flex; flex-direction:column; align-items:center; width:100%;">
-        <div style="font-size:0.75rem; text-align:center; color:var(--accent-gold); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">🏆 UCL FINAL</div>
-        ${renderCard(final, 'Championship')}
+        <!-- Column 4: Final -->
+        <div class="bracket-column" style="display:flex; flex-direction:column; align-items:center; min-width: 175px;">
+          <div style="font-size:0.75rem; text-align:center; color:var(--accent-gold); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">🏆 ${isUel ? 'UEL FINAL' : 'UCL FINAL'}</div>
+          ${renderCard(final, 'Championship')}
+        </div>
       </div>
     </div>
   `;

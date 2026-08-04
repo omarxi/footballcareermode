@@ -120,47 +120,63 @@ class CareerState {
     let uclClubIds = customUCLClubIds;
     let uelClubIds = [];
 
-    const userLeague = this.myClub ? this.myClub.league : 'La Liga';
-    const allLeagues = ['La Liga', 'Premier League', 'Serie A', 'Bundesliga', 'Ligue 1'];
+    // Authentic Fixed 13 UCL Clubs for Season 1:
+    const defaultUCLIds = [
+      'real_madrid', 'barcelona',           // La Liga 1st & 2nd
+      'man_city', 'arsenal',                 // Premier League 1st & 2nd
+      'inter_milan', 'juventus',             // Serie A 1st & 2nd
+      'bayern_munich', 'bayer_leverkusen',   // Bundesliga 1st & 2nd
+      'psg', 'monaco',                       // Ligue 1 1st & 2nd
+      'atletico_madrid', 'chelsea', 'liverpool' // 3 European wildcards
+    ];
+
+    // Authentic Fixed 10 UEL Clubs for Season 1:
+    const defaultUELIds = [
+      'athletic_bilbao', 'real_sociedad',    // La Liga 3rd & 4th
+      'man_united', 'tottenham',             // Premier League 3rd & 4th
+      'ac_milan', 'napoli',                  // Serie A 3rd & 4th
+      'dortmund', 'rb_leipzig',              // Bundesliga 3rd & 4th
+      'lille', 'marseille'                   // Ligue 1 3rd & 4th
+    ];
 
     if (!uclClubIds || !uclClubIds.length) {
-      uclClubIds = [];
+      if (this.seasonNumber && this.seasonNumber > 1 && this.standings && this.standings.length) {
+        // Subsequent Seasons: Dynamic qualification based on previous season league standings
+        uclClubIds = [];
+        const userLeague = this.myClub ? this.myClub.league : 'La Liga';
+        const allLeagues = ['La Liga', 'Premier League', 'Serie A', 'Bundesliga', 'Ligue 1'];
 
-      allLeagues.forEach(leagueName => {
-        const leagueClubs = this.clubs.filter(c => c.league === leagueName);
-        if (leagueName === userLeague && this.standings && this.standings.length) {
-          const sorted = [...this.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
-          if (sorted.length >= 2) uclClubIds.push(sorted[0].clubId, sorted[1].clubId);
-          if (sorted.length >= 4) uelClubIds.push(sorted[2].clubId, sorted[3].clubId);
-        } else {
-          const sortedForeign = [...leagueClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
-          if (sortedForeign.length >= 2) uclClubIds.push(sortedForeign[0].id, sortedForeign[1].id);
-          if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
+        allLeagues.forEach(leagueName => {
+          const leagueClubs = this.clubs.filter(c => c.league === leagueName);
+          if (leagueName === userLeague) {
+            const sorted = [...this.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
+            if (sorted.length >= 2) uclClubIds.push(sorted[0].clubId, sorted[1].clubId);
+            if (sorted.length >= 4) uelClubIds.push(sorted[2].clubId, sorted[3].clubId);
+          } else {
+            const sortedForeign = [...leagueClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
+            if (sortedForeign.length >= 2) uclClubIds.push(sortedForeign[0].id, sortedForeign[1].id);
+            if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
+          }
+        });
+
+        const remainingClubs = this.clubs.filter(c => !uclClubIds.includes(c.id)).sort((a, b) => (b.rating || 80) - (a.rating || 80));
+        while (uclClubIds.length < 13 && remainingClubs.length > 0) {
+          uclClubIds.push(remainingClubs.shift().id);
         }
-      });
+        uclClubIds = uclClubIds.slice(0, 13);
 
-      if (!uclClubIds.includes(this.myClubId) && !uelClubIds.includes(this.myClubId)) {
-        uclClubIds.push(this.myClubId);
+        uelClubIds = uelClubIds.filter(id => !uclClubIds.includes(id)).slice(0, 10);
+        const uelRemaining = this.clubs.filter(c => !uclClubIds.includes(c.id) && !uelClubIds.includes(c.id)).sort((a, b) => (b.rating || 80) - (a.rating || 80));
+        while (uelClubIds.length < 10 && uelRemaining.length > 0) {
+          uelClubIds.push(uelRemaining.shift().id);
+        }
+      } else {
+        // Season 1: Strict Authentic Fixed Lists!
+        uclClubIds = [...defaultUCLIds];
+        uelClubIds = [...defaultUELIds];
       }
-
-      const remainingClubs = this.clubs.filter(c => !uclClubIds.includes(c.id)).sort((a, b) => (b.rating || 80) - (a.rating || 80));
-      while (uclClubIds.length < 13 && remainingClubs.length > 0) {
-        uclClubIds.push(remainingClubs.shift().id);
-      }
-      uclClubIds = uclClubIds.slice(0, 13);
     } else {
-      allLeagues.forEach(leagueName => {
-        const leagueClubs = this.clubs.filter(c => c.league === leagueName);
-        const sortedForeign = [...leagueClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
-        if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
-      });
-    }
-
-    // Ensure 10 UEL teams (3rd & 4th of each league)
-    uelClubIds = uelClubIds.filter(id => !uclClubIds.includes(id)).slice(0, 10);
-    const uelRemaining = this.clubs.filter(c => !uclClubIds.includes(c.id) && !uelClubIds.includes(c.id)).sort((a, b) => (b.rating || 80) - (a.rating || 80));
-    while (uelClubIds.length < 10 && uelRemaining.length > 0) {
-      uelClubIds.push(uelRemaining.shift().id);
+      uelClubIds = [...defaultUELIds];
     }
 
     // 1. UCL Setup (13 teams, 8 matchdays)
