@@ -1017,11 +1017,18 @@
   <!-- MODAL 5: TEAM SELECTION ONBOARDING -->
   <div class="modal-backdrop active" id="teamSelectModal">
     <div class="modal-card" style="max-width: 1100px; padding: 2rem; position: relative;">
-      <button class="modal-close-btn" id="teamSelectModalClose">&times;</button>
       <div style="text-align: center; margin-bottom: 1.5rem;">
         <div class="logo-badge" style="display: inline-block; font-size: 2rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, var(--accent-lime), var(--accent-cyan));">FC 27 MANAGER CAREER</div>
         <h2 style="font-size: 1.8rem; font-weight: 800; color: #fff;">Select Your Club to Begin</h2>
         <p style="color: var(--text-muted); font-size: 0.92rem; margin-top: 0.3rem;">Choose a heavy-weight club from Europe's top 5 leagues to take command.</p>
+      </div>
+
+      <!-- Manager Name Input Bar -->
+      <div style="max-width: 550px; margin: 0 auto 1.5rem auto; background: #12141c; padding: 1.2rem 1.5rem; border-radius: 12px; border: 1px solid rgba(0, 255, 137, 0.4); text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+        <label for="managerNameInput" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent-lime); font-weight: 800; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <i class="fa-solid fa-user-tie" style="color: var(--accent-lime); font-size: 1rem;"></i> Manager Name
+        </label>
+        <input type="text" id="managerNameInput" value="Carlo Ancelotti" placeholder="Enter your Manager Name (e.g. Pep Guardiola, Xavi...)" style="width: 100%; background: #1a1d29; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.75rem 1rem; border-radius: 8px; font-size: 1rem; font-weight: 700; outline: none; box-sizing: border-box;">
       </div>
 
       <!-- League Selector Filter Tabs -->

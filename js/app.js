@@ -258,6 +258,11 @@ function renderTeamSelectGrid(leagueFilter = 'ALL') {
       const clubId = card.dataset.clubId;
       if (!clubId) return;
 
+      const nameInput = document.getElementById('managerNameInput');
+      if (nameInput && nameInput.value.trim()) {
+        state.managerName = nameInput.value.trim();
+      }
+
       state.selectUserClub(clubId);
       state.playSound?.('click');
 
