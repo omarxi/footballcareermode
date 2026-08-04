@@ -1,0 +1,116 @@
+import re
+import json
+
+# Flag mapping dictionary
+FLAG_MAP = {
+    "Spain": "🇪🇸",
+    "France": "🇫🇷",
+    "Brazil": "🇧🇷",
+    "Argentina": "🇦🇷",
+    "Germany": "🇩🇪",
+    "Italy": "🇮🇹",
+    "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "Netherlands": "🇳🇱",
+    "Portugal": "🇵🇹",
+    "Croatia": "🇭🇷",
+    "Japan": "🇯🇵",
+    "Belgium": "🇧🇪",
+    "Uruguay": "🇺🇾",
+    "Norway": "🇳🇴",
+    "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "Ukraine": "🇺🇦",
+    "Poland": "🇵🇱",
+    "Ghana": "🇬🇭",
+    "Colombia": "🇨🇴",
+    "Senegal": "🇸🇳",
+    "Cameroon": "🇨🇲",
+    "Ivory Coast": "🇨🇮",
+    "Denmark": "🇩🇰",
+    "Sweden": "🇸🇪",
+    "United States": "🇺🇸",
+    "Turkey": "🇹🇷",
+    "Morocco": "🇲🇦",
+    "Nigeria": "🇳🇬",
+    "Ecuador": "🇪🇨",
+    "Algeria": "🇩🇿",
+    "Austria": "🇦🇹",
+    "Switzerland": "🇨🇭",
+    "South Korea": "🇰🇷",
+    "Canada": "🇨🇦",
+    "Mexico": "🇲🇽",
+    "Paraguay": "🇵🇾",
+    "Czech Republic": "🇨🇿",
+    "Slovakia": "🇸🇰",
+    "Hungary": "🇭🇺",
+    "Romania": "🇷🇴",
+    "Serbia": "🇷🇸",
+    "Greece": "🇬🇷",
+    "Wales": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+    "Republic of Ireland": "🇮🇪",
+    "Northern Ireland": "🇬🇧",
+    "Jamaica": "🇯🇲",
+    "Australia": "🇦🇺",
+    "Egypt": "🇪🇬",
+    "Mali": "🇲🇱",
+    "Georgia": "🇬🇪",
+    "Venezuela": "🇻🇪",
+    "Albania": "🇦🇱",
+    "Finland": "🇫🇮",
+    "Slovenia": "🇸🇮",
+    "Bosnia and Herzegovina": "🇧🇦",
+    "DR Congo": "🇨🇩",
+    "Burkina Faso": "🇧🇫",
+    "Gambia": "🇬🇲",
+    "Kosovo": "🇽🇰",
+    "Montenegro": "🇲🇪",
+    "Iraq": "🇮🇶",
+    "Zambia": "🇿🇲",
+    "Chile": "🇨🇱",
+    "New Zealand": "🇳🇿",
+    "Togo": "🇹🇬",
+    "Mozambique": "🇲🇿",
+    "Cape Verde": "🇨🇻",
+    "Suriname": "🇸🇷",
+    "North Macedonia": "🇲🇰",
+    "Peru": "🇵🇪",
+    "Equatorial Guinea": "🇬🇶",
+    "Estonia": "🇪🇪",
+    "Armenia": "🇦🇲",
+    "Israel": "🇮🇱",
+    "Tunisia": "🇹🇳",
+    "Benin": "🇧🇯",
+    "Luxembourg": "🇱🇺",
+    "Iran": "🇮🇷",
+    "Central African Republic": "🇨🇫",
+    "Uzbekistan": "🇺🇿",
+    "Saudi Arabia": "🇸🇦",
+    "Indonesia": "🇮🇩",
+    "French Guiana": "🇬🇫",
+    "Republic of the Congo": "🇨🇬",
+    "Congo": "🇨🇬",
+    "Haiti": "🇭🇹",
+    "Madagascar": "🇲🇬",
+    "Zimbabwe": "🇿🇼",
+    "Angola": "🇦🇴",
+    "Guinea-Bissau": "🇬🇼",
+    "Guinea": "🇬🇳",
+    "Panama": "🇵🇦",
+    "Burundi": "🇧🇮",
+    "Guadeloupe": "🇬🇵",
+    "Costa Rica": "🇨🇷"
+}
+
+def parse_val(val_str):
+    val_str = val_str.replace("€", "").replace(" ", "").upper()
+    if "M" in val_str:
+        num = float(val_str.replace("M", ""))
+        return int(num * 1000000)
+    elif "K" in val_str:
+        num = float(val_str.replace("K", ""))
+        return int(num * 1000)
+    try:
+        return int(float(val_str))
+    except:
+        return 5000000
+
+print("Helper loaded.")

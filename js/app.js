@@ -60,7 +60,6 @@ function bootApp() {
   renderYouthAcademy();
   renderOffice();
   renderStandingsTable();
-  renderUCLHub();
   renderCompetitionsHub();
 }
 
@@ -71,6 +70,24 @@ if (document.readyState === 'loading') {
 }
 
 function initUI() {
+  // Competitions Sub-Tab Switcher
+  document.querySelectorAll('.comp-subtab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.comp-subtab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.comp-subtab-pane').forEach(p => p.style.display = 'none');
+      btn.classList.add('active');
+      const targetPane = document.getElementById(`subtab-${btn.dataset.subtab}`);
+      if (targetPane) targetPane.style.display = 'block';
+    });
+  });
+  // Quick Navigation Shortcuts
+  document.querySelectorAll('.nav-shortcut-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetTab = btn.dataset.tabTarget;
+      const tabBtn = document.querySelector(`.tab-btn[data-tab="${targetTab}"]`);
+      if (tabBtn) tabBtn.click();
+    });
+  });
   // Navigation Tabs
   document.querySelectorAll('.tab-btn').forEach(btn => {
     if (btn.classList.contains('league-filter-btn') || btn.classList.contains('comp-switch-btn')) return;
@@ -83,9 +100,12 @@ function initUI() {
       const targetPane = document.getElementById(`tab-${btn.dataset.tab}`);
       if (targetPane) targetPane.classList.add('active');
 
-      if (btn.dataset.tab === 'ucl') {
-        renderUCLHub();
-      }
+      if (btn.dataset.tab === 'central') renderDashboard();
+      if (btn.dataset.tab === 'squad') renderSquadHub();
+      if (btn.dataset.tab === 'ucl') renderCompetitionsHub();
+      if (btn.dataset.tab === 'stats') renderGoldenBootStats();
+      if (btn.dataset.tab === 'transfers') renderTransfers();
+      if (btn.dataset.tab === 'youth') renderYouthAcademy();
     });
   });
 
@@ -107,7 +127,7 @@ function initUI() {
 
     updateHeaderStats();
     renderDashboard();
-    renderUCLHub();
+    renderCompetitionsHub();
     renderYouthAcademy();
   });
 
@@ -178,7 +198,6 @@ function initUI() {
     renderTransfers();
     renderYouthAcademy();
     renderStandingsTable();
-    renderUCLHub();
     renderCompetitionsHub();
     state.playSound?.('goal');
   });
@@ -238,11 +257,6 @@ function renderTeamSelectGrid(leagueFilter = 'ALL') {
       const clubId = card.dataset.clubId;
       if (!clubId) return;
 
-      const nameInput = document.getElementById('managerNameInput');
-      if (nameInput && nameInput.value.trim()) {
-        state.managerName = nameInput.value.trim();
-      }
-
       state.selectUserClub(clubId);
       state.playSound?.('click');
 
@@ -253,15 +267,10 @@ function renderTeamSelectGrid(leagueFilter = 'ALL') {
       }
 
       updateHeaderStats();
-      if (typeof youthEngine !== 'undefined') {
-        youthEngine.initYouthLeague();
-      }
       renderDashboard();
       renderSquadHub();
       renderTransfers();
-      renderYouthAcademy();
       renderStandingsTable();
-      renderUCLHub();
       renderCompetitionsHub();
     };
 
@@ -407,7 +416,7 @@ function renderSquadHub() {
                 ? `<span style="background:rgba(255,207,37,0.15); color:var(--accent-gold); padding:2px 6px; border-radius:4px; font-size:0.68rem; font-weight:800; border:1px solid rgba(255,207,37,0.3); margin-left:4px;"><i class="fa-solid fa-arrow-right-arrow-left"></i> ON LOAN AT ${player.loanClub || 'RIVAL'}</span>` 
                 : ''}
             </div>
-            <div class="player-row-pos-age"><strong style="color:var(--accent-lime);">${player.pos}</strong> • Age ${player.age} • ${player.nation} • Val: €${(player.val/1000000).toFixed(1)}M • <span style="color:var(--accent-gold); font-weight:800;"><i class="fa-solid fa-futbol"></i> ${player.goals || 0} G</span> • <span style="color:var(--accent-cyan); font-weight:700;"><i class="fa-solid fa-shirt"></i> ${player.apps || 0} Apps</span></div>
+            <div class="player-row-pos-age"><strong style="color:var(--accent-lime);">${player.pos}</strong> • Age ${player.age} • ${player.nation} • <span style="color:var(--accent-gold); font-weight:800;">⚽ ${player.goals || 0} G</span> • <span style="color:var(--accent-cyan); font-weight:800;">🏃 ${player.apps || 0} Apps</span> • Val: €${(player.val/1000000).toFixed(1)}M</div>
           </div>
         </div>
         <div style="display: flex; gap: 0.35rem; align-items: center;">
@@ -950,7 +959,7 @@ function renderYouthAcademy() {
   const badgeEl = document.getElementById('youthRosterCountBadge');
   if (badgeEl) badgeEl.textContent = `${youthEngine.academy.length} Prospects`;
 
-  // Render Prospects Roster with Management Controls (Promote, Train, Release)
+  // Render Prospects Roster
   const renderAcademy = () => {
     container.innerHTML = youthEngine.academy.map(p => {
       const growthBadge = p.growthThisSeason > 0
@@ -958,22 +967,15 @@ function renderYouthAcademy() {
         : '';
 
       return `
-        <div class="player-row-item" style="padding: 0.6rem 0.8rem;">
+        <div class="player-row-item">
           <div class="player-row-left">
-            <div class="player-ovr-pill" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); font-weight: 900;">${p.ovr}</div>
+            <div class="player-ovr-pill" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan);">${p.ovr}</div>
             <div class="player-row-meta">
-              <div class="player-row-name" style="font-weight: 800; font-size: 0.92rem;">${p.name} (${p.pos}) ${p.nation} ${growthBadge}</div>
-              <div class="player-row-pos-age" style="font-size: 0.78rem;">Age ${p.age} • Potential: <strong style="color: var(--accent-lime);">${p.pot} POT</strong> • Val €${(p.val / 1000000).toFixed(1)}M</div>
+              <div class="player-row-name">${p.name} (${p.pos}) ${p.nation} ${growthBadge}</div>
+              <div class="player-row-pos-age">Age ${p.age} • Potential: <strong style="color: var(--accent-lime);">${p.pot} POT</strong> • Val €${(p.val / 1000000).toFixed(1)}M</div>
             </div>
           </div>
-          <div style="display: flex; gap: 0.35rem; align-items: center;">
-            <button class="btn-primary btn-promote" data-youth-id="${p.id}" style="font-size: 0.72rem; padding: 0.3rem 0.6rem;">
-              <i class="fa-solid fa-user-plus"></i> Promote
-            </button>
-            <button class="btn-secondary btn-release-youth" data-youth-id="${p.id}" title="Release Prospect" style="font-size: 0.72rem; padding: 0.3rem 0.5rem; background: rgba(255, 50, 80, 0.15); color: #ff4d6d; border: 1px solid rgba(255, 50, 80, 0.3);">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </div>
+          <button class="btn-primary btn-promote" data-youth-id="${p.id}" style="font-size: 0.75rem; padding: 0.35rem 0.7rem;">Promote to Squad</button>
         </div>
       `;
     }).join('');
@@ -984,24 +986,6 @@ function renderYouthAcademy() {
         renderYouthAcademy();
         renderSquadHub();
         updateHeaderStats();
-      });
-    });
-
-    container.querySelectorAll('.btn-train-youth').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const ok = youthEngine.trainProspect(btn.dataset.youthId);
-        if (ok) {
-          renderYouthAcademy();
-        }
-      });
-    });
-
-    container.querySelectorAll('.btn-release-youth').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (confirm('Release this prospect from the Youth Academy?')) {
-          youthEngine.releaseProspect(btn.dataset.youthId);
-          renderYouthAcademy();
-        }
       });
     });
   };
@@ -1108,37 +1092,6 @@ function renderOffice() {
       modal.classList.add('active');
     };
   }
-
-  // Render Trophy Room Cabinet
-  const trophyGrid = document.getElementById('trophyCabinetGrid');
-  const countBadge = document.getElementById('trophyTotalCount');
-
-  if (trophyGrid) {
-    if (countBadge) {
-      countBadge.textContent = `${state.trophies.length} Silverware`;
-    }
-
-    if (state.trophies.length === 0) {
-      trophyGrid.innerHTML = `
-        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,215,0,0.2);">
-          <i class="fa-solid fa-trophy" style="font-size: 2.5rem; color: rgba(255,215,0,0.3); margin-bottom: 0.8rem; display: block;"></i>
-          <div>No trophies won yet this career!</div>
-          <div style="font-size: 0.8rem; margin-top: 0.3rem;">Win your Domestic League, UEFA Champions League, or Youth League to fill your Cabinet.</div>
-        </div>
-      `;
-    } else {
-      trophyGrid.innerHTML = state.trophies.map(tr => `
-        <div style="background: radial-gradient(circle at top, rgba(255,215,0,0.12) 0%, rgba(10,18,30,0.9) 100%); border: 1px solid rgba(255,215,0,0.4); border-radius: 12px; padding: 1.2rem; text-align: center; box-shadow: 0 0 20px rgba(255,215,0,0.1);">
-          <div style="font-size: 2.4rem; color: ${tr.badgeColor || '#ffd700'}; margin-bottom: 0.5rem; text-shadow: 0 0 15px ${tr.badgeColor || '#ffd700'};">
-            <i class="fa-solid ${tr.icon || 'fa-trophy'}"></i>
-          </div>
-          <div style="font-weight: 900; font-size: 1rem; color: #fff;">${tr.name}</div>
-          <div style="font-size: 0.78rem; color: var(--accent-lime); font-weight: 700; margin-top: 0.25rem;">Season ${tr.season}</div>
-          <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem;">${tr.club}</div>
-        </div>
-      `).join('');
-    }
-  }
 }
 
 function renderStandingsTable() {
@@ -1184,17 +1137,102 @@ function renderStandingsTable() {
   }).join('');
 }
 
-function renderUCLHub() {
-  const uclTableContainer = document.getElementById('uclStandingsTableBody');
-  if (uclTableContainer) {
-    uclTableContainer.innerHTML = state.uclStandings.map((row, idx) => {
+
+function renderSymmetricBracketHtml(r16List, qfList, sfList, finalMatch, cupName) {
+  // Left side: r16 [0..3], qf [0..1], sf [0]
+  // Right side: r16 [4..7], qf [2..3], sf [1]
+  const leftR16 = r16List.slice(0, 4);
+  const rightR16 = r16List.slice(4, 8);
+  const leftQF = qfList.slice(0, 2);
+  const rightQF = qfList.slice(2, 4);
+  const leftSF = sfList[0] || { home: { name: 'TBD' }, away: { name: 'TBD' } };
+  const rightSF = sfList[1] || { home: { name: 'TBD' }, away: { name: 'TBD' } };
+
+  const renderCard = (m) => {
+    if (m === null) return `<div class="bracket-card" style="visibility:hidden;pointer-events:none;border:none;"></div>`;
+    if (!m || !m.home || m.home.name === 'TBD') return `<div class="bracket-card"><div class="bracket-card-team">TBD</div><div style="border-top:1px solid rgba(255,255,255,0.08); margin:0.1rem 0;"></div><div class="bracket-card-team">TBD</div></div>`;
+    
+    const homeName = m.home ? (m.home.name || m.home.shortName || 'TBD') : 'TBD';
+    const awayName = m.away ? (m.away.name || m.away.shortName || 'TBD') : 'TBD';
+    const isUser = m.isUserTie || (m.home && m.home.id === state.myClubId) || (m.away && m.away.id === state.myClubId);
+    
+    return `
+      <div class="bracket-card ${isUser ? 'is-user' : ''}">
+        <div class="bracket-card-team ${m.winner && m.winner.id === m.home?.id ? 'winner' : ''}">
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${homeName}</span>
+          ${m.scoreHome !== null ? `<span class="bracket-score">${m.scoreHome}</span>` : ''}
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.08); margin:0.1rem 0;"></div>
+        <div class="bracket-card-team ${m.winner && m.winner.id === m.away?.id ? 'winner' : ''}">
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;">${awayName}</span>
+          ${m.scoreAway !== null ? `<span class="bracket-score">${m.scoreAway}</span>` : ''}
+        </div>
+      </div>
+    `;
+  };
+
+  return `
+    <div class="bracket-tree-wrapper">
+      <!-- Left Column 1: Round of 16 (4 Ties) -->
+      <div class="bracket-column">
+        ${leftR16.map(renderCard).join('')}
+      </div>
+
+      <!-- Left Column 2: Quarter-Finals (2 Ties) -->
+      <div class="bracket-column">
+        ${leftQF.map(renderCard).join('')}
+      </div>
+
+      <!-- Left Column 3: Semi-Finals (1 Tie) -->
+      <div class="bracket-column">
+        ${renderCard(leftSF)}
+      </div>
+
+      <!-- Center Box: Trophy & Final -->
+      <div class="bracket-center-trophy">
+        <div class="trophy-icon">🏆</div>
+        <div style="font-size:0.8rem; font-weight:900; color:var(--accent-gold); text-transform:uppercase; letter-spacing:1px;">${cupName}</div>
+        <div style="margin-top:0.6rem;">
+          ${renderCard(finalMatch || { home: { name: 'TBD' }, away: { name: 'TBD' } })}
+        </div>
+      </div>
+
+      <!-- Right Column 3: Semi-Finals (1 Tie) -->
+      <div class="bracket-column">
+        ${renderCard(rightSF)}
+      </div>
+
+      <!-- Right Column 2: Quarter-Finals (2 Ties) -->
+      <div class="bracket-column">
+        ${rightQF.map(renderCard).join('')}
+      </div>
+
+      <!-- Right Column 1: Round of 16 (4 Ties) -->
+      <div class="bracket-column">
+        ${rightR16.map(renderCard).join('')}
+      </div>
+    </div>
+  `;
+}
+
+
+function renderCompetitionsHub() {
+  // 1. Domestic League Table
+  const fullLeagueTitle = document.getElementById('fullLeagueTitle');
+  if (fullLeagueTitle && state.myClub) {
+    fullLeagueTitle.innerHTML = `<i class="fa-solid fa-list-ol"></i> ${state.myClub.league} Table`;
+  }
+  const fullLeagueBody = document.getElementById('fullLeagueTableBody');
+  if (fullLeagueBody && state.standings) {
+    fullLeagueBody.innerHTML = state.standings.map((row, idx) => {
       const club = state.clubs.find(c => c.id === row.clubId) || row;
+      const qualBadge = idx < 2 ? '<span style="font-size:0.68rem; background:rgba(0,240,255,0.15); color:var(--accent-cyan); padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:800;">UCL</span>' : (idx < 4 ? '<span style="font-size:0.68rem; background:rgba(255,159,67,0.15); color:#ff9f43; padding:2px 6px; border-radius:4px; margin-left:6px; font-weight:800;">UEL</span>' : '');
       return `
         <tr class="${row.clubId === state.myClubId ? 'my-club' : ''}">
           <td><strong>${idx + 1}</strong></td>
           <td style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;">
             ${renderCrestHtml(row.crest, club, 'width:24px;height:24px;')}
-            <span style="font-weight:700;">${row.name}</span>
+            <span style="font-weight:700;">${row.name} ${qualBadge}</span>
           </td>
           <td>${row.played}</td>
           <td>${row.won}</td>
@@ -1207,16 +1245,51 @@ function renderUCLHub() {
     }).join('');
   }
 
-  const uelTableContainer = document.getElementById('uelStandingsTableBody');
-  if (uelTableContainer) {
-    uelTableContainer.innerHTML = (state.uelStandings || []).map((row, idx) => {
+  // 2. Domestic Cup Bracket
+  const domesticHeader = document.getElementById('domesticCupTabTitle');
+  if (domesticHeader) {
+    domesticHeader.innerHTML = `<i class="fa-solid fa-trophy" style="color:var(--accent-gold);"></i> ${state.domesticCupTitle || 'Domestic Cup'} Tournament Tree`;
+  }
+  const cupWrapper = document.getElementById('domesticCupTabBracketWrapper');
+  if (cupWrapper && state.cupTree) {
+    cupWrapper.innerHTML = renderSymmetricBracketHtml(
+      state.cupTree.r16 || [],
+      state.cupTree.qf || [],
+      state.cupTree.sf || [],
+      state.cupTree.final,
+      state.domesticCupTitle || 'DOMESTIC CUP'
+    );
+  }
+
+  // 3. UCL Standings & Bracket
+  const uclTableContainer = document.getElementById('uclStandingsTableBody');
+  if (uclTableContainer && state.uclStandings) {
+    uclTableContainer.innerHTML = state.uclStandings.map((row, idx) => {
       const club = state.clubs.find(c => c.id === row.clubId) || row;
+      
+      let badgeText = '';
+      let highlight = '';
+
+      if (idx < 2) {
+        highlight = 'background: rgba(0, 255, 137, 0.12);';
+        badgeText = '<span style="color:#00ff87; background:rgba(0,255,135,0.18); border:1px solid rgba(0,255,135,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">⭐ Bye to Semi-Finals</span>';
+      } else if (idx < 4) {
+        highlight = 'background: rgba(0, 240, 255, 0.12);';
+        badgeText = '<span style="color:#00e5ff; background:rgba(0,240,255,0.18); border:1px solid rgba(0,240,255,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">🔹 Bye to Quarter-Finals</span>';
+      } else if (idx < 8) {
+        highlight = 'background: rgba(255, 190, 11, 0.12);';
+        badgeText = '<span style="color:#ffbe0b; background:rgba(255,190,11,0.18); border:1px solid rgba(255,190,11,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">⚔️ Playoff Round</span>';
+      } else {
+        badgeText = '<span style="color:var(--text-muted); font-size:0.68rem; margin-left:0.5rem;">Eliminated</span>';
+      }
+
       return `
-        <tr class="${row.clubId === state.myClubId ? 'my-club' : ''}">
+        <tr class="${row.clubId === state.myClubId ? 'my-club' : ''}" style="${highlight}">
           <td><strong>${idx + 1}</strong></td>
           <td style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;">
             ${renderCrestHtml(row.crest, club, 'width:24px;height:24px;')}
             <span style="font-weight:700;">${row.name}</span>
+            ${badgeText}
           </td>
           <td>${row.played}</td>
           <td>${row.won}</td>
@@ -1228,6 +1301,77 @@ function renderUCLHub() {
       `;
     }).join('');
   }
+
+  const uclWrapper = document.getElementById('uclBracketWrapper');
+  if (uclWrapper && state.uclTree) {
+    uclWrapper.innerHTML = renderUclBracketHtml(state.uclTree);
+  }
+}
+
+function renderUclBracketHtml(uclTree) {
+  const po1 = uclTree?.playoffs?.[0] || { home: { name: '5th Place' }, away: { name: '8th Place' } };
+  const po2 = uclTree?.playoffs?.[1] || { home: { name: '6th Place' }, away: { name: '7th Place' } };
+  
+  const qf1 = uclTree?.qf?.[0] || { home: { name: '3rd Place (Bye)' }, away: { name: 'Playoff 2 Winner' } };
+  const qf2 = uclTree?.qf?.[1] || { home: { name: '4th Place (Bye)' }, away: { name: 'Playoff 1 Winner' } };
+  
+  const sf1 = uclTree?.sf?.[0] || { home: { name: '1st Place (Bye)' }, away: { name: 'QF1 Winner' } };
+  const sf2 = uclTree?.sf?.[1] || { home: { name: '2nd Place (Bye)' }, away: { name: 'QF2 Winner' } };
+  
+  const final = uclTree?.final || { home: { name: 'SF1 Winner' }, away: { name: 'SF2 Winner' } };
+
+  const renderCard = (m, label) => {
+    if (!m) return '';
+    const hName = m.home ? (m.home.name || m.home.shortName || 'TBD') : 'TBD';
+    const aName = m.away ? (m.away.name || m.away.shortName || 'TBD') : 'TBD';
+    const isUser = (m.home && m.home.id === state.myClubId) || (m.away && m.away.id === state.myClubId);
+    
+    return `
+      <div class="bracket-card ${isUser ? 'is-user' : ''}">
+        ${label ? `<div style="font-size:0.65rem; color:var(--accent-cyan); font-weight:800; text-transform:uppercase; margin-bottom:0.25rem;">${label}</div>` : ''}
+        <div class="bracket-card-team ${m.winner && m.winner.id === m.home?.id ? 'winner' : ''}">
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">${hName}</span>
+          ${m.scoreHome !== null && m.scoreHome !== undefined ? `<span class="bracket-score">${m.scoreHome}</span>` : ''}
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.08); margin:0.15rem 0;"></div>
+        <div class="bracket-card-team ${m.winner && m.winner.id === m.away?.id ? 'winner' : ''}">
+          <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">${aName}</span>
+          ${m.scoreAway !== null && m.scoreAway !== undefined ? `<span class="bracket-score">${m.scoreAway}</span>` : ''}
+        </div>
+      </div>
+    `;
+  };
+
+  return `
+    <div class="bracket-tree-wrapper" style="display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1rem; align-items: center; justify-items: center; padding: 1rem 0;">
+      <!-- Column 1: Playoff Round -->
+      <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; width:100%;">
+        <div style="font-size:0.75rem; text-align:center; color:var(--accent-gold); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">⚔️ PLAYOFF ROUND</div>
+        ${renderCard(po1, 'Playoff 1 (5th vs 8th)')}
+        ${renderCard(po2, 'Playoff 2 (6th vs 7th)')}
+      </div>
+
+      <!-- Column 2: Quarter-Finals -->
+      <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; width:100%;">
+        <div style="font-size:0.75rem; text-align:center; color:var(--accent-cyan); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">🔹 QUARTER-FINALS</div>
+        ${renderCard(qf1, 'QF 1 (3rd Bye)')}
+        ${renderCard(qf2, 'QF 2 (4th Bye)')}
+      </div>
+
+      <!-- Column 3: Semi-Finals -->
+      <div class="bracket-column" style="display:flex; flex-direction:column; gap: 1.2rem; width:100%;">
+        <div style="font-size:0.75rem; text-align:center; color:var(--accent-lime); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">⭐ SEMI-FINALS</div>
+        ${renderCard(sf1, 'SF 1 (1st Bye)')}
+        ${renderCard(sf2, 'SF 2 (2nd Bye)')}
+      </div>
+
+      <!-- Column 4: Final -->
+      <div class="bracket-column" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+        <div style="font-size:0.75rem; text-align:center; color:var(--accent-gold); font-weight:800; text-transform:uppercase; margin-bottom:0.2rem;">🏆 UCL FINAL</div>
+        ${renderCard(final, 'Championship')}
+      </div>
+    </div>
+  `;
 }
 
 function openMatchModal() {
@@ -1235,10 +1379,6 @@ function openMatchModal() {
   if (!fixture) {
     openEndOfSeasonModal();
     return;
-  }
-
-  while (state.currentDate < new Date(fixture.date)) {
-    state.advanceDay();
   }
 
   const modal = document.getElementById('matchModal');
@@ -1314,7 +1454,6 @@ function openMatchModal() {
     updateHeaderStats();
     renderDashboard();
     renderStandingsTable();
-    renderUCLHub();
     renderCompetitionsHub();
     checkEndOfSeasonTrigger();
   });
@@ -1348,11 +1487,6 @@ function quickSimMatch() {
   if (!fixture) {
     openEndOfSeasonModal();
     return;
-  }
-
-  // Advance state date to fixture date if needed and sim intermediate CPU matches
-  while (state.currentDate < new Date(fixture.date)) {
-    state.advanceDay();
   }
 
   const res = engineQuickSim(fixture, calculateTeamRatings, state);
@@ -1411,12 +1545,10 @@ function quickSimMatch() {
 
   const closeModal = () => {
     modal.classList.remove('active');
+    for (let i = 0; i < 7; i++) state.advanceDay?.();
     renderDashboard();
-    renderSquadHub();
     renderStandingsTable();
-    renderUCLHub();
     renderCompetitionsHub();
-    renderOfficeHub();
     updateHeaderStats();
     checkEndOfSeasonTrigger();
   };
@@ -1441,12 +1573,13 @@ function simRestOfSeason() {
   updateHeaderStats();
   renderDashboard();
   renderStandingsTable();
-  renderUCLHub();
   renderCompetitionsHub();
   openEndOfSeasonModal();
 }
 
 function checkEndOfSeasonTrigger() {
+  if (state.checkTournamentProgression) state.checkTournamentProgression();
+  
   const remaining = state.fixtures.filter(f => !f.played);
   if (remaining.length === 0) {
     openEndOfSeasonModal();
@@ -1505,7 +1638,7 @@ function openEndOfSeasonModal() {
       renderTransfers();
       renderYouthAcademy();
       renderStandingsTable();
-      renderUCLHub();
+      renderCompetitionsHub();
       state.playSound?.('goal');
     };
   }
@@ -2062,283 +2195,63 @@ function openIncomingOfferModal(offer) {
 }
 
 
-function renderCompetitionsHub() {
-  const userLeague = state.myClub ? state.myClub.league : 'La Liga';
-  const compInfo = (typeof LEAGUE_COMPETITIONS !== 'undefined' && LEAGUE_COMPETITIONS[userLeague])
-    ? LEAGUE_COMPETITIONS[userLeague]
-    : { cupTitle: 'Copa del Rey' };
-
-  const badgeEl = document.getElementById('domLeagueNameBadge');
-  const titleEl = document.getElementById('domLeagueTitle');
-  const treeTitleEl = document.getElementById('domCupTreeTitle');
-
-  if (badgeEl) badgeEl.textContent = `${userLeague.toUpperCase()} • DOMESTIC COMPETITIONS`;
-  if (titleEl) titleEl.textContent = `${userLeague} & ${compInfo.cupTitle}`;
-  if (treeTitleEl) treeTitleEl.innerHTML = `<i class="fa-solid fa-sitemap"></i> ${compInfo.cupTitle} Bracket Tree (Knockout / Elimination)`;
-
-  document.querySelectorAll('.sub-comp-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.sub-comp-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.subcomp-pane').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
-
-      btn.classList.add('active');
-      const target = document.getElementById(`subview-${btn.dataset.subcomp}`);
-      if (target) {
-        target.classList.add('active');
-        target.style.display = 'block';
-      }
-    };
-  });
-
-  renderDomesticLeagueTable();
-  renderDomesticCupBracketTree();
-  renderSwissUCLTable();
-  renderUCLKnockoutBracket();
-  renderTopScorersTable();
-}
-
-function renderDomesticLeagueTable() {
-  const container = document.getElementById('domLeagueTableBody');
-  if (!container) return;
-
-  const sorted = [...state.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
-  container.innerHTML = sorted.map((st, idx) => {
-    const isUser = st.clubId === state.myClubId;
-    const rowStyle = isUser ? 'background: rgba(0, 240, 255, 0.12); font-weight: 800; color: var(--accent-cyan);' : '';
-
-    return `
-      <tr style="${rowStyle}">
-        <td style="padding: 0.45rem;">${idx + 1}</td>
-        <td style="padding: 0.45rem;">${st.name} ${isUser ? '⭐' : ''}</td>
-        <td style="padding: 0.45rem; text-align: center;">${st.played}</td>
-        <td style="padding: 0.45rem; text-align: center;">${st.won}</td>
-        <td style="padding: 0.45rem; text-align: center;">${st.drawn}</td>
-        <td style="padding: 0.45rem; text-align: center;">${st.lost}</td>
-        <td style="padding: 0.45rem; text-align: center;">${st.gd > 0 ? '+' + st.gd : st.gd}</td>
-        <td style="padding: 0.45rem; text-align: center; color: var(--accent-gold); font-weight: 800;">${st.pts}</td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function renderDomesticCupBracketTree() {
-  const container = document.getElementById('domesticCupBracketTree');
-  if (!container || !state.domesticCup || !state.domesticCup.bracket) return;
-
-  const b = state.domesticCup.bracket;
-
-  const renderNode = (m) => {
-    if (!m) return `<div class="bracket-node-card" style="opacity: 0.4;">TBD</div>`;
-    const isUser = (m.homeClub && m.homeClub.id === state.myClubId) || (m.awayClub && m.awayClub.id === state.myClubId);
-    const hWin = m.winner && m.homeClub && m.winner.id === m.homeClub.id;
-    const aWin = m.winner && m.awayClub && m.winner.id === m.awayClub.id;
-
-    return `
-      <div class="bracket-node-card ${isUser ? 'user-team' : ''}">
-        <div class="bracket-team-row ${hWin ? 'winner' : ''}">
-          <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
-          <span class="bracket-score-pill">${m.played ? m.homeScore : '-'}</span>
-        </div>
-        <div style="height: 1px; background: rgba(255,255,255,0.06); margin: 0.2rem 0;"></div>
-        <div class="bracket-team-row ${aWin ? 'winner' : ''}">
-          <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
-          <span class="bracket-score-pill">${m.played ? m.awayScore : '-'}</span>
-        </div>
-      </div>
-    `;
-  };
-
-  // Left Octavos (1-4)
-  const leftR16 = b.r16.slice(0, 4).map(m => renderNode(m)).join('');
-  // Right Octavos (5-8)
-  const rightR16 = b.r16.slice(4, 8).map(m => renderNode(m)).join('');
-
-  // Left Cuartos (1-2)
-  const leftQF = b.qf.slice(0, 2).map(m => renderNode(m)).join('');
-  // Right Cuartos (3-4)
-  const rightQF = b.qf.slice(2, 4).map(m => renderNode(m)).join('');
-
-  // Semifinals (1 & 2)
-  const leftSF = renderNode(b.sf[0]);
-  const rightSF = renderNode(b.sf[1]);
-
-  // Final
-  const finalNode = renderNode(b.final[0]);
-
-  container.innerHTML = `
-    <div class="bracket-column">
-      <div class="bracket-round-header">Octavos (1-4)</div>
-      ${leftR16}
-    </div>
-    <div class="bracket-column">
-      <div class="bracket-round-header">Cuartos (1-2)</div>
-      ${leftQF}
-    </div>
-    <div class="bracket-column">
-      <div class="bracket-round-header">Semifinal 1</div>
-      ${leftSF}
-    </div>
-    <div class="bracket-column" style="background: rgba(255,215,0,0.05); padding: 0.5rem; border-radius: 12px; border: 1px solid rgba(255,215,0,0.2);">
-      <div class="bracket-round-header" style="background: var(--accent-gold); color: #000;">🏆 GRAN FINAL</div>
-      ${finalNode}
-    </div>
-    <div class="bracket-column">
-      <div class="bracket-round-header">Semifinal 2</div>
-      ${rightSF}
-    </div>
-    <div class="bracket-column">
-      <div class="bracket-round-header">Cuartos (3-4)</div>
-      ${rightQF}
-    </div>
-    <div class="bracket-column">
-      <div class="bracket-round-header">Octavos (5-8)</div>
-      ${rightR16}
-    </div>
-  `;
-}
-
-function renderSwissUCLTable() {
-  const container = document.getElementById('uclSwissTableBody');
-  const badge = document.getElementById('uclSwissMatchdayBadge');
-
-  if (badge) {
-    const uclFix = state.fixtures.filter(f => f.compType === 'UCL' && f.played);
-    const md = Math.floor(uclFix.length / 6) + 1;
-    badge.textContent = `MD ${Math.min(md, 8)}/8`;
+function renderDomesticCupTab() {
+  const titleEl = document.getElementById('cupTabTitleHeader');
+  if (titleEl) {
+    titleEl.innerText = (state.domesticCupTitle || 'DOMESTIC CUP') + ' TOURNAMENT BRACKET';
   }
 
-  if (!container || !state.uclStandings) return;
+  const container = document.getElementById('domesticCupTabBracket');
+  if (container && state.cupTree) {
+    container.innerHTML = renderSymmetricBracketHtml(
+      state.cupTree.r16 || [],
+      state.cupTree.qf || [],
+      state.cupTree.sf || [],
+      state.cupTree.final,
+      state.domesticCupTitle || 'DOMESTIC CUP'
+    );
+  }
+}
 
-  container.innerHTML = state.uclStandings.map((st, idx) => {
-    const isUser = st.clubId === state.myClubId;
-    const rank = idx + 1;
-    let rankBadge = '';
+function renderGoldenBootStats() {
+  // 1. Golden Boot Table (Top scorers across all players)
+  const goldenBootBody = document.getElementById('goldenBootTableBody');
+  if (goldenBootBody) {
+    const allPlayers = [...state.players].sort((a, b) => (b.goals || 0) - (a.goals || 0));
+    const topScorers = allPlayers.slice(0, 10);
 
-    if (rank <= 2) {
-      rankBadge = 'background: rgba(0, 255, 137, 0.15); border-left: 4px solid #00ff87;';
-    } else if (rank <= 6) {
-      rankBadge = 'background: rgba(0, 240, 255, 0.12); border-left: 4px solid #00f0ff;';
+    if (topScorers.every(p => (p.goals || 0) === 0)) {
+      goldenBootBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:1.5rem;">Season has just begun — play matches to generate Golden Boot stats!</td></tr>`;
     } else {
-      rankBadge = 'background: rgba(255, 50, 80, 0.1); border-left: 4px solid #ff4d6d;';
+      goldenBootBody.innerHTML = topScorers.map((p, idx) => {
+        const club = state.clubs.find(c => c.id === p.clubId) || { name: 'Free Agent' };
+        const isTop3 = idx < 3;
+        const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+        return `
+          <tr class="${p.clubId === state.myClubId ? 'my-club' : ''}">
+            <td><strong>${medal}</strong></td>
+            <td style="font-weight:700;">${p.name} <span style="font-size:0.75rem; color:var(--text-muted);">(${p.pos})</span></td>
+            <td>${club.name}</td>
+            <td>${p.apps || 0}</td>
+            <td><strong style="color:var(--accent-gold); font-size:1.1rem;">${p.goals || 0}</strong></td>
+          </tr>
+        `;
+      }).join('');
     }
-
-    const userStyle = isUser ? 'font-weight: 900; color: var(--accent-gold);' : '';
-
-    return `
-      <tr style="${rankBadge} ${userStyle}">
-        <td style="padding: 0.4rem; font-weight: 800;">${rank}</td>
-        <td style="padding: 0.4rem;">${st.name} ${isUser ? '⭐' : ''}</td>
-        <td style="padding: 0.4rem; text-align: center;"><span style="background: rgba(255,255,255,0.08); padding: 0.1rem 0.4rem; border-radius: 4px;">Top 13</span></td>
-        <td style="padding: 0.4rem; text-align: center;">${st.played}</td>
-        <td style="padding: 0.4rem; text-align: center;">${st.won}</td>
-        <td style="padding: 0.4rem; text-align: center;">${st.drawn}</td>
-        <td style="padding: 0.4rem; text-align: center;">${st.lost}</td>
-        <td style="padding: 0.4rem; text-align: center;">${st.gf}</td>
-        <td style="padding: 0.4rem; text-align: center;">${st.ga}</td>
-        <td style="padding: 0.4rem; text-align: center;">${st.gd > 0 ? '+' + st.gd : st.gd}</td>
-        <td style="padding: 0.4rem; text-align: center; color: var(--accent-gold); font-weight: 900;">${st.pts}</td>
-      </tr>
-    `;
-  }).join('');
-}
-
-function renderUCLKnockoutBracket() {
-  const container = document.getElementById('uclKnockoutBracketView');
-  if (!container || !state.uclKnockoutBracket) return;
-
-  if (!state.uclKnockoutSeeded) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 2rem; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(0,240,255,0.2);">
-        <i class="fa-solid fa-shield-halved" style="font-size: 2rem; color: var(--accent-cyan); margin-bottom: 0.5rem; display: block;"></i>
-        <div>UCL League Phase in progress</div>
-        <div style="font-size: 0.8rem; margin-top: 0.25rem;">Complete the 8 matchdays for the Top 6 Knockout bracket to populate!</div>
-      </div>
-    `;
-  } else {
-    const qf = state.uclKnockoutBracket.qf || [];
-    const sf = state.uclKnockoutBracket.sf || [];
-    const fn = state.uclKnockoutBracket.final || [];
-    
-    container.innerHTML = `
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem;">
-        ${qf.map(m => `
-          <div class="bracket-node-card">
-            <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.3rem;">${m.matchName}</div>
-            <div class="bracket-team-row">
-              <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
-            </div>
-            <div class="bracket-team-row">
-              <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
-            </div>
-          </div>
-        `).join('')}
-        ${sf.map(m => `
-          <div class="bracket-node-card">
-            <div style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 800; margin-bottom: 0.3rem;">${m.matchName}</div>
-            <div class="bracket-team-row">
-              <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
-            </div>
-            <div class="bracket-team-row">
-              <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
-            </div>
-          </div>
-        `).join('')}
-        ${fn.map(m => `
-          <div class="bracket-node-card" style="border: 1px solid var(--accent-gold);">
-            <div style="font-size: 0.72rem; color: var(--accent-gold); font-weight: 800; margin-bottom: 0.3rem;">🏆 ${m.matchName}</div>
-            <div class="bracket-team-row">
-              <span>${m.homeClub ? m.homeClub.name : 'TBD'}</span>
-            </div>
-            <div class="bracket-team-row">
-              <span>${m.awayClub ? m.awayClub.name : 'TBD'}</span>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-}
-
-function renderTopScorersTable() {
-  const container = document.getElementById('topScorersTableBody');
-  if (!container) return;
-
-  const allPlayers = [...(state.players || []), ...(typeof INITIAL_PLAYERS !== 'undefined' ? INITIAL_PLAYERS : [])];
-  
-  // Deduplicate players by id
-  const playerMap = new Map();
-  allPlayers.forEach(p => {
-    if (!playerMap.has(p.id)) {
-      playerMap.set(p.id, p);
-    } else {
-      const existing = playerMap.get(p.id);
-      if ((p.goals || 0) > (existing.goals || 0)) playerMap.set(p.id, p);
-    }
-  });
-
-  const scorersList = Array.from(playerMap.values())
-    .filter(p => (p.goals || 0) > 0)
-    .sort((a, b) => (b.goals || 0) - (a.goals || 0));
-
-  if (scorersList.length === 0) {
-    container.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No goals scored yet this season. Play or sim matches to see top scorers!</td></tr>`;
-    return;
   }
 
-  container.innerHTML = scorersList.slice(0, 25).map((p, idx) => {
-    const club = state.clubs.find(c => c.id === p.clubId);
-    const isUserPlayer = p.clubId === state.myClubId;
-    const rowStyle = isUserPlayer ? 'background: rgba(0, 240, 255, 0.1); font-weight: 800;' : '';
-
-    return `
-      <tr style="${rowStyle}">
-        <td style="padding: 0.45rem; font-weight: 800;">${idx === 0 ? '🥇 1' : (idx === 1 ? '🥈 2' : (idx === 2 ? '🥉 3' : idx + 1))}</td>
-        <td style="padding: 0.45rem;">${p.name} ${isUserPlayer ? '⭐' : ''}</td>
-        <td style="padding: 0.45rem;">${club ? club.name : 'Unknown Club'}</td>
-        <td style="padding: 0.45rem;"><span style="color: var(--accent-lime); font-weight: 800;">${p.pos}</span></td>
-        <td style="padding: 0.45rem; text-align: center;">${p.apps || 0}</td>
-        <td style="padding: 0.45rem; text-align: center; color: var(--accent-gold); font-weight: 900; font-size: 1.05rem;">⚽ ${p.goals}</td>
+  // 2. Squad Player Stats Table
+  const squadStatsBody = document.getElementById('squadStatsTableBody');
+  if (squadStatsBody && state.players) {
+    const myPlayers = state.players.filter(p => p.clubId === state.myClubId).sort((a, b) => (b.goals || 0) - (a.goals || 0));
+    squadStatsBody.innerHTML = myPlayers.map(p => `
+      <tr>
+        <td style="font-weight:700;">${p.name}</td>
+        <td><span class="pos-badge pos-${p.pos}">${p.pos}</span></td>
+        <td><strong>${p.ovr}</strong></td>
+        <td>${p.apps || 0}</td>
+        <td><strong style="color:var(--accent-lime);">${p.goals || 0}</strong></td>
       </tr>
-    `;
-  }).join('');
+    `).join('');
+  }
 }

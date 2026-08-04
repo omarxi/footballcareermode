@@ -25,6 +25,9 @@ class CareerState {
     // Incoming Transfer Bids from rival clubs
     this.incomingOffers = [];
 
+    // Trophies / Silverware Cabinet
+    this.trophies = [];
+
     // History of finished seasons
     this.seasonHistory = [];
 
@@ -42,11 +45,176 @@ class CareerState {
     
     // League Table, UCL, UEL & Fixtures Initialization
     this.initLeagueTable();
-    this.initEuropeanCompetitions();
+    this.init13TeamUCL();
     this.initDomesticCup();
+    this.init13TeamUCL();
     this.initFixtures();
     this.initSquad();
     this.initAudio();
+  }
+
+
+  initDomesticCup() {
+    const userLeague = this.myClub ? this.myClub.league : 'La Liga';
+    const compInfo = (typeof LEAGUE_COMPETITIONS !== 'undefined' && LEAGUE_COMPETITIONS[userLeague])
+      ? LEAGUE_COMPETITIONS[userLeague]
+      : { cupTitle: 'Copa del Rey' };
+
+    const leagueClubs = this.clubs.filter(c => c.league === userLeague);
+    const shuffled = [...leagueClubs].sort(() => Math.random() - 0.5);
+    const cupClubs = shuffled.slice(0, 16);
+
+    if (this.myClub && !cupClubs.some(c => c.id === this.myClubId)) {
+      cupClubs[15] = this.myClub;
+    }
+
+    const r16Matches = [];
+    for (let i = 0; i < 8; i++) {
+      r16Matches.push({
+        id: `cup_r16_${i+1}`,
+        matchName: `Octavos ${i+1}`,
+        homeClub: cupClubs[i * 2],
+        awayClub: cupClubs[i * 2 + 1],
+        homeScore: 0,
+        awayScore: 0,
+        played: false,
+        winner: null
+      });
+    }
+
+    this.domesticCup = {
+      name: compInfo.cupTitle,
+      bracket: {
+        r16: r16Matches,
+        qf: [
+          { id: 'cup_qf_1', matchName: 'Cuartos 1', homeClub: null, awayClub: null, homeScore: 0, awayScore: 0, played: false, winner: null },
+          { id: 'cup_qf_2', matchName: 'Cuartos 2', homeClub: null, awayClub: null, homeScore: 0, awayScore: 0, played: false, winner: null },
+          { id: 'cup_qf_3', matchName: 'Cuartos 3', matchName: 'Cuartos 3', homeClub: null, awayClub: null, homeScore: 0, awayScore: 0, played: false, winner: null },
+          { id: 'cup_qf_4', matchName: 'Cuartos 4', homeClub: null, awayClub: null, homeScore: 0, awayScore: 0, played: false, winner: null }
+        ],
+        sf: [
+          { id: 'cup_sf_1', matchName: 'Semifinal 1', homeClub: null, awayClub: null, homeScore: 0, awayScore: 0, played: false, winner: null },
+          { id: 'cup_sf_2', matchName: 'Semifinal 2', homeClub: null, awayClub: null, homeScore: 0, awayScore: 0, played: false, winner: null }
+        ],
+        final: [
+          { id: 'cup_final', matchName: 'Gran Final', homeClub: null, awayClub: null, homeScore: 0, awayScore: 0, played: false, winner: null }
+        ]
+      }
+    };
+  }
+
+  init13TeamUCL() {
+    const sorted = [...this.clubs].sort((a, b) => (b.rating || 75) - (a.rating || 75));
+    let uclClubs = sorted.slice(0, 13);
+
+    if (this.myClub && !uclClubs.some(c => c.id === this.myClubId)) {
+      uclClubs[12] = this.myClub;
+      uclClubs.sort((a, b) => (b.rating || 75) - (a.rating || 75));
+    }
+
+    this.uclStandings = uclClubs.map(club => ({
+      clubId: club.id,
+      name: club.name,
+      shortName: club.shortName,
+      crest: club.crest,
+      rating: club.rating,
+      league: club.league,
+      played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
+    }));
+
+    this.uclKnockoutBracket = {
+      qf: [
+        { id: 'ucl_qf_1', matchName: 'Quarter-Final 1 (3rd vs 6th)', homeClub: null, awayClub: null, played: false, winner: null },
+        { id: 'ucl_qf_2', matchName: 'Quarter-Final 2 (4th vs 5th)', homeClub: null, awayClub: null, played: false, winner: null }
+      ],
+      sf: [
+        { id: 'ucl_sf_1', matchName: 'Semi-Final 1 (1st vs QF2 Winner)', homeClub: null, awayClub: null, played: false, winner: null },
+        { id: 'ucl_sf_2', matchName: 'Semi-Final 2 (2nd vs QF1 Winner)', homeClub: null, awayClub: null, played: false, winner: null }
+      ],
+      final: [
+        { id: 'ucl_final', matchName: 'UEFA Champions League Final', homeClub: null, awayClub: null, played: false, winner: null }
+      ]
+    };
+  }
+
+  initFixtures() {
+    const targetLeague = this.myClub ? this.myClub.league : 'La Liga';
+    const compInfo = (typeof LEAGUE_COMPETITIONS !== 'undefined' && LEAGUE_COMPETITIONS[targetLeague])
+      ? LEAGUE_COMPETITIONS[targetLeague]
+      : { cupTitle: 'Copa del Rey' };
+
+    const leagueClubs = this.clubs.filter(c => c.league === targetLeague);
+    const opps = leagueClubs.filter(c => c.id !== this.myClubId);
+
+    const allFixtures = [];
+
+    // 1. League Weekend Fixtures
+    let currentDateCursor = new Date(this.currentDate);
+    currentDateCursor.setDate(currentDateCursor.getDate() + 3);
+
+    opps.forEach((opp, idx) => {
+      allFixtures.push({
+        id: `fix_league_${idx + 1}`,
+        matchday: idx + 1,
+        date: new Date(currentDateCursor),
+        competition: targetLeague,
+        homeClub: this.myClub,
+        awayClub: opp,
+        played: false,
+        result: null
+      });
+      currentDateCursor.setDate(currentDateCursor.getDate() + 7);
+    });
+
+    // 2. Domestic Cup Midweek Fixtures
+    if (this.domesticCup && this.domesticCup.bracket && this.domesticCup.bracket.r16) {
+      const userCupMatch = this.domesticCup.bracket.r16.find(m => 
+        (m.homeClub && m.homeClub.id === this.myClubId) || (m.awayClub && m.awayClub.id === this.myClubId)
+      );
+
+      if (userCupMatch) {
+        let cupDate = new Date(this.currentDate);
+        cupDate.setDate(cupDate.getDate() + 10);
+        allFixtures.push({
+          id: userCupMatch.id,
+          matchday: 'Octavos',
+          date: new Date(cupDate),
+          competition: compInfo.cupTitle,
+          homeClub: userCupMatch.homeClub,
+          awayClub: userCupMatch.awayClub,
+          played: false,
+          result: null,
+          isCupMatch: true
+        });
+      }
+    }
+
+    // 3. 13-Team UCL Fixtures (6 Matchdays for User Club)
+    if (this.uclStandings && this.uclStandings.some(s => s.clubId === this.myClubId)) {
+      const uclOpps = this.uclStandings.filter(s => s.clubId !== this.myClubId);
+      let uclDate = new Date(this.currentDate);
+      uclDate.setDate(uclDate.getDate() + 17);
+
+      for (let i = 0; i < Math.min(6, uclOpps.length); i++) {
+        const oppClub = this.clubs.find(c => c.id === uclOpps[i].clubId) || { name: uclOpps[i].name };
+        allFixtures.push({
+          id: `fix_ucl_${i + 1}`,
+          matchday: `UCL MD ${i + 1}`,
+          date: new Date(uclDate),
+          competition: 'UEFA Champions League',
+          homeClub: i % 2 === 0 ? this.myClub : oppClub,
+          awayClub: i % 2 === 0 ? oppClub : this.myClub,
+          played: false,
+          result: null,
+          isUCLMatch: true
+        });
+        uclDate.setDate(uclDate.getDate() + 14);
+      }
+    }
+
+    // Sort chronologically
+    allFixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+    this.fixtures = allFixtures;
   }
 
   selectUserClub(clubId) {
@@ -59,9 +227,14 @@ class CareerState {
     
     this.initSquad();
     this.initLeagueTable();
-    this.initEuropeanCompetitions();
+    this.init13TeamUCL();
     this.initDomesticCup();
+    this.init13TeamUCL();
     this.initFixtures();
+
+    if (typeof youthEngine !== 'undefined') {
+      youthEngine.initYouthLeague();
+    }
 
     this.news.unshift({
       headline: `APPOINTMENT: ${this.managerName} announced as Manager of ${club.name}! Target: Domestic & Champions League glory.`,
@@ -113,37 +286,40 @@ class CareerState {
     }));
   }
 
-  initEuropeanCompetitions(customUCLClubIds = null) {
+  initEuropeanCompetitions(customUCLClubIds = null, customUELClubIds = null) {
     let uclClubIds = customUCLClubIds;
+    let uelClubIds = customUELClubIds;
 
-    if (!uclClubIds || !uclClubIds.length) {
-      uclClubIds = [];
+    if (!uclClubIds || !uclClubIds.length || !uelClubIds || !uelClubIds.length) {
       const userLeague = this.myClub ? this.myClub.league : 'La Liga';
       const allLeagues = ['La Liga', 'Premier League', 'Serie A', 'Bundesliga', 'Ligue 1'];
+
+      uclClubIds = [];
+      uelClubIds = [];
 
       allLeagues.forEach(leagueName => {
         const leagueClubs = this.clubs.filter(c => c.league === leagueName);
         if (leagueName === userLeague && this.standings && this.standings.length) {
           const sorted = [...this.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
           if (sorted.length >= 2) uclClubIds.push(sorted[0].clubId, sorted[1].clubId);
+          if (sorted.length >= 4) uelClubIds.push(sorted[2].clubId, sorted[3].clubId);
         } else {
+          // Select top-rated elite clubs (~85+ OVR) for UCL from foreign leagues
           const sortedForeign = [...leagueClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
           if (sortedForeign.length >= 2) uclClubIds.push(sortedForeign[0].id, sortedForeign[1].id);
+          if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
         }
       });
+    }
 
-      if (!uclClubIds.includes(this.myClubId)) {
-        uclClubIds.push(this.myClubId);
-      }
-
-      const remainingClubs = this.clubs.filter(c => !uclClubIds.includes(c.id)).sort((a, b) => (b.rating || 80) - (a.rating || 80));
-      while (uclClubIds.length < 13 && remainingClubs.length > 0) {
-        uclClubIds.push(remainingClubs.shift().id);
-      }
-      uclClubIds = uclClubIds.slice(0, 13);
+    // Always ensure user club is in UCL or UEL if missing
+    if (!uclClubIds.includes(this.myClubId) && !uelClubIds.includes(this.myClubId)) {
+      uclClubIds[0] = this.myClubId;
     }
 
     const uclClubs = this.clubs.filter(c => uclClubIds.includes(c.id));
+    const uelClubs = this.clubs.filter(c => uelClubIds.includes(c.id));
+
     this.uclStandings = uclClubs.map(club => ({
       clubId: club.id,
       name: club.name,
@@ -153,98 +329,63 @@ class CareerState {
       played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
     }));
 
-        this.uclTree = {
-      qf: [
-        { match: 'QF1: 3rd vs 6th', home: null, away: null, winner: null },
-        { match: 'QF2: 4th vs 5th', home: null, away: null, winner: null }
-      ],
-      sf: [
-        { match: 'SF1: 1st vs QF1 Winner', home: null, away: null, winner: null },
-        { match: 'SF2: 2nd vs QF2 Winner', home: null, away: null, winner: null }
-      ],
-      final: { match: 'UCL Final', home: null, away: null, winner: null }
-    };
+    this.uelStandings = uelClubs.map(club => ({
+      clubId: club.id,
+      name: club.name,
+      shortName: club.shortName,
+      crest: club.crest,
+      league: 'UEFA Europa League',
+      played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
+    }));
 
+    // Generate UCL Fixtures for user club
     this.uclFixtures = [];
     if (uclClubIds.includes(this.myClubId)) {
       const uclOpps = uclClubs.filter(c => c.id !== this.myClubId);
       let uclDate = new Date(this.currentDate);
-      uclDate.setDate(uclDate.getDate() + 10);
+      uclDate.setDate(uclDate.getDate() + 10); // Midweek
 
-      const selectedOpps = uclOpps.slice(0, 8);
-      selectedOpps.forEach((opp, idx) => {
+      uclOpps.slice(0, 6).forEach((opp, idx) => {
         this.uclFixtures.push({
           id: `ucl_fix_${idx + 1}`,
           matchday: idx + 1,
           date: new Date(uclDate),
           competition: 'UEFA Champions League',
-          homeClub: (idx % 2 === 0) ? this.myClub : opp,
-          awayClub: (idx % 2 === 0) ? opp : this.myClub,
+          homeClub: this.myClub,
+          awayClub: opp,
           played: false,
           result: null
         });
         uclDate.setDate(uclDate.getDate() + 14);
       });
     }
+
+    // Generate UEL Fixtures for user club
+    this.uelFixtures = [];
+    if (uelClubIds.includes(this.myClubId)) {
+      const uelOpps = uelClubs.filter(c => c.id !== this.myClubId);
+      let uelDate = new Date(this.currentDate);
+      uelDate.setDate(uelDate.getDate() + 11);
+
+      uelOpps.slice(0, 6).forEach((opp, idx) => {
+        this.uelFixtures.push({
+          id: `uel_fix_${idx + 1}`,
+          matchday: idx + 1,
+          date: new Date(uelDate),
+          competition: 'UEFA Europa League',
+          homeClub: this.myClub,
+          awayClub: opp,
+          played: false,
+          result: null
+        });
+        uelDate.setDate(uelDate.getDate() + 14);
+      });
+    }
   }
 
-  initDomesticCup() {
-    const userLeague = this.myClub ? this.myClub.league : 'La Liga';
-    const cupTitles = {
-      'Premier League': 'FA Cup',
-      'La Liga': 'Copa del Rey',
-      'Serie A': 'Coppa Italia',
-      'Bundesliga': 'DFB-Pokal',
-      'Ligue 1': 'Coupe de France'
-    };
-    this.domesticCupTitle = cupTitles[userLeague] || 'Domestic Cup';
-
-    const leagueClubs = this.clubs.filter(c => c.league === userLeague);
-    const shuffled = [...leagueClubs].sort(() => Math.random() - 0.5);
-    const cupClubs = shuffled.slice(0, 16);
-
-    if (this.myClub && !cupClubs.some(c => c.id === this.myClubId)) {
-      cupClubs[15] = this.myClub;
-    }
-
-    // Build 16-Team Tournament Tree (8 R16 ties)
-    const r16 = [];
-    for (let i = 0; i < 16; i += 2) {
-      r16.push({
-        id: `cup_r16_${i/2 + 1}`,
-        home: cupClubs[i],
-        away: cupClubs[i+1],
-        scoreHome: null,
-        scoreAway: null,
-        winner: null,
-        isUserTie: (cupClubs[i].id === this.myClubId || cupClubs[i+1].id === this.myClubId)
-      });
-    }
-
-    this.cupTree = {
-      r16: r16,
-      qf: Array(4).fill(null).map((_, idx) => ({ id: `cup_qf_${idx+1}`, home: { name: 'TBD' }, away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null })),
-      sf: Array(2).fill(null).map((_, idx) => ({ id: `cup_sf_${idx+1}`, home: { name: 'TBD' }, away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null })),
-      final: { id: 'cup_final', home: { name: 'TBD' }, away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null }
-    };
-    
-    this.cupFixtures = [];
-    let d = new Date(this.currentDate);
-    d.setDate(d.getDate() + 45); 
-
-    this.cupTree.r16.forEach(match => {
-      this.cupFixtures.push({
-        id: match.id,
-        matchday: 'Round of 16',
-        date: new Date(d),
-        competition: this.domesticCupTitle,
-        homeClub: match.home,
-        awayClub: match.away,
-        played: false,
-        result: null
-      });
-      d.setDate(d.getDate() + 1); // stagger them slightly
-    });
+  // Alias for backward compatibility
+  initUCL() {
+    this.init13TeamUCL();
   }
 
   initFixtures() {
@@ -253,6 +394,7 @@ class CareerState {
     const opponentClubs = leagueClubs.filter(c => c.id !== this.myClubId);
     const opps = opponentClubs.length > 0 ? opponentClubs : this.clubs.filter(c => c.id !== this.myClubId);
 
+    // League Weekend Fixtures
     const leagueFix = [];
     let fixtureDate = new Date(this.currentDate);
     fixtureDate.setDate(fixtureDate.getDate() + 4);
@@ -263,230 +405,24 @@ class CareerState {
         matchday: idx + 1,
         date: new Date(fixtureDate),
         competition: targetLeague,
-        homeClub: (idx % 2 === 0) ? this.myClub : opp,
-        awayClub: (idx % 2 === 0) ? opp : this.myClub,
+        homeClub: this.myClub,
+        awayClub: opp,
         played: false,
         result: null
       });
       fixtureDate.setDate(fixtureDate.getDate() + 7);
     });
 
-    const eurFix = this.uclFixtures || [];
-    const cupFix = this.cupFixtures || [];
-    const allUnplayed = [...leagueFix, ...eurFix, ...cupFix];
+    // Interleave League + UCL + UEL into ONE master chronological schedule
+    const eurFix = [...(this.uclFixtures || []), ...(this.uelFixtures || [])];
+    const allUnplayed = [...leagueFix, ...eurFix];
     allUnplayed.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     this.fixtures = allUnplayed;
   }
 
   getNextFixture() {
-    return this.fixtures.find(f => !f.played && (f.homeClub.id === this.myClubId || f.awayClub.id === this.myClubId)) || null;
-  }
-
-  simCpuMatches() {
-    const nextUser = this.getNextFixture();
-    const maxDate = nextUser ? new Date(nextUser.date) : new Date(2090, 0, 1);
-
-    // Auto sim all CPU vs CPU fixtures scheduled on or before maxDate
-    const cpuFixes = this.fixtures.filter(f => !f.played && f.homeClub.id !== this.myClubId && f.awayClub.id !== this.myClubId && new Date(f.date) <= maxDate);
-
-    cpuFixes.forEach(fix => {
-      if (typeof engineQuickSim === 'function' && typeof calculateTeamRatings === 'function') {
-        engineQuickSim(fix, calculateTeamRatings, this);
-      } else {
-        fix.played = true;
-        let h = Math.floor(Math.random() * 3) + 1;
-        let a = Math.floor(Math.random() * 2);
-        if (h === a) h++;
-        fix.result = { homeScore: h, awayScore: a };
-        this.processTournamentResult(fix, h, a);
-      }
-    });
-  }
-
-  processTournamentResult(fixture, homeScore, awayScore) {
-    if (!fixture.id.includes('cup_') && !fixture.id.includes('ucl_')) return;
-    
-    // Force tie-breaker if draw in knockout
-    if (homeScore === awayScore) {
-      if (Math.random() < 0.5) homeScore++;
-      else awayScore++;
-      fixture.result = { homeScore, awayScore };
-    }
-
-    const winner = homeScore > awayScore ? fixture.homeClub : fixture.awayClub;
-    
-    const updateNode = (tree) => {
-      ['playoffs', 'r16', 'qf', 'sf'].forEach(round => {
-        if (tree[round]) {
-          const match = tree[round].find(m => m.id === fixture.id);
-          if (match) { match.scoreHome = homeScore; match.scoreAway = awayScore; match.winner = winner; }
-        }
-      });
-      if (tree.final && tree.final.id === fixture.id) {
-        tree.final.scoreHome = homeScore; tree.final.scoreAway = awayScore; tree.final.winner = winner;
-      }
-    };
-
-    if (fixture.id.includes('cup_') && this.cupTree) updateNode(this.cupTree);
-    if (fixture.id.includes('ucl_') && this.uclTree) updateNode(this.uclTree);
-  }
-
-  checkTournamentProgression() {
-    this.simCpuMatches();
-
-    const generateNextRound = (tree, currentRound, nextRound, prefix, title) => {
-      if (!tree[currentRound] || !tree[nextRound]) return;
-      
-      const allDone = tree[currentRound].every(m => m.winner);
-      const isPlaceholder = tree[nextRound][0] && tree[nextRound][0].home && tree[nextRound][0].home.name === 'TBD';
-
-      if (allDone && isPlaceholder) {
-        let d = new Date(this.currentDate);
-        d.setDate(d.getDate() + 14);
-        const matches = tree[currentRound];
-        for (let i = 0; i < tree[nextRound].length; i++) {
-          const m1 = matches[i * 2], m2 = matches[i * 2 + 1];
-          tree[nextRound][i].id = `${prefix}_gen_${i+1}`;
-          tree[nextRound][i].home = m1.winner; 
-          tree[nextRound][i].away = m2.winner;
-          tree[nextRound][i].isUserTie = (m1.winner.id === this.myClubId || m2.winner.id === this.myClubId);
-          
-          this.fixtures.push({
-            id: tree[nextRound][i].id,
-            matchday: nextRound.toUpperCase(),
-            date: new Date(d),
-            competition: title,
-            homeClub: m1.winner,
-            awayClub: m2.winner,
-            played: false,
-            result: null
-          });
-          d.setDate(d.getDate() + 1);
-        }
-        this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-      }
-    };
-
-    // 1. Domestic Cup Progression
-    if (this.cupTree) {
-      generateNextRound(this.cupTree, 'r16', 'qf', 'cup_qf', this.domesticCupTitle);
-      generateNextRound(this.cupTree, 'qf', 'sf', 'cup_sf', this.domesticCupTitle);
-      
-      if (this.cupTree.sf.every(m => m.winner) && this.cupTree.final.home.name === 'TBD') {
-        this.cupTree.final.id = 'cup_final_gen';
-        this.cupTree.final.home = this.cupTree.sf[0].winner;
-        this.cupTree.final.away = this.cupTree.sf[1].winner;
-        this.cupTree.final.isUserTie = (this.cupTree.final.home.id === this.myClubId || this.cupTree.final.away.id === this.myClubId);
-        
-        let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
-        this.fixtures.push({
-          id: this.cupTree.final.id,
-          matchday: 'FINAL',
-          date: new Date(d),
-          competition: this.domesticCupTitle,
-          homeClub: this.cupTree.final.home,
-          awayClub: this.cupTree.final.away,
-          played: false,
-          result: null
-        });
-        this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-      }
-    }
-
-    // 2. UCL League Phase Completion & Playoff Generation
-    const userUclDone = !this.uclFixtures || this.uclFixtures.length === 0 || this.uclFixtures.every(f => f.played);
-    
-    if (this.uclStandings && userUclDone && !this.uclTree.generatedKnockouts) {
-      this.uclTree.generatedKnockouts = true;
-
-      // Simulate rest of UCL group stage for all AI teams if needed
-      this.uclStandings.forEach(s => {
-        while (s.played < 8) {
-          s.played++;
-          const h = Math.floor(Math.random() * 3);
-          const a = Math.floor(Math.random() * 2);
-          s.gf += h; s.ga += a; s.gd = s.gf - s.ga;
-          if (h > a) { s.won++; s.pts += 3; }
-          else if (h < a) { s.lost++; }
-          else { s.drawn++; s.pts += 1; }
-        }
-      });
-
-      const sorted = [...this.uclStandings].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
-      const top8 = sorted.slice(0, 8).map(s => this.clubs.find(c => c.id === s.clubId));
-      this.uclTree.top8Clubs = top8;
-
-      // 1st & 2nd Bye to SF; 3rd & 4th Bye to QF; 5th vs 8th, 6th vs 7th in Playoffs
-      this.uclTree.playoffs = [
-        { id: 'ucl_po_gen_1', home: top8[4], away: top8[7], scoreHome: null, scoreAway: null, winner: null, isUserTie: top8[4].id === this.myClubId || top8[7].id === this.myClubId },
-        { id: 'ucl_po_gen_2', home: top8[5], away: top8[6], scoreHome: null, scoreAway: null, winner: null, isUserTie: top8[5].id === this.myClubId || top8[6].id === this.myClubId }
-      ];
-      this.uclTree.qf = [
-        { id: 'ucl_qf_stub_1', home: top8[2], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
-        { id: 'ucl_qf_stub_2', home: top8[3], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false }
-      ];
-      this.uclTree.sf = [
-        { id: 'ucl_sf_stub_1', home: top8[0], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
-        { id: 'ucl_sf_stub_2', home: top8[1], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false }
-      ];
-      this.uclTree.final = { id: 'ucl_final_stub', home: { name: 'TBD' }, away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null };
-
-      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
-      this.uclTree.playoffs.forEach(match => {
-        this.fixtures.push({ id: match.id, matchday: 'UCL PLAYOFFS', date: new Date(d), competition: 'UEFA Champions League', homeClub: match.home, awayClub: match.away, played: false, result: null });
-        d.setDate(d.getDate() + 1);
-      });
-      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-
-    // 3. UCL Playoffs -> QF
-    if (this.uclTree && this.uclTree.playoffs && this.uclTree.playoffs.every(m => m.winner) && (!this.uclTree.qf[0] || this.uclTree.qf[0].away.name === 'TBD')) {
-      const top8 = this.uclTree.top8Clubs || [];
-      const po1Winner = this.uclTree.playoffs[0].winner; // 5th vs 8th winner
-      const po2Winner = this.uclTree.playoffs[1].winner; // 6th vs 7th winner
-
-      this.uclTree.qf[0] = { id: 'ucl_qf_gen_1', home: top8[2], away: po2Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top8[2].id === this.myClubId || po2Winner.id === this.myClubId };
-      this.uclTree.qf[1] = { id: 'ucl_qf_gen_2', home: top8[3], away: po1Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top8[3].id === this.myClubId || po1Winner.id === this.myClubId };
-
-      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
-      this.uclTree.qf.forEach(match => {
-        this.fixtures.push({ id: match.id, matchday: 'UCL QF', date: new Date(d), competition: 'UEFA Champions League', homeClub: match.home, awayClub: match.away, played: false, result: null });
-        d.setDate(d.getDate() + 1);
-      });
-      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-
-    // 4. UCL QF -> SF (1st & 2nd waiting in SF!)
-    if (this.uclTree && this.uclTree.qf && this.uclTree.qf.every(m => m.winner) && (!this.uclTree.sf[0] || this.uclTree.sf[0].away.name === 'TBD')) {
-      const top8 = this.uclTree.top8Clubs || [];
-      const qf1Winner = this.uclTree.qf[0].winner;
-      const qf2Winner = this.uclTree.qf[1].winner;
-
-      this.uclTree.sf[0] = { id: 'ucl_sf_gen_1', home: top8[0], away: qf1Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top8[0].id === this.myClubId || qf1Winner.id === this.myClubId };
-      this.uclTree.sf[1] = { id: 'ucl_sf_gen_2', home: top8[1], away: qf2Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top8[1].id === this.myClubId || qf2Winner.id === this.myClubId };
-
-      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
-      this.uclTree.sf.forEach(match => {
-        this.fixtures.push({ id: match.id, matchday: 'UCL SF', date: new Date(d), competition: 'UEFA Champions League', homeClub: match.home, awayClub: match.away, played: false, result: null });
-        d.setDate(d.getDate() + 1);
-      });
-      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-
-    // 5. UCL SF -> Final
-    if (this.uclTree && this.uclTree.sf && this.uclTree.sf.every(m => m.winner) && (!this.uclTree.final || this.uclTree.final.home.name === 'TBD')) {
-      const sf1Winner = this.uclTree.sf[0].winner;
-      const sf2Winner = this.uclTree.sf[1].winner;
-
-      this.uclTree.final = { id: 'ucl_final_gen', home: sf1Winner, away: sf2Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: sf1Winner.id === this.myClubId || sf2Winner.id === this.myClubId };
-
-      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
-      this.fixtures.push({ id: this.uclTree.final.id, matchday: 'UCL FINAL', date: new Date(d), competition: 'UEFA Champions League', homeClub: sf1Winner, awayClub: sf2Winner, played: false, result: null });
-      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
-    }
-
-    this.simCpuMatches();
+    return this.fixtures.find(f => !f.played) || null;
   }
 
   simRestOfLeagueMatchday(isEuropean = false, type = 'UCL') {
@@ -603,6 +539,7 @@ class CareerState {
         biddingClubName: biddingClub.name,
         bidAmount: bidAmount,
         date: this.getFormattedDate(),
+        expiresTime: Date.now() + (14 * 24 * 60 * 60 * 1000), // 14 Days expiration
         status: 'PENDING'
       };
 
@@ -643,6 +580,7 @@ class CareerState {
         wageSplit: wageSplit, // % paid by borrowing club
         buyOptionFee: offerType === 'LOAN_OPTION' ? buyOptionFee : 0,
         date: this.getFormattedDate(),
+        expiresTime: Date.now() + (14 * 24 * 60 * 60 * 1000), // 14 Days expiration
         status: 'PENDING'
       };
 
@@ -733,6 +671,27 @@ class CareerState {
     this.currentDate.setDate(this.currentDate.getDate() + 1);
     this.playSound('tick');
     
+    // Check and expire pending offers older than 14 days
+    const nowTime = Date.now();
+    this.incomingOffers.forEach(off => {
+      if (off.status === 'PENDING' && off.expiresTime && nowTime > off.expiresTime) {
+        off.status = 'EXPIRED';
+        this.inbox.unshift({
+          id: 'msg_exp_' + Date.now() + '_' + Math.random(),
+          type: 'EXPIRED_OFFER',
+          title: `OFFER EXPIRED: ${off.biddingClubName}`,
+          sender: off.biddingClubName + ' Representative',
+          date: this.getFormattedDate(),
+          body: `The proposal from ${off.biddingClubName} for ${off.playerName} has expired after 2 weeks of inactivity.`
+        });
+        this.news.unshift({
+          headline: `EXPIRED: ${off.biddingClubName} withdraw offer for ${off.playerName} after 2 weeks.`,
+          date: this.getFormattedDate(),
+          category: 'TRANSFERS'
+        });
+      }
+    });
+
     // Increased chance to receive incoming transfer offers for any squad player (~45% chance per day advance)
     if (Math.random() < 0.45) {
       this.generateIncomingOffer();
@@ -757,22 +716,80 @@ class CareerState {
   }
 
   startNextSeason() {
-    this.trophyCabinet = this.trophyCabinet || [];
-    
     // Snapshot the final standings BEFORE we reset anything
     const sortedLeagueStandings = [...this.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
 
     const userRankIdx = sortedLeagueStandings.findIndex(s => s.clubId === this.myClubId);
     const userFinishPos = userRankIdx !== -1 ? userRankIdx + 1 : 1;
     const champClub = this.clubs.find(c => c.id === sortedLeagueStandings[0]?.clubId);
-    
-    if (champClub && champClub.id === this.myClubId) {
-      this.trophyCabinet.push({ name: this.myClub.league + ' Title', year: this.season });
-    }
 
     // Board prize money
     const prizeMoney = userFinishPos === 1 ? 40000000 : (userFinishPos <= 4 ? 25000000 : 15000000);
     this.myClub.budget += prizeMoney;
+
+    // Record League & Domestic Trophies based on user's league
+    const userLeagueName = this.myClub ? this.myClub.league : 'La Liga';
+    const compInfo = (typeof LEAGUE_COMPETITIONS !== 'undefined' && LEAGUE_COMPETITIONS[userLeagueName])
+      ? LEAGUE_COMPETITIONS[userLeagueName]
+      : { leagueTitle: 'Domestic League Trophy', cupTitle: 'National Cup', superCupTitle: 'Super Cup' };
+
+    if (userFinishPos === 1) {
+      this.trophies.push({
+        id: 'tr_league_' + Date.now(),
+        name: compInfo.leagueTitle,
+        season: this.season,
+        icon: 'fa-trophy',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#ffd700'
+      });
+      this.trophies.push({
+        id: 'tr_supercup_' + Date.now(),
+        name: compInfo.superCupTitle,
+        season: this.season,
+        icon: 'fa-shield-halved',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#ff9f43'
+      });
+    }
+
+    // Domestic Cup Victory
+    if (userFinishPos <= 2 && Math.random() > 0.3) {
+      this.trophies.push({
+        id: 'tr_cup_' + Date.now(),
+        name: compInfo.cupTitle,
+        season: this.season,
+        icon: 'fa-crown',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#ee2524'
+      });
+    }
+
+    // Premier League EFL Cup
+    if (userLeagueName === 'Premier League' && userFinishPos <= 3 && Math.random() > 0.4) {
+      this.trophies.push({
+        id: 'tr_efl_' + Date.now(),
+        name: 'EFL Cup (Carabao Cup)',
+        season: this.season,
+        icon: 'fa-wine-glass-empty',
+        club: this.myClub ? this.myClub.name : '',
+        badgeColor: '#00a859'
+      });
+    }
+
+    // Check Youth League finish
+    if (typeof youthEngine !== 'undefined' && youthEngine.standings && youthEngine.standings.length) {
+      const topYouth = [...youthEngine.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
+      if (topYouth[0] && topYouth[0].isUser) {
+        this.trophies.push({
+          id: 'tr_youth_' + Date.now(),
+          name: 'Youth League Champions',
+          season: this.season,
+          icon: 'fa-graduation-cap',
+          club: `${this.myClub ? this.myClub.name : 'Club'} U19`,
+          badgeColor: '#00f0ff'
+        });
+      }
+    }
 
     // Save season to history
     this.seasonHistory.unshift({
@@ -789,10 +806,24 @@ class CareerState {
     this.season = `${startYear}/${endYearShort}`;
     this.currentDate = new Date(startYear, 6, 1); // 01 July of new season
 
-    // Reset player goals and apps
-    this.players.forEach(p => {
-      p.goals = 0;
-      p.apps = 0;
+    // Determine European qualification from final standings of last season
+    const qualifiedUCL = [];
+    const qualifiedUEL = [];
+    const userLeague = this.myClub ? this.myClub.league : 'La Liga';
+    const allLeagues = ['La Liga', 'Premier League', 'Serie A', 'Bundesliga', 'Ligue 1'];
+
+    allLeagues.forEach(leagueName => {
+      if (leagueName === userLeague) {
+        // User's league: top 2 -> UCL, 3rd & 4th -> UEL (based on just-finished season)
+        if (sortedLeagueStandings.length >= 2) qualifiedUCL.push(sortedLeagueStandings[0].clubId, sortedLeagueStandings[1].clubId);
+        if (sortedLeagueStandings.length >= 4) qualifiedUEL.push(sortedLeagueStandings[2].clubId, sortedLeagueStandings[3].clubId);
+      } else {
+        // Foreign leagues: Top-rated elite teams (85+ OVR) -> UCL/UEL
+        const foreignClubs = this.clubs.filter(c => c.league === leagueName);
+        const sortedForeign = [...foreignClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
+        if (sortedForeign.length >= 2) qualifiedUCL.push(sortedForeign[0].id, sortedForeign[1].id);
+        if (sortedForeign.length >= 4) qualifiedUEL.push(sortedForeign[2].id, sortedForeign[3].id);
+      }
     });
 
     // Player Development: ageing + growth
@@ -818,10 +849,21 @@ class CareerState {
             p.clubId = p.loanParentClub || p.clubId;
             this.starters = this.starters.filter(s => s.id !== p.id);
             this.bench = this.bench.filter(s => s.id !== p.id);
+            this.news.unshift({
+              headline: `LOAN END: ${p.name}'s loan spell at ${this.myClub.name} has concluded.`,
+              date: this.getFormattedDate(),
+              category: 'TRANSFERS'
+            });
           }
           if (p.isLoaned) {
             p.isLoaned = false;
+            const prevClub = p.loanClub || 'their loan club';
             p.loanClub = null;
+            this.news.unshift({
+              headline: `LOAN RETURN: ${p.name} returns to ${this.myClub.name} after loan spell at ${prevClub}!`,
+              date: this.getFormattedDate(),
+              category: 'TRANSFERS'
+            });
           }
         }
       }
@@ -829,8 +871,7 @@ class CareerState {
 
     // Re-initialize all tables and fixtures for the new season
     this.initLeagueTable();
-    this.initEuropeanCompetitions(); // 13-team UCL
-    this.initDomesticCup();
+    this.initEuropeanCompetitions(qualifiedUCL, qualifiedUEL);
     this.initFixtures();
     this.initSquad();
 
@@ -847,7 +888,7 @@ class CareerState {
     });
 
     this.news.unshift({
-      headline: `NEW SEASON BEGINS: ${this.season} officially kicks off!`,
+      headline: `NEW SEASON BEGINS: ${this.season} officially kicks off — European draw confirmed!`,
       date: this.getFormattedDate(),
       category: 'SEASON LAUNCH'
     });

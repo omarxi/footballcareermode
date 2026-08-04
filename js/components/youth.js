@@ -1,35 +1,23 @@
+const ALL_NATIONS = ['🇧🇷', '🇦🇷', '🇫🇷', '🇪🇸', '🇩🇪', '🇮🇹', '🇬🇧', '🇵🇹', '🇳🇱', '🇧🇪', '🇪🇬', '🇯🇵', '🇰🇷', '🇨🇴', '🇺🇾', '🇲🇽', '🇳🇬', '🇸🇳', '🇭🇷', '🇦🇺', '🇨🇦', '🇺🇸', '🇵🇱'];
+function getRandomNation() {
+  return ALL_NATIONS[Math.floor(Math.random() * ALL_NATIONS.length)];
+}
+
 /* Youth Academy & Scouting Engine */
 
 
 
 class YouthEngine {
   constructor() {
-    this.academy = [];
-    this.generateRandomAcademy();
-    this.initYouthLeague();
-  }
-
-  generateRandomNation() {
-    const nations = [
-      { name: 'Spain', flag: '🇪🇸' },
-      { name: 'France', flag: '🇫🇷' },
-      { name: 'Brazil', flag: '🇧🇷' },
-      { name: 'Argentina', flag: '🇦🇷' },
-      { name: 'Germany', flag: '🇩🇪' },
-      { name: 'Italy', flag: '🇮🇹' },
-      { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-      { name: 'Netherlands', flag: '🇳🇱' },
-      { name: 'Portugal', flag: '🇵🇹' },
-      { name: 'Croatia', flag: '🇭🇷' },
-      { name: 'Japan', flag: '🇯🇵' },
-      { name: 'Belgium', flag: '🇧🇪' }
+    this.academy = [
+      { id: 'y1', name: 'Diego Silva', pos: 'CAM', ovr: 68, pot: 92, age: 16, nation: '🇧🇷', pac: 82, sho: 70, pas: 75, dri: 80, def: 40, phy: 55, val: 4500000, wage: 5000, growthThisSeason: 0 },
+      { id: 'y2', name: 'Mateo Kovac', pos: 'CB', ovr: 65, pot: 89, age: 15, nation: '🇭🇷', pac: 74, sho: 40, pas: 65, dri: 62, def: 72, phy: 70, val: 3200000, wage: 4000, growthThisSeason: 0 },
+      { id: 'y3', name: 'Jan Van Dijk', pos: 'GK', ovr: 64, pot: 86, age: 16, nation: '🇳🇱', pac: 60, sho: 30, pas: 55, dri: 50, def: 65, phy: 68, val: 2100000, wage: 3500, growthThisSeason: 0 },
+      { id: 'y4', name: 'Leo Dupont', pos: 'ST', ovr: 66, pot: 88, age: 16, nation: '🇫🇷', pac: 81, sho: 71, pas: 60, dri: 68, def: 35, phy: 64, val: 3800000, wage: 4500, growthThisSeason: 0 }
     ];
-    return nations[Math.floor(Math.random() * nations.length)].flag;
-  }
 
-  generateRandomAcademy() {
-    this.academy = [];
     this.ensureMinimumRoster();
+    this.initYouthLeague();
   }
 
   ensureMinimumRoster() {
@@ -38,25 +26,24 @@ class YouthEngine {
 
     const needed = minPlayers - this.academy.length;
     const positions = ['GK', 'RB', 'CB', 'LB', 'CM', 'CDM', 'CAM', 'RW', 'LW', 'ST'];
-    const firstNames = ['Liam', 'Noah', 'Oliver', 'Ethan', 'Lucas', 'Mateo', 'Alex', 'Jack', 'Sandro', 'Milan', 'Enzo', 'Gabriel', 'Julian', 'Marco', 'Leo', 'Kai', 'Luka', 'Hugo', 'Rafael', 'Carlos'];
-    const lastNames = ['Smith', 'Garcia', 'Martin', 'Bauer', 'Novak', 'Silva', 'Conti', 'Dubois', 'Nielsen', 'Kovacs', 'Santos', 'Moreno', 'Rossi', 'Müller', 'Schneider', 'Fernandez', 'Alvarez', 'Zhao', 'Vargas', 'Ramos'];
+    const firstNames = ['Liam', 'Noah', 'Oliver', 'Ethan', 'Lucas', 'Mateo', 'Alex', 'Jack', 'Sandro', 'Milan'];
+    const lastNames = ['Smith', 'Garcia', 'Martin', 'Bauer', 'Novak', 'Silva', 'Conti', 'Dubois', 'Nielsen', 'Kovacs'];
 
     for (let i = 0; i < needed; i++) {
       const pos = positions[i % positions.length];
       const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
       const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
-      const ovr = Math.floor(Math.random() * 8) + 60; // 60-67 OVR
-      const pot = Math.floor(Math.random() * 13) + 80; // 80-92 Potential
-      const nation = this.generateRandomNation();
+      const ovr = Math.floor(Math.random() * 7) + 60; // 60-66 OVR
+      const pot = Math.floor(Math.random() * 12) + 80; // 80-91 Potential
 
       this.academy.push({
-        id: `y_auto_${Date.now()}_${Math.floor(Math.random()*10000)}_${i}`,
+        id: `y_auto_${Date.now()}_${i}`,
         name: `${fn} ${ln}`,
         pos,
         ovr,
         pot,
         age: Math.floor(Math.random() * 3) + 15,
-        nation,
+        nation: getRandomNation(),
         pac: Math.floor(Math.random() * 20) + 65,
         sho: Math.floor(Math.random() * 20) + 55,
         pas: Math.floor(Math.random() * 20) + 60,
@@ -220,8 +207,8 @@ class YouthEngine {
     this.academy.forEach(p => {
       if (p.ovr >= p.pot) return;
 
-      // Growth chance: realistic gradual development over time
-      const chance = fromMatch ? 0.03 : 0.01;
+      // Growth chance: higher if far below potential or after match
+      const chance = fromMatch ? 0.35 : 0.08;
       if (Math.random() < chance) {
         p.ovr += 1;
         p.growthThisSeason = (p.growthThisSeason || 0) + 1;
@@ -254,7 +241,7 @@ class YouthEngine {
       ovr,
       pot,
       age: Math.floor(Math.random() * 3) + 15,
-      nation: regionName === 'South America' ? '🇧🇷' : regionName === 'Europe' ? '🇪🇸' : '🇯🇵',
+      nation: getRandomNation(),
       pac: Math.floor(Math.random() * 20) + 70,
       sho: Math.floor(Math.random() * 20) + 60,
       pas: Math.floor(Math.random() * 20) + 65,
@@ -283,10 +270,9 @@ class YouthEngine {
       const prospect = this.academy.splice(idx, 1)[0];
       prospect.clubId = state.myClubId;
       state.bench.push(prospect);
-      state.players.push(prospect); // Crucial fix: Add to main players array so it shows in Squad Hub
 
       state.news.unshift({
-        headline: `YOUTH PROMOTION: ${prospect.name} (${prospect.ovr} OVR) has been promoted to ${state.myClub ? state.myClub.name : 'First Team'}!`,
+        headline: `YOUTH PROMOTION: ${prospect.name} (${prospect.ovr} OVR) has been promoted to ${state.myClub.name} first team!`,
         date: state.getFormattedDate(),
         category: 'ACADEMY'
       });
@@ -294,35 +280,10 @@ class YouthEngine {
       // Auto-replenish to maintain full youth squad
       this.ensureMinimumRoster();
 
-      state.playSound?.('goal');
+      state.playSound('goal');
       return prospect;
     }
     return null;
-  }
-
-  trainProspect(prospectId) {
-    const prospect = this.academy.find(p => p.id === prospectId);
-    if (!prospect) return false;
-    if (prospect.ovr >= prospect.pot) return false;
-
-    const gain = Math.floor(Math.random() * 2) + 1; // +1 or +2 OVR
-    prospect.ovr = Math.min(prospect.pot, prospect.ovr + gain);
-    prospect.growthThisSeason += gain;
-    prospect.val = Math.round(prospect.ovr * 50000);
-
-    state.playSound?.('click');
-    return true;
-  }
-
-  releaseProspect(prospectId) {
-    const idx = this.academy.findIndex(p => p.id === prospectId);
-    if (idx !== -1) {
-      this.academy.splice(idx, 1);
-      this.ensureMinimumRoster();
-      state.playSound?.('click');
-      return true;
-    }
-    return false;
   }
 }
 

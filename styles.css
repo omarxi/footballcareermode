@@ -1252,69 +1252,86 @@ select.input-field {
   margin-top: auto;
 }
 
-/* Knockout Visual Bracket Tree UI Styles */
-.visual-bracket-tree {
+
+
+/* Visual Tournament Bracket Tree Layout */
+.bracket-tree-wrapper {
   display: flex;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 1.2rem;
-  min-width: 950px;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #0d0e12;
+  border-radius: 12px;
+  overflow-x: auto;
+  border: 1px solid rgba(255,255,255,0.1);
+  margin-top: 1rem;
 }
 
 .bracket-column {
   display: flex;
   flex-direction: column;
   justify-content: space-around;
-  gap: 0.8rem;
-  flex: 1;
+  gap: 1.2rem;
+  height: 100%;
 }
 
-.bracket-round-header {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--accent-gold);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: center;
-  margin-bottom: 0.5rem;
-  background: rgba(255, 215, 0, 0.08);
-  padding: 0.3rem;
-  border-radius: 6px;
-}
-
-.bracket-node-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-glass);
-  border-radius: 10px;
-  padding: 0.45rem 0.65rem;
-  font-size: 0.78rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-.bracket-node-card.user-team {
-  border-color: var(--accent-gold);
-  background: rgba(255, 215, 0, 0.12);
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.25);
-}
-
-.bracket-team-row {
+.bracket-card {
+  background: #16181f;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  min-width: 145px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.3rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  position: relative;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.bracket-card.is-user {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+.bracket-card-team {
+  display: flex;
   align-items: center;
-  padding: 0.2rem 0;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #ccc;
+  gap: 0.4rem;
 }
 
-.bracket-team-row.winner {
-  color: var(--accent-lime);
+.bracket-card-team.winner {
+  color: #fff;
   font-weight: 900;
 }
 
-.bracket-score-pill {
+.bracket-score {
   font-weight: 900;
-  font-size: 0.82rem;
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--accent-cyan);
+  font-size: 0.85rem;
 }
 
+.bracket-center-trophy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(0,240,255,0.12), rgba(255,215,0,0.18));
+  border: 2px solid var(--accent-gold);
+  border-radius: 12px;
+  min-width: 170px;
+  text-align: center;
+  box-shadow: 0 0 25px rgba(255,215,0,0.2);
+}
+
+.bracket-center-trophy .trophy-icon {
+  font-size: 3.5rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 10px var(--accent-gold));
+}
