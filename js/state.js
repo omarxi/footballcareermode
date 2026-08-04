@@ -118,24 +118,28 @@ class CareerState {
 
   initEuropeanCompetitions(customUCLClubIds = null) {
     let uclClubIds = customUCLClubIds;
+    let uelClubIds = [];
+
+    const userLeague = this.myClub ? this.myClub.league : 'La Liga';
+    const allLeagues = ['La Liga', 'Premier League', 'Serie A', 'Bundesliga', 'Ligue 1'];
 
     if (!uclClubIds || !uclClubIds.length) {
       uclClubIds = [];
-      const userLeague = this.myClub ? this.myClub.league : 'La Liga';
-      const allLeagues = ['La Liga', 'Premier League', 'Serie A', 'Bundesliga', 'Ligue 1'];
 
       allLeagues.forEach(leagueName => {
         const leagueClubs = this.clubs.filter(c => c.league === leagueName);
         if (leagueName === userLeague && this.standings && this.standings.length) {
           const sorted = [...this.standings].sort((a, b) => b.pts - a.pts || b.gd - a.gd);
           if (sorted.length >= 2) uclClubIds.push(sorted[0].clubId, sorted[1].clubId);
+          if (sorted.length >= 4) uelClubIds.push(sorted[2].clubId, sorted[3].clubId);
         } else {
           const sortedForeign = [...leagueClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
           if (sortedForeign.length >= 2) uclClubIds.push(sortedForeign[0].id, sortedForeign[1].id);
+          if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
         }
       });
 
-      if (!uclClubIds.includes(this.myClubId)) {
+      if (!uclClubIds.includes(this.myClubId) && !uelClubIds.includes(this.myClubId)) {
         uclClubIds.push(this.myClubId);
       }
 
@@ -144,8 +148,22 @@ class CareerState {
         uclClubIds.push(remainingClubs.shift().id);
       }
       uclClubIds = uclClubIds.slice(0, 13);
+    } else {
+      allLeagues.forEach(leagueName => {
+        const leagueClubs = this.clubs.filter(c => c.league === leagueName);
+        const sortedForeign = [...leagueClubs].sort((a, b) => (b.rating || 80) - (a.rating || 80));
+        if (sortedForeign.length >= 4) uelClubIds.push(sortedForeign[2].id, sortedForeign[3].id);
+      });
     }
 
+    // Ensure 10 UEL teams (3rd & 4th of each league)
+    uelClubIds = uelClubIds.filter(id => !uclClubIds.includes(id)).slice(0, 10);
+    const uelRemaining = this.clubs.filter(c => !uclClubIds.includes(c.id) && !uelClubIds.includes(c.id)).sort((a, b) => (b.rating || 80) - (a.rating || 80));
+    while (uelClubIds.length < 10 && uelRemaining.length > 0) {
+      uelClubIds.push(uelRemaining.shift().id);
+    }
+
+    // 1. UCL Setup (13 teams, 8 matchdays)
     const uclClubs = this.clubs.filter(c => uclClubIds.includes(c.id));
     this.uclStandings = uclClubs.map(club => ({
       clubId: club.id,
@@ -156,16 +174,12 @@ class CareerState {
       played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
     }));
 
-        this.uclTree = {
-      qf: [
-        { match: 'QF1: 3rd vs 6th', home: null, away: null, winner: null },
-        { match: 'QF2: 4th vs 5th', home: null, away: null, winner: null }
-      ],
-      sf: [
-        { match: 'SF1: 1st vs QF1 Winner', home: null, away: null, winner: null },
-        { match: 'SF2: 2nd vs QF2 Winner', home: null, away: null, winner: null }
-      ],
-      final: { match: 'UCL Final', home: null, away: null, winner: null }
+    this.uclTree = {
+      playoffs: [],
+      qf: [],
+      sf: [],
+      final: null,
+      generatedKnockouts: false
     };
 
     this.uclFixtures = [];
@@ -187,6 +201,47 @@ class CareerState {
           result: null
         });
         uclDate.setDate(uclDate.getDate() + 14);
+      });
+    }
+
+    // 2. UEL Setup (10 teams, 6 matchdays)
+    const uelClubs = this.clubs.filter(c => uelClubIds.includes(c.id));
+    this.uelStandings = uelClubs.map(club => ({
+      clubId: club.id,
+      name: club.name,
+      shortName: club.shortName,
+      crest: club.crest,
+      league: 'UEFA Europa League',
+      played: 0, won: 0, drawn: 0, lost: 0, gf: 0, ga: 0, gd: 0, pts: 0
+    }));
+
+    this.uelTree = {
+      playoffs: [],
+      qf: [],
+      sf: [],
+      final: null,
+      generatedKnockouts: false
+    };
+
+    this.uelFixtures = [];
+    if (uelClubIds.includes(this.myClubId)) {
+      const uelOpps = uelClubs.filter(c => c.id !== this.myClubId);
+      let uelDate = new Date(this.currentDate);
+      uelDate.setDate(uelDate.getDate() + 12);
+
+      const selectedOpps = uelOpps.slice(0, 6);
+      selectedOpps.forEach((opp, idx) => {
+        this.uelFixtures.push({
+          id: `uel_fix_${idx + 1}`,
+          matchday: idx + 1,
+          date: new Date(uelDate),
+          competition: 'UEFA Europa League',
+          homeClub: (idx % 2 === 0) ? this.myClub : opp,
+          awayClub: (idx % 2 === 0) ? opp : this.myClub,
+          played: false,
+          result: null
+        });
+        uelDate.setDate(uelDate.getDate() + 14);
       });
     }
   }
@@ -539,6 +594,97 @@ class CareerState {
 
       let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
       this.fixtures.push({ id: this.uclTree.final.id, matchday: 'UCL FINAL', date: new Date(d), competition: 'UEFA Champions League', homeClub: sf1Winner, awayClub: sf2Winner, played: false, result: null });
+      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    // 6. UEL League Phase Completion & Playoff/Knockout Generation (10 Teams)
+    const userUelDone = !this.uelFixtures || this.uelFixtures.length === 0 || this.uelFixtures.every(f => f.played);
+    
+    if (this.uelStandings && userUelDone && (!this.uelTree || !this.uelTree.generatedKnockouts)) {
+      this.uelTree = this.uelTree || {};
+      this.uelTree.generatedKnockouts = true;
+
+      // Simulate rest of UEL group stage for all AI teams if needed
+      this.uelStandings.forEach(s => {
+        while (s.played < 6) {
+          s.played++;
+          const h = Math.floor(Math.random() * 3);
+          const a = Math.floor(Math.random() * 2);
+          s.gf += h; s.ga += a; s.gd = s.gf - s.ga;
+          if (h > a) { s.won++; s.pts += 3; }
+          else if (h < a) { s.lost++; }
+          else { s.drawn++; s.pts += 1; }
+        }
+      });
+
+      const sortedUel = [...this.uelStandings].sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+      const top6 = sortedUel.slice(0, 6).map(s => this.clubs.find(c => c.id === s.clubId));
+      this.uelTree.top6Clubs = top6;
+
+      // 1st & 2nd Bye to SF; 3rd & 4th Bye to QF; 5th vs 6th in Playoff
+      this.uelTree.playoffs = [
+        { id: 'uel_po_gen_1', home: top6[4], away: top6[5], scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[4].id === this.myClubId || top6[5].id === this.myClubId }
+      ];
+      this.uelTree.qf = [
+        { id: 'uel_qf_stub_1', home: top6[2], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
+        { id: 'uel_qf_stub_2', home: top6[3], away: top6[4], scoreHome: null, scoreAway: null, winner: null, isUserTie: false }
+      ];
+      this.uelTree.sf = [
+        { id: 'uel_sf_stub_1', home: top6[0], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false },
+        { id: 'uel_sf_stub_2', home: top6[1], away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null, isUserTie: false }
+      ];
+      this.uelTree.final = { id: 'uel_final_stub', home: { name: 'TBD' }, away: { name: 'TBD' }, scoreHome: null, scoreAway: null, winner: null };
+
+      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
+      this.uelTree.playoffs.forEach(match => {
+        this.fixtures.push({ id: match.id, matchday: 'UEL PLAYOFFS', date: new Date(d), competition: 'UEFA Europa League', homeClub: match.home, awayClub: match.away, played: false, result: null });
+        d.setDate(d.getDate() + 1);
+      });
+      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    // UEL Playoffs -> QF
+    if (this.uelTree && this.uelTree.playoffs && this.uelTree.playoffs.every(m => m.winner) && (!this.uelTree.qf[0] || this.uelTree.qf[0].away.name === 'TBD')) {
+      const top6 = this.uelTree.top6Clubs || [];
+      const poWinner = this.uelTree.playoffs[0].winner;
+
+      this.uelTree.qf[0] = { id: 'uel_qf_gen_1', home: top6[2], away: poWinner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[2].id === this.myClubId || poWinner.id === this.myClubId };
+      this.uelTree.qf[1] = { id: 'uel_qf_gen_2', home: top6[3], away: top6[4], scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[3].id === this.myClubId || top6[4].id === this.myClubId };
+
+      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
+      this.uelTree.qf.forEach(match => {
+        this.fixtures.push({ id: match.id, matchday: 'UEL QF', date: new Date(d), competition: 'UEFA Europa League', homeClub: match.home, awayClub: match.away, played: false, result: null });
+        d.setDate(d.getDate() + 1);
+      });
+      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    // UEL QF -> SF
+    if (this.uelTree && this.uelTree.qf && this.uelTree.qf.every(m => m.winner) && (!this.uelTree.sf[0] || this.uelTree.sf[0].away.name === 'TBD')) {
+      const top6 = this.uelTree.top6Clubs || [];
+      const qf1Winner = this.uelTree.qf[0].winner;
+      const qf2Winner = this.uelTree.qf[1].winner;
+
+      this.uelTree.sf[0] = { id: 'uel_sf_gen_1', home: top6[0], away: qf1Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[0].id === this.myClubId || qf1Winner.id === this.myClubId };
+      this.uelTree.sf[1] = { id: 'uel_sf_gen_2', home: top6[1], away: qf2Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: top6[1].id === this.myClubId || qf2Winner.id === this.myClubId };
+
+      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
+      this.uelTree.sf.forEach(match => {
+        this.fixtures.push({ id: match.id, matchday: 'UEL SF', date: new Date(d), competition: 'UEFA Europa League', homeClub: match.home, awayClub: match.away, played: false, result: null });
+        d.setDate(d.getDate() + 1);
+      });
+      this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+
+    // UEL SF -> Final
+    if (this.uelTree && this.uelTree.sf && this.uelTree.sf.every(m => m.winner) && (!this.uelTree.final || this.uelTree.final.home.name === 'TBD')) {
+      const sf1Winner = this.uelTree.sf[0].winner;
+      const sf2Winner = this.uelTree.sf[1].winner;
+
+      this.uelTree.final = { id: 'uel_final_gen', home: sf1Winner, away: sf2Winner, scoreHome: null, scoreAway: null, winner: null, isUserTie: sf1Winner.id === this.myClubId || sf2Winner.id === this.myClubId };
+
+      let d = new Date(this.currentDate); d.setDate(d.getDate() + 14);
+      this.fixtures.push({ id: this.uelTree.final.id, matchday: 'UEL FINAL', date: new Date(d), competition: 'UEFA Europa League', homeClub: sf1Winner, awayClub: sf2Winner, played: false, result: null });
       this.fixtures.sort((a, b) => new Date(a.date) - new Date(b.date));
     }
 

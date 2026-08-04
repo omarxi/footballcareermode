@@ -1304,7 +1304,53 @@ function renderCompetitionsHub() {
 
   const uclWrapper = document.getElementById('uclBracketWrapper');
   if (uclWrapper && state.uclTree) {
-    uclWrapper.innerHTML = renderUclBracketHtml(state.uclTree);
+    uclWrapper.innerHTML = renderUclBracketHtml(state.uclTree, 'UEFA Champions League');
+  }
+
+  // 4. UEL Standings & Bracket (10 teams, 6 matchdays)
+  const uelTableContainer = document.getElementById('uelStandingsTableBody');
+  if (uelTableContainer && state.uelStandings) {
+    uelTableContainer.innerHTML = state.uelStandings.map((row, idx) => {
+      const club = state.clubs.find(c => c.id === row.clubId) || row;
+      
+      let badgeText = '';
+      let highlight = '';
+
+      if (idx < 2) {
+        highlight = 'background: rgba(0, 255, 137, 0.12);';
+        badgeText = '<span style="color:#00ff87; background:rgba(0,255,135,0.18); border:1px solid rgba(0,255,135,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">⭐ Bye to Semi-Finals</span>';
+      } else if (idx < 4) {
+        highlight = 'background: rgba(0, 240, 255, 0.12);';
+        badgeText = '<span style="color:#00e5ff; background:rgba(0,240,255,0.18); border:1px solid rgba(0,240,255,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">🔹 Bye to Quarter-Finals</span>';
+      } else if (idx < 6) {
+        highlight = 'background: rgba(255, 190, 11, 0.12);';
+        badgeText = '<span style="color:#ffbe0b; background:rgba(255,190,11,0.18); border:1px solid rgba(255,190,11,0.4); font-size:0.7rem; margin-left:0.5rem; padding:2px 7px; border-radius:12px; font-weight:800;">⚔️ Playoff Round</span>';
+      } else {
+        badgeText = '<span style="color:var(--text-muted); font-size:0.68rem; margin-left:0.5rem;">Eliminated</span>';
+      }
+
+      return `
+        <tr class="${row.clubId === state.myClubId ? 'my-club' : ''}" style="${highlight}">
+          <td><strong>${idx + 1}</strong></td>
+          <td style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;">
+            ${renderCrestHtml(row.crest, club, 'width:24px;height:24px;')}
+            <span style="font-weight:700;">${row.name}</span>
+            ${badgeText}
+          </td>
+          <td>${row.played}</td>
+          <td>${row.won}</td>
+          <td>${row.drawn}</td>
+          <td>${row.lost}</td>
+          <td>${row.gd > 0 ? '+' + row.gd : row.gd}</td>
+          <td><strong>${row.pts}</strong></td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  const uelWrapper = document.getElementById('uelBracketWrapper');
+  if (uelWrapper && state.uelTree) {
+    uelWrapper.innerHTML = renderUclBracketHtml(state.uelTree, 'UEFA Europa League');
   }
 }
 
